@@ -261,7 +261,8 @@
       %\vfill
       \vspace{1in}
       \begin{center}
-      {\Large \bf DISTRIBUTED APPROACHES TO MOTION PLANNING AND CONTROL IN MULTI-ROBOT SYSTEMS \par}
+      % cybersecurity vulnerabilities, software security vulnerabilities/weakness, cybersecurity violations/weakness, software security violations/weakness
+      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA VERIFICATION AND FUZZ TESTING \par}
      %\vfill
      \vspace{2.4in}
       %{\LARGE by \par}
@@ -292,8 +293,8 @@
        \begin{figure}[!htbp]
               \centering
               \vspace{0.4in}
-            \end{figure}
-      {\Large \bf DISTRIBUTED APPROACHES TO MOTION PLANNING AND CONTROL IN MULTI-ROBOT SYSTEMS \par}
+            \end{figure}            
+      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA VERIFICATION AND FUZZ TESTING \par}
       %{\LARGE by \par}
       \vspace{1.3in}
       %{\LARGE \authornames \par}
