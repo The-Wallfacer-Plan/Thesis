@@ -42,6 +42,7 @@
 \usepackage{tikz}
 \usepackage{yhmath}
 \usepackage{cite}
+\usepackage{xcolor}
 
 
 \DeclareFontFamily{OMX}{yhex}{}
@@ -108,6 +109,19 @@
 
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % New command to make the lines in the title page
+
+%----------------------------------------------------------------------------------------
+%	additional commands
+%----------------------------------------------------------------------------------------
+\newcommand*{\FOT}{FOT\xspace}
+\newcommand*{\AFL}{\text{AFL}}
+\newcommand*{\dFOT}{\text{Hawkeye}\xspace}
+\newcommand*{\aflgo}{{AFLGo}}
+\newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
+\newcommand*{\utte}{\ensuremath{\mu \textbf{TTE}}}
+
+\newcommand*{\mtfuzz}{{\textsc{Doublade}}\xspace}
+\newcommand*{\mtfuzzc}{\textsc{Dou-AFL}\xspace}
 
 
 % PDF meta-data
@@ -252,32 +266,30 @@
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Preliminaries}}{}}
 \input{chapters/chapter3/preliminary}
 
+\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Vulnerability Detection Techniques}}{}}
+\input{chapters/chapter4/vul_detect}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Distributed Approach to Trajectory Planning}}{}}
-\input{chapters/chapter4/sta}
-
-
-\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Discrete Abstraction}}{}}
-\input{chapters/chapter5/fuzzing}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Security Type Checking for Android Access Control}}{}}
+\input{chapters/chapter5/sta}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Distributed Approach to Collision and Deadlock Avoidance}}{}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{The FOT Fuzzing Framework}}{}}
 \input{chapters/chapter6/fot}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Distributed Approach to Higher-order Deadlock Avoidance}}{}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{\dFOT: Directed Grey-box Fuzzing}}{}}
 \input{chapters/chapter7/dfot}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Distributed Approach to Robust Control}}{}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{\mtfuzz: Multi-threading Aware Fuzzing}}{}}
 \input{chapters/chapter8/mtfuzz}
 
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Hybrid Approach to Distributed Motion Control}}{}}
-\input{chapters/chapter9/misc}
+\input{chapters/chapter9/discuss}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Conclusion and Future Work}}{}}
