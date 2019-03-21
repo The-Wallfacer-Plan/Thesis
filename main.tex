@@ -19,6 +19,7 @@
 
 \usepackage[perpage]{footmisc}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{algorithmic}
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -43,27 +44,19 @@
 \usepackage{yhmath}
 \usepackage{cite}
 \usepackage{xcolor}
+\usepackage{bussproofs}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{semantic}
+\usepackage{fixltx2e}
+%\usepackage[T1]{fontenc}
 
 
 \DeclareFontFamily{OMX}{yhex}{}
 \DeclareFontShape{OMX}{yhex}{m}{n}{<->yhcmex10}{}
 \DeclareSymbolFont{yhlargesymbols}{OMX}{yhex}{m}{n}
 \DeclareMathAccent{\wideparen}{\mathord}{yhlargesymbols}{"F3}
-
-
-
-
-
-%\usepackage{epstopdf}
-
-
-
-%\usepackage{booktabs}
-
-%\usepackage{cite}
-
-
-
 
 \DeclareMathOperator*{\argminA}{arg\,min}
 
@@ -82,7 +75,7 @@
 \newcommand{\ac}{\bm{a}}
 \newcommand{\s}{\bm{s}}
 \newcommand{\R}{\mathbb{R}^{n_0}}
-\newcommand{\chx}{{\bf Hongxu Chen}}
+\newcommand{\myname}{{\bf Hongxu Chen}}
 \renewcommand{\figurename}{Fig.}
 %\makeatletter\@addtoreset{chapter}{part}\makeatother
 
@@ -101,8 +94,6 @@
 \pagestyle{fancy} % Finally, use the "fancy" page style to implement the FancyHdr headers
 
 
-
-
 %\mainmatter
 %\fancyhead[RE,LO]{\fancyplain{}{\leftmark}} 	% pagestyle for arabic number pages
 %\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
@@ -113,15 +104,9 @@
 %----------------------------------------------------------------------------------------
 %	additional commands
 %----------------------------------------------------------------------------------------
-\newcommand*{\FOT}{FOT\xspace}
-\newcommand*{\AFL}{\text{AFL}}
-\newcommand*{\dFOT}{\text{Hawkeye}\xspace}
-\newcommand*{\aflgo}{{AFLGo}}
 \newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
-\newcommand*{\utte}{\ensuremath{\mu \textbf{TTE}}}
-
-\newcommand*{\mtfuzz}{{\textsc{Doublade}}\xspace}
-\newcommand*{\mtfuzzc}{\textsc{Dou-AFL}\xspace}
+\input{cmd-sta}
+\input{cmd-fuzz}
 
 
 % PDF meta-data
