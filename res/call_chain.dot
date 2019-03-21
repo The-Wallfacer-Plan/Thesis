@@ -1,0 +1,10 @@
+Digraph CallChain {
+    a -> b;
+    a -> c;
+    b -> t;
+    c -> d;
+    d -> e;
+    e -> t;
+    f -> g;
+    g -> t;
+}

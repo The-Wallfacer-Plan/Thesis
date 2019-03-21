@@ -252,7 +252,7 @@
 
             \begin{figure}[htbp]
               %\centering
-              \includegraphics[width=0.7\textwidth]{figures/NTU-logo/full-color.pdf}
+              \includegraphics[width=0.7\textwidth]{res/NTU-logo/full-color.pdf}
               \label{fig:NTU_Logo}
             \end{figure}
 

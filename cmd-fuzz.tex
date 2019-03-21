@@ -1,8 +1,170 @@
 \newcommand*{\FOT}{FOT\xspace}
 \newcommand*{\AFL}{\text{AFL}}
 \newcommand*{\dFOT}{\text{Hawkeye}\xspace}
-\newcommand*{\aflgo}{{AFLGo}}
-\newcommand*{\utte}{\ensuremath{\mu \textbf{TTE}}}
 
 \newcommand*{\mtfuzz}{{\textsc{Doublade}}\xspace}
 \newcommand*{\mtfuzzc}{\textsc{Dou-AFL}\xspace}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand*{\aflgo}{{AFLGo}\xspace}
+%\newcommand*{\aflfast}{\textsc{AFLFast}\xspace}
+\newcommand*{\aflfast}{{AFLFast}\xspace}
+\newcommand*{\dGO}{\text{HE-Go}\xspace}
+
+\newcommand*{\tgtbbset}{\ensuremath{T_b}}
+\newcommand*{\tgtbb}{\ensuremath{t_b}}
+\newcommand*{\tgtbbn}[1]{\ensuremath{t_b^{#1}}}
+\newcommand*{\tgtfnset}{\ensuremath{T_f}}
+\newcommand*{\tgtfn}{\ensuremath{t_f}}
+\newcommand*{\tgtfnn}[1]{\ensuremath{t_f^{#1}}}
+
+\newcommand*{\traceDistFinal}[2]{\ensuremath{\tilde{d}_s(#1,#2)}}
+\newcommand*{\traceDist}[2]{\ensuremath{d_s(#1,#2)}}
+\newcommand*{\traceFnDistPrime}[2]{\ensuremath{d^{\prime}_f(#1,#2)}}
+\newcommand*{\traceFnDistn}{\ensuremath{d_f}}
+\newcommand*{\traceDistn}{\ensuremath{d_s}}
+\newcommand*{\traceDistnFinal}{\ensuremath{\tilde{d}_s}}
+\newcommand*{\traceFnDist}[2]{\ensuremath{d_f(#1,#2)}}
+\newcommand*{\simpleBBDist}[2]{\ensuremath{d_b^o(#1,#2)}}
+\newcommand*{\traceBBDist}[2]{\ensuremath{d_b(#1, #2)}}
+\newcommand*{\traceBBDistn}{\ensuremath{d_b}}
+
+\newcommand*{\BBCallees}[1]{\ensuremath{C_f(#1)}}
+\newcommand*{\BBCalleesT}[1]{\ensuremath{C_f^T(#1)}}
+\newcommand*{\transitiveBB}{\ensuremath{Trans_b}}
+\newcommand*{\covDist}[2]{\ensuremath{c_s(#1, #2)}}
+\newcommand*{\covDistn}{\ensuremath{c_s}}
+\newcommand*{\covDistN}[2]{\ensuremath{\tilde{c}_{s}}(#1, #2)}
+\newcommand*{\covDistnN}{\ensuremath{\tilde{c}_{s}}}
+
+\newcommand*{\cfg}[1]{\ensuremath{G(#1)}}
+\newcommand*{\fnset}{\ensuremath{F}}
+
+\newcommand*{\bbtrace}[1]{\ensuremath{\xi_b(#1)}}
+\newcommand*{\fntrace}[1]{\ensuremath{\xi_f(#1)}}
+
+\newcommand*{\pts}[1]{p_t(#1)}
+
+\newcommand*{\csnum}{\ensuremath{C_N}}
+\newcommand*{\csbb}{\ensuremath{C_B}}
+\newcommand*{\csnumn}[2]{\ensuremath{C_N(#1, #2)}}
+\newcommand*{\csbbn}[2]{\ensuremath{C_B(#1, #2)}}
+\newcommand*{\utte}{\ensuremath{\mu \textbf{TTE}}}
+\newcommand*{\alz}{\ensuremath{A_{12}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand*{\testsALL}{\ensuremath{N_a}}
+\newcommand*{\testsMT}{\ensuremath{N_n}}
+\newcommand*{\testsRatio}{$\frac{\testsMT}{\testsALL}$}
+\newcommand*{\vulsMT}{\ensuremath{V_{m}}}
+\newcommand*{\vulsNUM}{\ensuremath{N_{c}}}
+\newcommand*{\vulsST}{\ensuremath{V_{s}}}
+\newcommand*{\cbugs}{\ensuremath{C_{bug}}}
+
+\newcommand*{\var}{\texttt}
+\newcommand*{\func}{\emph}
+
+\newcommand*{\ccr}[1]{\ensuremath{P_e(#1)}\xspace}
+\newcommand*{\ccrn}{{\ensuremath{P_e}}\xspace}
+
+\newcommand*{\mtp}[2]{{\ensuremath{P_m(#1, #2)}}\xspace}
+\newcommand*{\mtpn}{{\ensuremath{P_m}}\xspace}
+\newcommand*{\mtpnO}{{\ensuremath{P_{m0}}}\xspace}
+
+\newcommand*{\AFLTSan}{AFL-TSan\xspace}
+
+\newcommand*{\stp}[1]{{\ensuremath{P_s(#1)}}\xspace}
+\newcommand*{\stpn}{{\ensuremath{P_s}}\xspace}
+\newcommand*{\stpnO}{{\ensuremath{P_{s0}}}\xspace}
+
+\newcommand*{\rtifunc}{\ensuremath{f_I}\xspace}
+
+\newcommand*{\aBB}{\ensuremath{b}\xspace}
+\newcommand*{\aFUNC}{\ensuremath{f}\xspace}
+\newcommand*{\aINSTR}{\ensuremath{i}\xspace}
+
+\newcommand*{\ntid}{\ensuremath{N_{ctx}}\xspace}
+\newcommand*{\iloc}{\ensuremath{Loc}\xspace}
+\newcommand*{\threadCtx}[2]{\ensuremath{\langle #1, #2\rangle}\xspace}
+\newcommand*{\FSThread}{\ensuremath{F_{ctx}}\xspace}
+\newcommand*{\threadCtxn}{\ensuremath{TC}}
+\newcommand*{\threadCtxSeq}{\ensuremath{\mathbb{C}^t}\xspace}
+\newcommand*{\tctxSign}{\ensuremath{{S}_{ctx}}\xspace}
+
+
+\newcommand*{\tcg}{\ensuremath{\var{TCG}}\xspace}
+\newcommand*{\tclosure}{\ensuremath{FC_{fork}}\xspace}
+\newcommand*{\FSStart}{\ensuremath{F_{fork}}\xspace}
+\newcommand*{\reachable}[2]{\ensuremath{\textbf{R}(#1, #2)}\xspace}
+\newcommand*{\unreachable}[2]{\ensuremath{\textbf{UR}(#1, #2)}\xspace}
+\newcommand*{\ttrace}{\ensuremath{FS_t}\xspace}
+
+\newcommand*{\dijkO}[2]{\ensuremath{d(#1, #2)}\xspace}
+\newcommand*{\dijk}[2]{\ensuremath{d'(#1, #2)}\xspace}
+\newcommand*{\dijkS}[2]{\ensuremath{D(#1, #2)}\xspace}
+\newcommand*{\dist}[2]{\ensuremath{\mathbb{S}(#1, #2)}\xspace}
+
+\newcommand*{\mutBase}{\ensuremath{\mathrm{M}_0}\xspace}
+\newcommand*{\mutChance}{\ensuremath{\mathbb{M}}\xspace}
+
+\newcommand*{\distNorm}[2]{\ensuremath{\hat{\mathbb{S}}(#1, #2)}\xspace}
+\newcommand*{\distNormN}{\ensuremath{\mathbb{S}}\xspace}
+\newcommand*{\distMax}{\ensuremath{\mathbb{S}_{max}}\xspace}
+\newcommand*{\distMin}{\ensuremath{\mathbb{S}_{min}}\xspace}
+
+\newcommand*{\probNNN}{\ensuremath{P_{nnn}}\xspace}
+\newcommand*{\probYNT}{\ensuremath{P_{ynt}}\xspace}
+\newcommand*{\probYNN}{\ensuremath{P_{ynn}}\xspace}
+
+\newcommand*{\NcalO}{\ensuremath{N_0}\xspace}
+\newcommand*{\NcalV}{\ensuremath{N_v}\xspace}
+\newcommand*{\NcalB}{\ensuremath{B_v}}
+\newcommand*{\Ncal}{\ensuremath{\mathbb{N}_{c}}\xspace}
+\newcommand*{\NcalTrace}{\ensuremath{T_{cal}}\xspace}
+
+\newcommand*{\CTrace}{\ensuremath{C_{cal}}\xspace}
+\newcommand*{\Nmt}{\ensuremath{C_{m}}\xspace}
+
+\newcommand*{\Seeds}{\ensuremath{T_{S}}\xspace}
+\newcommand*{\FinalSeeds}{\ensuremath{T^{\prime}_{S}}\xspace}
+\newcommand*{\CrashSeeds}{\ensuremath{T_{C}}\xspace}
+\newcommand*{\Prog}{\ensuremath{\mathbb{P}_f}\xspace}
+\newcommand*{\ProgO}{\ensuremath{\mathbb{P}_o}\xspace}
+\newcommand*{\ProgTS}{\ensuremath{\mathbb{P}_t}\xspace}
+
+\newcommand*{\ts}{{\textsf{ThreadSanitizer}}\xspace} 
+
+\newcommand*{\mtiscope}{\ensuremath{L_{m}}\xspace}
+\newcommand*{\pscope}{\ensuremath{S_{a}}\xspace}
+\newcommand*{\stscope}{\ensuremath{S_{s}}\xspace}
+\newcommand*{\mtiColor}[1]{\colorbox{lightgray}{#1}}
+\newcommand*{\stiColor}[1]{\colorbox{yellow}{#1}}
+\newcommand*{\mtcolor}{\color{lightgray}}
+\newcommand*{\stcolor}{\color{yellow}}
+
+\newcommand*{\pbin}[1]{\textcolor{black}{#1}}
+\newcommand*{\gres}[1]{\underline{#1}}
+
+
+\newcommand*{\AFLIns}{\textsf{AFL-Ins}\xspace}
+\newcommand*{\MTIns}{\textsf{MT-Ins}\xspace}
+
+\newcommand*{\Pstatic}{\ensuremath{P}}
+\newcommand*{\Pcausal}{\ensuremath{P'}}
+\newcommand*{\Pfuzz}{\ensuremath{P''}}
+
+\newcommand*{\Thread}{\ensuremath{T}}
+\newcommand*{\Func}{\ensuremath{F}}
+\newcommand*{\BB}{\ensuremath{B}}
+\newcommand*{\BT}{\ensuremath{B_t}}
+
+\newcommand*{\TStart}{\texttt{TFork}\xspace}
+\newcommand*{\TEnd}{\texttt{TJoin}\xspace}
+\newcommand*{\TLock}{\texttt{TLock}\xspace}
+\newcommand*{\TUnLock}{\texttt{TUnLock}\xspace}
+\newcommand*{\TSharedVar}{\texttt{TShareVar}\xspace}
+
+\newcommand*{\BinF}[2]{\ensuremath{B_{{#1}{#2}}}}
+\newcommand*{\IinB}[2]{\ensuremath{I_{{#1}{#2}}}}

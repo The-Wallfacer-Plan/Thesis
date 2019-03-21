@@ -1,16 +1,1727 @@
 % !TeX root =../../main.tex
 
-\chapter{Approach} \label{Chapter5}
+\chapter{Type Checking Based Verification} \label{Chapter5}
 
-\section{Introduction and Motivation}
+\section{Background and Introduction}\label{sec:intro}
 
-\section{Security Type System}
+Mobile security has become increasingly important for our daily life due to the pervasive use of mobile applications.
+Among the mobile devices that are currently in the market, Android devices account for the majority of them so analysis of their security
+has been of significant interests. There has been a large number of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) focusing on detecting potential security violations. Here we are interested instead in the problem of constructing secure applications,
+in particular, in providing guarantee of information flow security in the constructed applications. 
+ 
+We follow the language-based security approach whereby
+information flow is enforced through type systems~\cite{Denning:1976cl,Denning:1977hwa,Volpano:1996,Sabelfeld:2003}.
+In particular, we propose a design of a type system that
+guarantees non-interference property~\cite{Volpano:1996}, i.e., typable
+programs are non-interferent. As shown in~\cite{Goguen:1982ta}, non-interference provides
+a general and natural way to model information flow security.
+The type-based approach to non-interference requires assigning
+security labels to program variables and security policies to functions or procedures. Such policies
+are typically encoded as types, and typeability of the program implies that the runtime behavior of
+the program complies with the stated policies.
+Security labels form a lattice structure with an underlying partial order $\leq$,
+e.g., a lattice with two elements ``high'' ($H$) and ``low'' ($L$) where $L \leq H$.
+Typing rules can then be designed to prevent both explicit
+and implicit flow (through conditionals, e.g., if-then-else statements) from $H$ to $L$.
+To prevent an \emph{explicit} flow, the typing rule for an assignment statement
+such as \textit{x := e} would require that $l(e) \leq l(x)$ where $l(.)$
+denotes the security level of an expression. To prevent an \emph{implicit} flow, e.g.,
+\textit{if (y = 0) then x:= 0 else x := 1},
+most type systems for non-interference require that
+the assignments in \emph{both} branches are given the same
+security level that is higher or at least equal to the security level of the condition (\emph{y=0}). 
+For example, if $y$ is of type $H$ and $x$ is of type $L$, the statement would not be typable.
+
+\subsection{Motivating Examples}
+In designing an information flow type system for Android, we encounter
+a common pattern of conditionals that would not be typable using conventional type systems.
+Consider the pseudo-code in Listing~\ref{lst:eg_contact}.
+\begin{lstlisting}[float=tp, caption={Sample code for getting contact info with a permission check.}, label={lst:eg_contact}]
+String getContactNo(String name) {
+    String number;
+    if(checkPermission(READ_CONTACT))
+       number = ... ; else number = "";
+    return number;
+}
+\end{lstlisting}
+Such a code fragment could be part of a phone dialer or a social network service app such as Facebook, WhatsApp, where \textit{getContactNo} provides
+a public interface to query the phone number associated with a name. The (implicit) security policy in this
+context is that contact information (the phone number) can only be released if the calling app has
+READ\_CONTACT permission.
+The latter is enforced using the \textit{checkPermission} API in Android.
+Suppose phone numbers are labelled with $H$, and the empty string is labelled with $L$.
+If the interface is invoked by an app that has the required permission,
+the phone number ($H$) is returned; otherwise an empty string ($L$)
+is returned. In both cases, no data leakage happens: in the former case, the calling app is authorized; and in the latter case, no sensitive data is ever returned. By this informal reasoning, the function complies with the implicit security policy and it
+should be safe to be called in \emph{any} context, regardless of the permissions the calling app has.
+However, in the traditional (non-value dependent) typing rule for the if-then-else construct, one would assign \emph{the same} security level to both branches,
+and the return value of the function would be assigned level $H$.
+As a result, if this function is called from an app with \emph{no} permission, assigning the return value to a variable with security level $L$ has to be rejected by the type system even though no sensitive information is leaked.
+To cater for such a scenario, we need to make the security type of \textit{getContactNo}
+ \emph{depend on} the permissions possessed by the caller.
+
+Banerjee and Naumann~\cite{Banerjee:2005ht} proposed a type system (which we shall refer to as {\BN} system)
+that incorporates permissions into function types.
+Their type system was designed for an access control mechanism different from ours,
+but the basic principles are still applicable.
+In {\BN} system, a Java class may be assigned a set of permissions which need to be {\em explicitly enabled} via an \textbf{enable} command for them to have any effect.
+We say a permission is {\em disabled} for an class if it is \emph{not assigned} to the class, or it is \emph{assigned} to the class but is \emph{not explicitly enabled}.
+Depending on the permissions of
+the calling class (corresponding to an \emph{app} in the above example), a function such as \textit{getContactNo} can have a collection of types. In {\BN} type system, the types of a function take
+the form $(l_1,\dots, l_n)\xrightarrow{~P~}l$
+where $l_1,\dots,l_n$ denote security levels of the input, $l$ denotes the security level of the output
+and $P$ denotes a set of permissions that are disabled by the caller.
+The idea is that permissions are guards to sensitive values. Thus conservatively, one would type the return value of \textit{getContactNo} as $L$ only if
+one knows that the permission READ\_CONTACT is disabled.
+In {\BN} system, \textit{getContactNo} admits the following types:
+\begin{equation*}
+\textit{getContactNo} : L~\xrightarrow{~P~}~L\qquad
+\textit{getContactNo} : L~\xrightarrow{~\emptyset~}~H
+\end{equation*}
+where $P = \{ \mathrm{READ\_CONTACT} \}.$
+When typing a call to \textit{getContactNo} by
+an app without permissions,
+the first type of \textit{getContactNo} is used; otherwise
+the second type is used.
+
+In {\BN} system, the typing judgment is parameterized
+by a permission set $Q$ containing the permissions that are
+currently known to be disabled. The set $Q$ may or may not contain all disabled permissions.
+Their language features a command ``\lcCP{P}{c_1}{c_2}'', which
+means that if the permissions in the set $P$ are \emph{all enabled}, then
+the command behaves like $c_1$; otherwise it behaves like $c_2$.
+The typing rules for the \textit{test} command (in a much
+simplified form) are:
+\[
+\inference[(R1)~]{
+Q \cap P = \emptyset & Q |- c_1 : \tau & Q \vdash {c_2} : \tau
+}
+{
+Q \vdash \lcCP{P}{c_1}{c_2} : \tau
+}
+\]
+\[
+\inference[(R2)~]{
+Q \cap P \not = \emptyset & Q \vdash c_2 : \tau
+}
+{
+Q \vdash \lcCP{P}{c_1}{c_2} : \tau
+}
+\]
+where $Q$ is a set of permissions that are disabled.
+When $Q \cap P \not = \emptyset$, then
+at least one of the permissions in $P$ is disabled, thus
+one can determine statically that ``\textbf{test}(P)'' would fail and only the \emph{else} branch would be executed at runtime. This case is
+reflected in the typing rule R2.
+When $Q \cap P = \emptyset$, there can be two possible runtime scenarios.
+One scenario is that all permissions in $P$ are enabled, so ``\textbf{test}(P)'' succeeds and $c_1$ is executed.
+The other is that some permissions in $P$ are disabled, but are not accounted for in $Q$.
+So in this case, one cannot determine statically which branch of \textbf{test} will be
+taken at runtime. The typing rule R1 therefore conservatively considers typing both branches.
+
+When adapting {\BN} system to Android, R1
+is still too strong in some scenarios, especially when it is desired that the \emph{absence} of some permissions
+leads to the release of sensitive values. Consider for example an application
+that provides location tracking information related to a certain
+{\em advertising ID} (Listing~\ref{lst:eg_nonmonotonic}), where the latter provides a unique ID for the purpose of anonymizing mobile users
+to be used for advertising (instead of relying on hardware device IDs such
+as IMEI numbers). If one can correlate an advertising
+ID with a unique hardware ID, it will defeat the purpose of
+the anonymizing service provided by the advertising ID. To prevent
+that, \textit{getInfo} returns the location information for an advertising ID
+only if the caller \emph{does not} have access to device ID.
+To simplify discussion, let us assume that the permissions to access
+IMEI and location information are denoted by $p$ and $q$, respectively.
+\begin{lstlisting}[caption={An example about non-monotonic policy.}, label={lst:eg_nonmonotonic}]
+String getInfo() {
+   String r = "";
+   test(p) {
+     test(q) r = loc; else r = "";
+   } else  {
+     test(q) r = id++loc; else r = "";
+   }
+   return r;
+}
+\end{lstlisting}
+Here \textit{id} denotes a unique advertising ID  generated and stored by the app for
+the purpose of anonymizing user tracking and \textit{loc} denotes location
+information.
+The function first tests whether the caller has access to IMEI number.
+If it does, and if it has access to location, then only the location information is returned.
+If the caller has no access to IMEI number, but can access location information,
+then the combination of advertising id and location \textit{id++loc} is returned.
+In all the other cases, an empty string is returned.
+Let us consider a lattice with four elements ordered as:
+$L \leq l_1, l_2 \leq H$, where $l_1$ and $l_2$ are incomparable. We specify that empty string is of type $L$, \textit{loc} is of type $l_1$,
+\textit{id} is of type $l_2$, and the aggregate \textit{id++loc} is of type $H.$
+Consider the case where the caller has permissions $p$ and $q$ and both are (explicitly) \emph{enabled}.
+When applying {\BN} system, the desired type of \textit{getInfo} in this case is  $()~{\xrightarrow{~\emptyset~}}~l_1$.
+This means that the type of \textit{r} has to be at most $l_1$.
+Since no permissions are disabled, only \ruleTagText{R1} is applicable
+to type this program. This, however, will force both branches of \textbf{test}(p)
+to have the same type. As a result, \textit{r}
+has to be typed as $H$ so that all four assignments in the program
+can be typed.
+
+The issue with the example in Listing~\ref{lst:eg_nonmonotonic} is that the stated security policy is \emph{non-monotonic} in the sense that an app with more permissions does not necessarily have access to information with higher
+level of security.  The fact that {\BN} system
+cannot precisely capture non-monotonic policies appears to be a design decision:
+they cited in \cite{Banerjee:2005ht} the lack of motivating examples for non-monotonic policies, and
+suggested that to accommodate such policies one might need to consider a notion of declassification.
+As we have seen, however, non-monotonic policies can arise naturally in mobile
+applications. In a study on Android
+malwares~\cite{Enck:2009:UAS:1512148.1512324}, Enck et. al. 
+identify several combinations of permissions that are potentially
+`dangerous', in the sense that they allow potentially unsafe information flow.
+An information flow policy that requires
+the {\em absence} of such combinations of permissions in 
+information release would obviously be non-monotonic.
+In general, non-monotonic policies can be required to solve the {\em aggregation problem}
+studied in the information flow theory~\cite{Landauer93}, where several pieces of low security level information may
+be pooled together to learn information at a higher security level.
+
+We therefore designed a more precise type system for information flow
+under an access control model inspired by Android framework.
+Our type system solves the problem of typing non-monotonic policies
+without resorting to downgrading or declassifying information.
+It is done technically via a \emph{merging} operator on security types, to keep information related to both
+branches of \textbf{test}. Additionally, there is a significant
+difference in the permission model used in traditional type systems such as {\BN} system, where permissions
+are propagated across method invocations among apps. This is due to the fact that permissions in Android are relevant only during inter-process calls, while permissions are not inherited along the call
+chains across apps. As we shall see in Section~\ref{sec:typing_rules}, this may give rise to a type of attack which we call
+``parameter laundering'' attack if one adopts a naive typing rule for function calls.
+The soundness proof for our type system is significantly different from that for {\BN} type system due to the difference
+in permission model and the new merging operator on types in our type system.  
+
+Due to space constraints, most proofs are omitted but they can be found in a technical report~\cite{Chen17arxiv}. 
 
 
-\section{Type Inference}
+\subsection{Contributions}
+The contributions of our work are three-fold.
+\begin{enumerate}\item We develop a lightweight type system in which security types are dependent on a permission-based access control mechanism, and prove its soundness with respect to non-interference (Section~\ref{sec:type_system}). A novel feature of the type system is the type merging constructor, used for typing the conditional branch in permission checking, which allows us to model non-monotonic information flow policies.
+	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during function calls. This problem
+	arises as a byproduct of Android's permission model, which is significantly different from that in JVM, and adopting a standard typing rule for function calls such as the one proposed for Java in~\cite{Banerjee:2005ht} 
+	would lead to unsoundness. We call this problem the parameter laundering problem and we propose a typing rule for function calls that prevents it.
+	\item We show that the type inference is decidable for our type system, by reducing it to a constraint solving problem (Section~\ref{sec:constraint_gen}).
+\end{enumerate}
+ \section{A Secure Information Flow Type System}\label{sec:type_system}
 
-\section{Case Studies}
+In this section, we present the proposed information flow type system. Section~\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
+Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
+constructs based on the abstract permission model.
+Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness with respect to a notion of non-interference.
 
-\section{Conclusion}
+\subsection{A model of permission-based access control}
+\label{sec:permission_model}
+
+Instead of taking all the language features and the library dependencies of Android apps into account, we focus on the permission model used in inter-component communications within and across apps. Such permissions are used to regulate access to protected resources, such as device id, location information, contact information, etc.
+
+In Android, an app specifies the permissions it needs at installation time via a manifest file. In recent versions of Android (since Android 6.0, API level 23), some of these permissions need to be granted by users at runtime. But
+at no point a permission request is allowed if it is not already specified in the manifest.
+For now, we assume a permission enforcement mechanism that applies to Android versions prior to version 6.0, so it does not
+account for permission granting at runtime~\footnote{To be specific, runtime permission request requires the compatible version specified in the manifest file to be greater than or equal to API level 23, and running OS should be at least Android 6.0.}. Runtime permission granting~\cite{url:android-perm} poses some problems in typing non-monotonic
+policies; we shall come back to this point later in Section~\ref{sec:conclusion}.
+
+An Android app may provide services to other apps,
+or other components within the app itself. Such a service provider
+may impose permissions on other apps who want to
+access its services. Communication between apps is implemented
+through Binder IPC (inter-process communications)~\cite{Android-Binder-IPC}.
+
+In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc. ~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this paper, however the focus is improving the precision of information leakage detection rather than non-interference certification.}
+
+One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must be careful to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
+
+\subsection{A Language with Permission Checks}\label{sec:language}
+
+As mentioned earlier, we do not model directly all the language features of an Android app, but use a much simplified language to focus on the permission mechanism part. The language is a variant of the  language considered in \cite{Volpano:1996}, extended with functions and an operator for permission checks.
+
+We model an \emph{app} as a collection of \emph{functions}
+(\emph{services}), together with a statically assigned permission
+set. A \emph{system}, denoted by $\mathcal{S}$, consists of a set of
+apps. We use capital letters $A,B,\ldots$ to denote apps. A function
+$f$ defined in an app $A$ is denoted by $A.f$, and may be called
+independently of other functions in the same app. The intention is
+that a function models an  application component (i.e.,
+\emph{Activity}, \emph{Service}, \emph{BroadCastReceiver}, and
+\emph{ContentProvider}) in Android, which may be called from within
+the same app or other apps.
+
+We assume that only one function is
+executed at a time, so we do not model concurrent executions of
+apps. We think that in the Android setting, considering sequential behavior only is
+not overly restrictive. This is because the communication between apps are
+(mostly) done via IPC. Shared states between apps,
+which is what contributes to the difficulty in concurrency handling, is mostly
+absent, apart from the very limited sharing of preferences. In such a setting,
+each invocation of a service can be treated independently as there is usually
+no synchronization needed between different invocations. Additionally, we assume functions in a system are not (mutually)
+recursive, so there is a finite chain of function calls from any given
+function. The absence of recursion is not a restriction, since our
+functions are supposed to model communications in Android, which are
+rarely recursive. We denote with $\PS$ the finite set containing all permissions in
+the system. Each app is assigned a static set of permissions drawn
+from this set. The powerset of $\PS$ is written as $\PPS$.  
+
+
+For simplicity, we consider only programs manipulating \emph{integers}, so the expressions in our language all have the integer type. Boolean values are encoded as 0 (false) and any non-zero values (true). The grammar for expressions is given below:
+\begin{equation*}
+e ::= n \mid \leVAR{x} \mid \leOP{e}{e}
+\end{equation*}
+where $n$ denotes an integer literal, $\leVAR{x}$ denotes a variable, and $\leOP{}{}$ denotes a binary operation.
+The commands of the language are given in the following grammar:
+\begin{equation*}
+\begin{array}{l}
+  c\;::=\; \lcASS{x}{e} \mid \lcIF{e}{c}{c} \mid  \lcWHILE{e}{c} \mid \lcSEQ{c}{c}  \\
+  \quad \mid \lcLETVAR{x}{e}{c} \mid \lcCALL{x}{A.f}{\overline{e}} \mid \lcCP{p}{c}{c}
+\end{array}
+\end{equation*}
+The first four constructs are respectively assignment, conditional, while-loop and sequential composition.
+The statement ``\lcLETVAR{x}{e}{c}'' is a local variable declaration statement. Here $x$ is
+declared and initialized to $e$, and its scope is the command $c$. We require
+that $x$ does not occur in $e.$
+The statement ``\lcCALL{x}{A.f}{\overline{e}}''  denotes an assignment whose right hand side is
+a function call to $A.f$. The statement
+``\lcCP{p}{c_1}{c_2}''
+checks whether the calling app has permission $p$: if it does then $c_1$ is executed,
+otherwise $c_2$ is executed.
+This is similar to the \textbf{test} construct in {\BN} system, except that we allow testing only
+one permission at a time. This is a not real restriction since both versions of the \textbf{test} can simulate one another.
+
+
+A function declaration has the following syntax:
+\begin{equation*}
+F ::= \lpPROG{A.f}{\overline{x}}{c}{{\lpRES}}
+\end{equation*}
+where $A.f$ is the name of the function, $\bar x$ are function parameters,
+$c$ is a command and {\lpRES} is a local variable
+that holds the return value of the function.
+The variables $\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{return}~r$'' in their scopes.
+We consider only {\em closed functions}, i.e., the variables occurring in $c$
+are either introduced by \textbf{letvar} or from the set $\{\overline{x}, r\}$.
+
+
+
+\begin{figure*}[ht]
+{\small
+\[
+\inference[E-VAL]{}{\eta \vdash \leVAL{v}  \leadsto v}
+\qquad
+\inference[E-VAR]{}{\eta \vdash \leVAR{x}  \leadsto \eta(x)}
+\]
+
+\[
+\inference[E-OP]{\eta \vdash e_1 \leadsto v_1\quad \eta \vdash e_2 \leadsto v_2}
+{\eta \vdash \leOP{e_1}{e_2} \leadsto v_1~op~v_2}
+\qquad
+\inference[E-LETVAR]{\eta \vdash e \leadsto v \quad \eta [ x \mapsto v ]; A ; P \vdash c \leadsto \eta'}
+{\eta; A; P \vdash \lcLETVAR{x}{e}{c} \leadsto \eta' - x}
+\]
+
+\[
+\inference[E-SEQ]{\eta;A; P \vdash c_1 \leadsto \eta' \quad \eta';A; P \vdash c_2 \leadsto \eta''}
+{\eta;A;P \vdash \lcSEQ{c_1}{c_2} \leadsto \eta''}
+\qquad
+\inference[E-ASS]{\eta \vdash e \leadsto v}
+{\eta; A; P \vdash \lcASS{x}{e} \leadsto \eta [ x \mapsto v ]}
+\]
+
+\[
+\inference[E-IF-T]{\eta \vdash e \leadsto v\quad v\neq 0\quad \eta; A; P \vdash c_1 \leadsto \eta'}
+{\eta; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta'}
+\qquad
+\inference[E-IF-F]{\eta \vdash e \leadsto v\quad v = 0\quad \eta;A; P \vdash c_2 \leadsto \eta'}
+{\eta;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta'}
+\]
+
+\[
+\inference[E-WHILE-T]{
+\eta \vdash e \leadsto v\quad v\neq 0\quad
+\eta;A; P \vdash c \leadsto \eta'\\
+\quad \eta' ; A ; P \vdash \lcWHILE{e}{c} \leadsto \eta''
+}
+{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta''}
+\qquad
+\inference[E-WHILE-F]{\eta \vdash e \leadsto v\qquad v = 0}
+{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta}
+\]
+
+\[
+\inference[E-CP-T]{p\in P \quad \eta; A; P \vdash c_1 \leadsto \eta'}
+{\eta; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+\qquad
+\inference[E-CP-F]{p\notin P \quad \eta;A;P \vdash c_2 \leadsto \eta'}
+{\eta;A;P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+\]
+
+\[
+\inference[E-CALL]{
+\FD(B.f) = \lpPROG{B.f}{\overline{y}}{c}{\lpRES} \qquad
+\eta\vdash\overline{e} \leadsto \overline{v} \quad
+[\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c \leadsto \eta'}
+{\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto \eta[x \mapsto \eta'(r) ]}
+\]
+}
+\caption{Evaluation rules for expressions and commands,
+given a function definition table $\FD$ and a permission assignment $\Theta.$
+}
+\label{fig:semantics}
+\end{figure*}
+ 
+\subsection{Operational Semantics}\label{sec:semantics}
+We assume that function definitions are stored in a table $\FD$ indexed by function names, and the permission sets assigned to apps are given by a table $\Theta$ indexed by app names.
+
+An {\termEmph{evaluation environment}
+is a finite mapping from variables to values (i.e., integers).
+We denote with $EEnv$ the set of evaluation environments.
+Elements of $EEnv$ are ranged over by $\eta$.
+We  use the notation
+$[ x_1 \mapsto v_1, \cdots,  x_n \mapsto v_n]$
+to denote an evaluation environment mapping variable $x_i$ to value $v_i$; this will sometimes be abbreviated as $[ \overline x \mapsto \overline v ].$
+The domain of $\eta = [ x_1 \mapsto v_1, \cdots, x_n \mapsto v_n]$ (i.e., $\{x_1,\dots,x_n\}$) is denoted by $dom(\eta)$.
+Given two environments $\eta_1$ and $\eta_2$, we define
+$\eta_1\eta_2$ as an environment $\eta$ such that $\eta(x) = \eta_2(x)$ if $x \in dom(\eta_2)$,
+otherwise $\eta(x) =\eta_1(x)$.
+For example, $\eta[x \mapsto v]$ maps $x$ to $v$, and $y$ to $\eta(y)$
+for any $y \in dom(\eta)$ such that $y \not = x.$
+Given a mapping $\eta$ and a variable $x$, we write $\eta\!-\!x$ to denote the
+mapping resulting from removing $x$ from $dom(\eta)$.
+
+The operational semantics for expressions and commands is
+given in Fig.~\ref{fig:semantics}.
+The evaluation judgment
+for expressions has the form $\eta\vdash e\leadsto v$,
+which states that expression $e$ evaluates to value $v$ when variables
+in $e$ are interpreted in the evaluation environment $\eta.$
+We write $\eta \vdash \overline{e} \leadsto \overline{v}$,
+where $\overline{e}=e_1,\dots,e_n$ and $\overline{v} = v_1,\dots,v_n$ for some $n$,
+to denote a sequence of judgments
+$\eta \vdash e_1 \leadsto v_1, \ldots, \eta \vdash e_n \leadsto v_n.$
+
+The evaluation judgment for commands takes the form
+$\eta;A;P\vdash c \leadsto \eta'$
+where $\eta$ is an evaluation environment before the execution
+of the command $c$, and $\eta'$ is the evaluation environment
+after the execution of $c$. Here $A$ refers to the app to which the command $c$ belongs.
+The permission set $P$ denotes the {\em permission context}, i.e., it is the set of permissions of the app which invokes the function of $A$ in which the command $c$ resides. The caller
+app may be $A$ itself (in which case the permission context will be the same as the permission set of $A$) but more often it is another app in the system.
+
+The operational semantics of most commands are straightforward.
+We explain the semantics of the \emph{test} primitive and the function call.
+Rules (\ruleTagText{E-CP-T}) and (\ruleTagText{E-CP-F}) capture the semantics of the \textbf{test} primitive.
+These are where the permission context $P$ in the evaluation judgement is used.
+The semantics of function calls is given by (\ruleTagText{E-CALL}). 
+ Notice that $c$ inside the body of \emph{callee} is executed under
+the permission context $\Theta(A)$, which is the permission set of $A$. The permission context $P$
+in the conclusion of that rule, which denotes the permission of the app that calls $A$, 
+is not used in the premise. That is, the permission context of $A$ is not inherited by 
+the callee function $B.f$. This reflects the way permission contexts in Android
+are passed on during IPCs~\cite{Android-CheckPerm,Android-Binder-IPC}, and is also a major difference
+between our permission model and that in {\BN} type system,
+where permission contexts are inherited by successive function calls.
+
+ \subsection{Security Types}\label{sec:types}
+
+In information flow type systems such as \cite{Volpano:1996}, it is common to adopt a lattice
+structure to encode security levels. Security types in this setting are just security
+levels. In our case, we generalize the security types to account for
+the dependency of security levels on permissions. So we shall distinguish
+security levels, given by a lattice structure which encodes sensitivity levels
+of information, and security types, which are mappings from permissions to security levels.
+We assume the security levels are given by a lattice $\SL$, with a partial order $\leq_{\SL}$.
+Security types are defined in the following.
+
+\begin{definition}\label{def:base_type}
+A \termEmph{base security type} (or \termEmph{base type}) $t$ is a mapping from $\PPS$ to $\SL$.
+We denote with $\Tcal$ the set of base types.
+Given two base types $s$ and $t$, we say $s=t$ \text{iff} $s(P)=t(P)$ for all  $P\in\PPS$.
+We define an ordering $\leq_\Tcal$ on base types as follows: 
+$s\leq_\Tcal t$ \text{iff} $\forall$ $P\in \PPS$, $s(P) \leq_{\SL} t(P)$.
+\end{definition}
+
+As we shall see, if a variable is typed by a base type, the sensitivity of
+its content may depend on the permissions of the app which writes to the variable.
+In contrast, in traditional information flow type systems,
+a variable annotated with a security level has a fixed sensitivity level
+regardless of the permissions of the app that writes to the variable.
+
+The set of base types with the order $\leq_{\Tcal}$ forms a lattice. The join and meet
+of the lattice are defined as follows:
+
+\begin{definition}\label{def:type-cup-cap}
+For $s, t\in\Tcal$, $s\sqcup t$ and $s\sqcap t$ are defined as
+\begin{align*}
+(s\sqcup t)(P) =  s(P)\sqcup t(P), \forall P \in \PPS\\
+(s\sqcap t)(P) =  s(P)\sqcap t(P), \forall P \in \PPS
+\end{align*}
+\end{definition}
+
+
+
+
+
+
+
+
+From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when no ambiguity arises.
+
+
+
+\begin{definition}
+\label{def:embed}
+Given a security level $l$, we define $\hat{l}$ as follows:
+for all $P \in \PPS$, we have $\hat{l}(P) = l.$
+\end{definition}
+Accordingly, a security level $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
+
+
+
+
+ \begin{definition}\label{def:fun-type}
+   A \termEmph{function type} has the form $\overline{t} \rightarrow t$, where $\overline{t}=(t_1,\ldots,t_m)$, $m\geq 0$ and $t, t_i$ are base types.
+   The types $\overline t$ are the types for the arguments of the function and $t$ is the return type of the function.
+ \end{definition}
+
+
+In our type system, security types of  expressions (commands, functions, resp.) may be
+altered depending on the execution context. That is, when an expression is used in
+a context where a permission check has been performed (either successfully or unsuccessfully),
+its type may be adjusted to take into account the \emph{presence} or \emph{absence}
+of the checked permission.
+Such an adjustment is called a {\termEmph{promotion} or a {\termEmph{demotion}.
+
+
+\begin{definition}\label{def:updown}
+Given a permission $p$, the \termEmph{promotion} and \termEmph{demotion} of a base type $t$
+with respect to $p$ are: \begin{align*}
+(t\uparrow_{p}) (P) = t(P\cup \{p\}), \forall P\in \PPS
+\tag{promotion}
+\\
+(t\downarrow_{p}) (P) = t(P\setminus\{p\}), \forall P\in \PPS
+\tag{demotion}
+\end{align*}
+The \termEmph{promotion} and \termEmph{demotion} of a function type~$\overline{t}\rightarrow t$,
+where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
+\begin{align*}
+(\overline{t}\rightarrow t)\uparrow_{p} = \overline{t}\uparrow_{p} \rightarrow t\uparrow_{p},~
+\text{where}~\overline{t}\uparrow_{p} = (t_1\uparrow_{p},\ldots, t_m\uparrow_{p}),
+\\
+(\overline{t}\rightarrow t)\downarrow_{p} = \overline{t}\downarrow_{p}\rightarrow t\downarrow_{p},~
+\text{where}~\overline{t}\downarrow_{p} = (t_1\downarrow_{p},\ldots, t_m\downarrow_{p}).
+\end{align*}
+\end{definition}
+
+
+
+
+
+
+
+
+\subsection{Security Type System}\label{sec:typing_rules}
+
+
+\begin{figure*}
+\small
+\[
+\inference[T-VAR]{}
+{\Gamma \vdash \leVAR{x} : \Gamma(x)}
+\qquad
+\inference[T-OP]
+{\Gamma\vdash e_1: t & \Gamma ; A\vdash e_2: t}
+{\Gamma\vdash \leOP{e_1}{e_2} : t}
+\qquad
+\inference[T-SUB$_{e}$]
+{\Gamma\vdash e : s & s \leq t}
+{\Gamma\vdash e : t}
+\qquad
+\inference[T-SUB$_{c}$]
+{\Gamma; A \vdash c : s & t \leq s}
+{\Gamma; A\vdash c : t}
+\]
+
+\[
+\inference[T-ASS]
+{\Gamma \vdash e : \Gamma(x)}
+{\Gamma ;A \vdash \lcASS{x}{e} : \Gamma(x)}
+\qquad
+\inference[T-LETVAR]
+{\Gamma \vdash e : s &
+\Gamma[x:s]; A \vdash c : t }
+{\Gamma; A\vdash \lcLETVAR{x}{e}{c} :  t}
+\qquad
+\inference[T-IF]
+{\Gamma \vdash e : t & \Gamma ; A\vdash c_1 : t & \Gamma; A \vdash c_2 : t }
+{\Gamma; A \vdash \lcIF{e}{c_1}{c_2} : t}
+\]
+
+\[
+\inference[T-CP]
+{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Gamma\downarrow_{p} ; A\vdash c_2 : t_2}
+{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : \omerge p {t_1} {t_2}}
+\qquad
+\inference[T-WHILE]
+{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
+{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+\quad
+\inference[T-SEQ]
+{\Gamma; A\vdash c_1 : t & \Gamma ; A\vdash c_2 : t }
+{\Gamma ; A\vdash \lcSEQ{c_1}{c_2} : t}
+\]
+
+\[
+\inference[T-CALL]
+{\FT(B.f) = \overline{t} \rightarrow t' &
+\Gamma \vdash \overline{e} : \app{\overline{t}}{\Theta(A)} &
+\app{t'}{\Theta(A)} \leq \Gamma(x)}
+{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+ \Gamma(x)  }
+\qquad
+\inference[T-FUN]
+{[\overline{x}:\overline{t}, r : t'] ; B\vdash c : s}
+{ \vdash \lpFUN{B.f}{\overline{x}}{c} :
+  \overline{t} \rightarrow t'}
+\]
+\caption{Typing rules for expressions, commands and functions.}
+\label{fig:typing-rules}
+\end{figure*}
+
+
+ 
+We first define a couple of operations on security types and permissions that will
+be used later.
+
+\begin{definition}\label{def:projection}
+Given $t\in\Tcal$ and $P\in\PPS$, the \termEmph{projection} of $t$ on a permission set $P$ is a security type  $\app{t}{P}$ defined as: \begin{equation*}
+\app{t}{P}(Q) = t(P),\; \forall Q\in \PPS.
+\end{equation*}
+Type projection of a list of types
+on $P$ is then written as
+\[
+\app{(t_1,\dots,t_n)}{P} = (\app{t_1}{P}, \dots, \app{t_n}{P}).
+\]
+\end{definition}
+\begin{definition}\label{def:merge}
+Given a permission $p$ and two types $t_1$ and $t_2$, the {\termEmph{merging}} of
+$t_1$ and $t_2$ along $p$, denoted as $\omerge {p} {t_1} {t_2}$, is:
+\begin{equation*}
+(\omerge p {t_1} {t_2}) (P) =
+\begin{cases}
+t_1(P) & p\in P \\
+t_2(P) & p\not\in P\\
+\end{cases}
+\quad\forall P\in{\PPS}
+\end{equation*}
+\end{definition}
+
+A {\em typing environment} is a finite mapping from variables to base types.
+We use the notation  $[x_1 : t_1, \dots, x_n : t_n]$
+to enumerate a typing environment with domain $\{x_1,\dots,x_n\}.$
+Typing environments are ranged over by $\Gamma.$
+Given $\Gamma_1$ and $\Gamma_2$ such that $dom(\Gamma_1) \cap dom(\Gamma_2) = \emptyset$,
+we write $\Gamma_1\Gamma_2$ to denote a typing environment that is the (disjoint) union of the mappings
+in $\Gamma_1$ and $\Gamma_2$.
+
+\begin{definition}\label{def:tenv-pd}
+  Given a typing environment $\Gamma$, its {\em promotion} and {\em demotion} along $p$
+  are typing environments $\Gamma\!\uparrow_p$ and $\Gamma\!\downarrow_p$, such that
+$(\Gamma\!\uparrow_{p})(x) = \Gamma(x)\!\uparrow_{p}$ and
+$(\Gamma\!\downarrow_{p})(x) = \Gamma(x)\!\downarrow_{p}$ for every $x \in dom(\Gamma).$
+  The projection of $\Gamma$ on $P \in \PPS$ is a typing environment $\app{\Gamma}{P}$ such that
+$(\app{\Gamma}{P})(x) = \app{\Gamma(x)}{P}$ for each $x \in dom(\Gamma).$
+\end{definition}
+
+There are three typing judgments in our type system as explained below. All these judgments are implicitly parameterized by
+a function type table, $\FT$, which maps all function names to function types, and a mapping $\Theta$ assigning permission sets to apps.
+
+\begin{itemize}
+\item Expression typing: $\Gamma \vdash e : t.$
+This says that under $\Gamma$,
+the expression $e$ has a base type at most $t$.
+
+\item Command typing: $\Gamma; A \vdash c : t$.
+This means that the command $c$ writes to variables with type at least $t$, when
+executed by app $A$, under the typing environment $\Gamma.$
+
+\item Function typing:
+The typing judgment takes the form: $$\vdash \lpFUN{B.f}{\overline{x}}{c} :  \overline{t} \xrightarrow{} t'$$
+where $\overline{x} = (x_1,\dots,x_n)$ and
+$\overline{t} = (t_1,\dots,t_n)$ for some $n \geq 0.$
+Functions are
+polymorphic in the permissions of the caller.
+Intuitively, this means that each caller of the function above with permission set $P$
+``sees'' the function as having type
+$\app{\overline{t}}{P} \rightarrow \app{t'}{P}.$
+That is, if the function is called from another app with permission $P$,
+then it expects input of type up to $\app{\overline{t}}{P}$ and
+a return value of type at most $\app{t'}{P}$.
+
+\end{itemize}
+The typing rules are given in Fig.~\ref{fig:typing-rules}.
+Most of them are common to
+information flow type systems~\cite{Volpano:1996,Banerjee:2005ht,Sabelfeld:2003} except for \ruleTagText{T-CP} and \ruleTagText{T-CALL}. Note that in the subtyping rule for commands (\ruleTagText{T-SUB$_c$}), the security type of the effect of the command
+can be safely downgraded, since typing for commands keeps track of a lower bound of the write effects of the command. This typing rule for
+command is standard, see, e.g., \cite{Volpano:1996} for a more detailed discussion.
+
+In \ruleTagText{T-CP}, to type statement \lcCP{p}{c_1}{c_2},
+we type $c_1$ in a promoted typing environment for a successful permission check on $p$, and $c_2$ in a demoted typing environment for a failed permission check on $p$.
+The challenge is how to combine the types of the two premises  to obtain the type
+for the conclusion. One possibility is to force
+the type of the two premises and the conclusion to be identical (i.e., treat permission check the same as other if-then-else statements and apply \ruleTagText{T-IF}).
+This, as we have seen in Section~\ref{sec:intro},
+leads to a loss in precision of the type for \textbf{test} construct. Instead, we consider
+a more refined \emph{merged} type $\omerge{p}{t_1}{t_2}$ for the conclusion,
+where $t_1$ ($t_2$ resp.) is the type of the left (right resp.) premise.
+To understand the merged type,
+consider a scenario where the statement
+is executed in a context where permission $p$ is \emph{present}.
+Then the permission check succeeds and
+the statement $\lcCP{p}{c_1}{c_2}$ is equivalent to $c_1$.
+In this case, one would expect that the behavior of $\lcCP{p}{c_1}{c_2}$ would be
+equivalent to that of $c_1$. This is in fact captured by the equation
+$
+(\omerge p {t_1} {t_2})(P) = t_1(P)
+$
+for all $P$ such that $p \in P$, which holds by definition. A dual scenario arises when
+$p$ is not in the permissions of the execution context.
+
+In \ruleTagText{T-CALL}, the callee function $B.f$ is assumed to be type checked beforehand
+and its type is given in the $FT$ table. Here the function $B.f$ is called
+by $A$ so the type of $B.f$ as seen by $A$ should be
+a projection of the type given in $FT(B.f)$ on the permissions of $A$ (given by $\Theta(A)$):
+$\app{\overline{t}}{\Theta(A)} \rightarrow \app{t'}{\Theta(A)}.$
+Therefore the arguments for the function call should be typed
+as
+$\Gamma \vdash \overline{e} : \app{\overline{t}}{\Theta(A)}$
+and the return type (as viewed by $A$) should be dominated
+by the type of $x$, i.e., $\app{t'}{\Theta(A)} \leq \Gamma(x)$.
+
+
+\textbf{Parameter laundering}~It is essential that in Rule \ruleTagText{T-CALL}, the arguments $\overline{e}$ and the return value of
+the function call are typed according to the projection of $\overline{t}$ and $t'$ on $\Theta(A)$. If they are instead typed with $\overline{t}$, then there is a potential implicit flow via a ``parameter laundering'' attack. To see why, consider the following alternative to \ruleTagText{T-CALL}:
+\begin{equation*}
+\inference[T-CALL']
+{
+ \FT(B.f) = \overline{t} \rightarrow t' &
+ \Gamma \vdash \overline{e} :\overline{t} &
+ t'  \leq \Gamma(x)}
+{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+  \Gamma(x)}
+\end{equation*}
+Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially what is adopted in {\BN} system for method calls~\cite{Banerjee:2005ht}.
+
+Let us consider the example in Listing~\ref{lst:laundery}.
+\begin{lstlisting}[float=tp, label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
+A.f(x) {  init r = 0 in { r := call B.g (x); return r }
+}
+	
+B.g(x) { init r = 0 in {
+	   test(p) r := 0 else r := x;
+	   return r 
+   }
+}
+
+C.getsecret() { init r = 0 in {
+	  test(p) r := P_INFO else r := 0;
+	  return r 
+  }
+}
+
+M.main() { init r = 0 in {
+	  letvar {return r
+  }
+}
+\end{lstlisting}
+Let $\PS=\{p\}$ and $t$ be the base type $t =  \{\emptyset \mapsto L, \{p\} \mapsto H\}$,
+where $L$ and $H$ are bottom and top levels respectively. Here we assume \textit{P\_INFO} is a sensitive value
+of security level $H$ that needs to be protected, so function \textit{C.getsecret} is required to have type $() \rightarrow t$. That is, only apps that have the required permission $p$ may obtain
+the secret value.
+Suppose the permissions assigned to the apps are given by:  $\Theta(A) =  \Theta(B) = \emptyset, \Theta(C) = \Theta(M) = \{p\}.$
+
+If we were to adopt the modified \ruleTagText{T-CALL'} instead of \ruleTagText{T-CALL}, then we can assign the following
+types to the above functions:
+\[
+FT := \left\{
+\begin{array}{lcl}
+A.f & \mapsto & t \rightarrow \hat{L} \\
+B.g & \mapsto & t \rightarrow \hat{L}\\
+C.getsecret & \mapsto & () \rightarrow t\\
+M.main & \mapsto  & () \rightarrow \hat{L}
+\end{array}
+\right.
+\]
+Notice that the return type of $M.main$ is $\hat{L}$ despite having a
+return value that contains sensitive value \textit{P\_INFO}.
+If we were to use \ruleTagText{T-CALL'} in place of \ruleTagText{T-CALL}, the above functions can
+be typed as shown in Fig.~\ref{fig:type1}.
+Finally, still assuming \ruleTagText{T-CALL'}, a partial typing
+derivation for $M.main$ is given in Fig.~\ref{fig:type2}.
+
+As shown in Fig.~\ref{fig:type1}, \textit{B.g} can be given type $t \rightarrow \hat{L}$. Intuitively, it checks that the
+caller has permission $p$. If it does, then \textit{B.g} returns 0 (non-sensitive), otherwise it returns the
+argument of the function (i.e., $x$). This is as expected and is sound, under the assumption that the security level of
+the content of $x$ is dependent on the permissions of the caller. If the caller of \textit{B.g} is the original creator of the content of $x$,
+then the assumption is trivially satisfied. The situation gets a bit tricky when the caller simply passes on the content  it
+receives from another app to $x$. In our example, app $A$ makes a call to \textit{B.g}, and passes on the value of $x$ it receives.
+In the run where \textit{A.f} is called from \textit{M.main}, the value of $x$ is actually \emph{sensitive} since it requires the permission $p$ to acquire.
+However, when it goes through \textit{A.f} to \textit{B.g}, the value of $x$ is perceived as \emph{non-sensitive} by $B$, since
+the caller in this case ($A$) has no permissions. The use of the intermediary $A$ in this case in effect launders the permissions
+associated with $x.$
+Therefore, if the rule \ruleTagText{T-CALL'} is used in place of \ruleTagText{T-CALL}, the call chain
+from \textit{M.main} to \textit{A.f} and finally to \textit{B.g} can
+all be typed.
+This is correct in a setting where permissions are \emph{propagated}
+along with calling context (e.g., \cite{Banerjee:2005ht}) however it
+is incorrect in the Android permission model~\ref{sec:permission_model}. 
+To avoid the parameter laundering problem, our approach is to make sure that an app may only pass an argument
+to another function if the app itself is authorized to access the content of the argument in the first place,
+as formalized in the rule \ruleTagText{T-CALL}.
+
+\begin{figure*}[ht]
+\begin{small}
+\begin{prooftree}
+\AxiomC{$FT(B.g) = t \rightarrow \hat{L}$}
+\AxiomC{$x : t, r : \hat{L} \vdash x : t$}
+\AxiomC{$\hat{L} \leq t$}
+\LeftLabel{T-CALL'}
+\TrinaryInfC{$x : t, r : \hat{L} ; A \vdash \lcCALL{r}{B.g}{x} : \hat{L}$}
+\LeftLabel{T-FUN}
+\UnaryInfC{$\vdash \lpPROG{A.f}{x} {\lcCALL{r}{B.g}{x} }{\lpRES} : t \rightarrow \hat{L}$}
+\end{prooftree}
+
+\vskip1ex
+
+
+\begin{prooftree}
+\AxiomC{$x : t\uparrow_p,  r : \hat{L}\uparrow_p \vdash \lcASS{r}{0} : \hat{L}$ }
+\AxiomC{$x : t\downarrow_p,  r : \hat{L}\downarrow_p \vdash \lcASS{r}{x} : \hat{L} $ }
+\LeftLabel{T-CP}
+\BinaryInfC{$x : t, r : \hat{L} \vdash \lcCP {p} { \lcASS{r}{0} } {\lcASS{r}{x}} : \omerge{p}{\hat{L}}{\hat{L}} $}
+\LeftLabel{T-FUN}
+\UnaryInfC{$\vdash \lpPROG{B.g}{x}{ \lcCP {p} { \lcASS{r}{0} } {\lcASS{r}{x}} }{\lpRES} : t \rightarrow \hat{L}$}
+\end{prooftree}
+Note that $t\uparrow_p = \hat{H}$, $t\downarrow_p = \hat{L} = \hat{L}\downarrow = \hat{L}\uparrow$ and $\omerge{p}{\hat{L}}{\hat{L}} = \hat{L}.$
+
+\vskip1ex
+
+\begin{prooftree}
+\AxiomC{$r : t\uparrow_p \vdash \lcASS{r}{\mathrm{SECRET}} : \hat{H}$}
+\AxiomC{$r : t\downarrow_p \vdash \lcASS{r}{0} : \hat{L}$}
+\LeftLabel{T-CP}
+\BinaryInfC{$r : t \vdash \lcCP{p}{\lcASS{r}{\mathrm{SECRET}}}{\lcASS{r}{0}} :  \omerge{p}{\hat{H}}{\hat{L}} $}
+\LeftLabel{T-FUN}
+\UnaryInfC{$\vdash \lpPROG{C.getsecret}{~}
+		{ \lcCP{p}{\lcASS{r}{\mathrm{SECRET}}}{\lcASS{r}{0}}}
+		{\lpRES} : () \rightarrow t$}
+\end{prooftree}
+Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
+\end{small}
+\caption{Typing derivations for functions A.f, B.g and C.getsecret}
+\label{fig:type1}
+\end{figure*}
+
+
+\begin{figure*}[ht]
+\begin{small}
+\begin{prooftree}
+\AxiomC{$r : \hat{L} \vdash 0 : t$}
+	\AxiomC{$\Gamma ; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
+	\AxiomC{$\Gamma ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
+\LeftLabel{T-SEQ}
+\BinaryInfC{$r : \hat{L}, x_H : t ; M \vdash \lcSEQ {\lcCALL{x_H}{C.getsecret}{~} } {\lcCALL{r}{A.f}{x_H} }  :  \hat{L}$}
+\LeftLabel{T-LETVAR}
+\BinaryInfC{$r : \hat{L} ~; M \vdash \lcLETVAR{x_H}{0}
+		{\lcSEQ {\lcCALL{x_H}{C.getsecret}{~} } {\lcCALL{r}{A.f}{x_H} } } : \hat{L} $}
+\LeftLabel{T-FUN}
+\UnaryInfC{$
+\begin{array}{l}
+\vdash M.main(~)~ \{ \textbf{init} ~ r = 0 ~ \textbf{in} \\
+\quad \textbf{letvar} ~ x_H = 0 ~ \textbf{in}~ \{ \\
+\qquad \lcCALL{x_H}{C.getsecret}{~}; \\
+\qquad \lcCALL{r}{A.f}{x_H} \\
+\quad \} \\
+\quad \textbf{return}~r
+\quad \}
+\end{array}
+: () \rightarrow \hat{L}
+$}
+\end{prooftree}
+where $\Gamma = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are derived, respectively, as follows:
+
+
+\vskip1ex
+
+\begin{prooftree}
+\AxiomC{$FT(C.getsecret) = () \rightarrow t$}
+\AxiomC{$\Gamma \vdash () : () $}
+\AxiomC{$t \leq \Gamma(x_H) = t $}
+\LeftLabel{T-CALL'}
+\TrinaryInfC{$\Gamma; M \vdash \lcCALL{x_H}{C.getsecret}{~} : t$}
+\LeftLabel{T-SUB${}_c$}
+\UnaryInfC{$\Gamma; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
+\end{prooftree}
+
+\vskip1ex
+
+\begin{prooftree}
+\AxiomC{$FT(A.f) = t \rightarrow \hat{L}$}
+\AxiomC{$\Gamma \vdash x_H : t$}
+\AxiomC{$\hat{L} \leq \Gamma(x_H) = t$}
+\LeftLabel{T-CALL'}
+\TrinaryInfC{$\Gamma ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
+\end{prooftree}
+\end{small}
+\caption{A typing derivation for function M.main}
+\label{fig:type2}
+\end{figure*}
+
+With the correct typing rule for function calls, the function $A.f$ cannot be assigned type
+$t \rightarrow \hat{L}$, since that would require the instance of T-CALL (i.e., when making the
+call to $B.g$) in this case to satisfy
+the constraint:
+\[
+x : t, r : \hat{L} \vdash x : \app{t}{\Theta(A)}
+\]
+where $\app{t}{\Theta(A)} = \hat{L}$, which is impossible since $t \not \leq \hat{L}.$ What this
+means is essentially that in our type system, information received by an app $A$ from the parameters
+cannot be propagated by $A$ to another app $B$, unless $A$ is already authorized to access the
+information contained in the parameter. Note that this only restricts the propagation of such parameters
+to other apps; the app $A$ can process the information internally without necessarily violating
+the typing constraints.
+
+Finally, the reader may check that if we fix the type of $B.g$ to $t \rightarrow \hat{L}$ then
+$A.f$ can only be assigned type $\hat{L} \rightarrow \hat{L}.$ In no circumstances can
+$M.main$ be typed, since the statement $x_H := C.getsecret()$ forces $x_H$ to have
+type $\hat{H}$, and thus cannot be passed to $A.f$ as an argument.
+
+
+
+
+
+
+
+
+\subsection{Noninterference and Soundness}\label{sec:non-interference}
+
+We first define an \termEmph{indistinguishability} relation between evaluation environments.
+Such a definition typically assumes an observer who may observe values of variables at a certain security level.
+In the non-dependent setting, the security level of the observer is fixed, say at $l_O$, and valuations
+of variables at level $l_O$ or below are required to be identical. In our setting, the security level of
+a variable in a function can vary depending on the permissions of the caller app (which may be the observer itself), so
+it may seem more natural to define indistinguishability in terms of the permission set assigned to the observer. However,
+we argue that such a definition is subsumed by the  
+more traditional definition that is based on the security level of the observer.
+Assuming that the observer app is assigned a permission set $P$, 
+then given two variables $x : t$ and $y : t'$,
+the level of information that the observer can access through $x$ and $y$ is at most $t(P) \sqcap t'(P).$
+In general the least upper bound of the security level that an observer with permission $P$ has access to can
+be computed from the least upper bound of projections (along $P$) of the types of variables and the return types
+of functions in the system.
+In the following definition of indistinguishability, we simply assume that
+such an upper bound has been computed, and we will not refer explicitly to the permission set of the observer from
+which this upper bound is derived.
+
+
+\begin{definition}\label{def:envequ}
+Given two evaluation environments $\eta, \eta'$,
+a typing environment $\Gamma$, a security level $l_O \in \SL$ of the observer,
+the {\termEmph{indistinguishability relation}}  $=_{\Gamma}^{l_O}$ is defined as: \begin{equation*}
+\eta =_{\Gamma}^{l_{O}} \eta' \text{ iff}
+\forall x\in dom(\Gamma) .\; \big(\Gamma(x) \leq \hat{l_{O}} \Rightarrow \eta(x) = \eta'(x) \big)
+\end{equation*}
+where
+$\eta(x) = \eta'(x)$ holds iff both sides of the equation are defined and equal,
+or both sides are undefined.
+\end{definition}
+
+Note that in Definition~\ref{def:envequ}, $\eta$ and $\eta'$ may not have the same domain, but they must agree on
+their valuations for the variables in the domain of $\Gamma$. 
+Note also that since base types are functions from permissions to security level, the security
+level $l_O$ needs to be lifted to a base type in the comparison $\Gamma(x) \leq \hat{l_{O}}$.
+The latter implies that
+$\Gamma(x)(P) \leq l_O$ (in the latice $\SL$) for every permission set $P.$
+If the base type of each variable assigns the same security level to every permission set (i.e., the security level
+is independent of the permissions), then our notion of indistinguishability coincides with the standard definition
+for the non-dependent setting.
+
+
+
+
+
+
+
+
+
+
+
+We hereby give the definitions for well-typed property
+(Definition~\ref{def:cmd-welltype}) and non-interference for the type
+system (Defintion~\ref{def:ni} and Definition~\ref{def:sys-ni}),
+together with the final soundness conclusion
+(Theorem~\ref{thm:ni}). The detailed proofs are available
+in~\cite{Chen17arxiv}.
+
+
+\begin{definition}\label{def:cmd-welltype}
+Let $\mathcal{S}$ be a system, and let $\FD$, $\FT$ and $\Theta$ be
+its function declaration table, function type table, and permission
+assignments. We say $\mathcal{S}$ is \termEmph{well-typed} iff for
+every function $A.f$, $\vdash \FD(A.f) : \FT(A.f)$ is derivable.
+\end{definition}
+
+
+
+
+\begin{definition}\label{def:ni}
+A command $c$ executed in app $A$ is said to be {\termEmph{non-interferent}} \text{iff}
+for all $\eta_1, \eta'_1,\Gamma, P, l_{O}$,
+if  $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, \; $\eta_1;A ; P\vdash c \leadsto \eta_2 $ and
+ $\eta'_1; A; P\vdash c\leadsto \eta'_2  $
+then $\eta_2 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_2$.
+\end{definition}
+
+
+\begin{definition}\label{def:sys-ni}
+Let $\mathcal{S}$ be a system.
+A function
+$$\lpFUN{A.f}{\overline{x}}{c}$$
+in $\mathcal{S}$
+with $FT(A.f) = \overline{t} \rightarrow t'$
+is {\termEmph{non-interferent}}
+if for all $\eta_1, \eta'_1, P, v, l_{O}$,
+if the following hold:
+\begin{itemize}
+\item $t'(P) \leq l_{O}$,
+\item $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, where
+$\Gamma = [\overline{x} : \overline{t}, r : t']$,
+\item $\eta_1;A ; P\vdash c \leadsto \eta_2 $, and $\eta'_1; A; P\vdash c\leadsto \eta'_2 $,
+\end{itemize}
+then $\eta_2(r) = \eta_2'(r).$
+The system $\mathcal{S}$ is \termEmph{non-interferent} iff all functions
+in $\mathcal{S}$ are non-interferent.
+\end{definition}
+
+\begin{theorem}\label{thm:ni}
+Well-typed systems are non-interferent.
+\end{theorem}
+ \section{Type Inference}\label{sec:constraint_gen}
+This section describes a decidable inference algorithm for the language  in Section~\ref{sec:language}.
+Section~\ref{sec:constraint-gen-rules} firstly rewrites the typing
+rules (Fig.~\ref{fig:typing-rules}) in the form of permission trace
+rules (Fig.~\ref{fig:infer-rules}), then reduces the type inference
+into a constraint solving problem; Section~\ref{sec:constraint_solve}
+provides procedures to solve the generated constraints. Detailed
+definitions and proofs can be found in~\cite{Chen17arxiv}.
+
+
+\subsection{Constraint Generation}\label{sec:constraint-gen-rules}
+\subsubsection{\textbf{Permission Tracing}}\label{sec:trace_rules}
+In an IPC between different apps (components), there may be multiple permission checks in a calling context.
+Therefore, to infer a security type for an expression, a command or a function, we need to track
+the applications of promotions $\Gamma\!\uparrow_{p}$ and demotions $\Gamma\!\downarrow_{q}$ in their typing derivations.
+To this end,  we keep the applications symbolic and collect the promotions and demotions into a sequence.
+In other words, we treat them as a \emph{sequence} of promotions $\uparrow_{p}$ and demotions $\downarrow_{p}$ applied on a typing environment $\Gamma$.
+For example, $(\Gamma\!\uparrow_{p})\downarrow_{q}$ can be viewed as
+an \emph{application} of the sequence $\uparrow_{p}\downarrow_{q}$ on $\Gamma$.
+The sequence of promotions and demotions is called a \emph{permission trace} and denoted by {\trace}. The grammar of {\trace} is:
+\begin{equation*}
+\trace~::=~\tplus{p} ::\trace~|~ \tminus{p} :: \trace~|~ \epsilon
+\quad p\in \PS
+\end{equation*}
+and its length, denoted by $\tlength{\trace}$, is defined as:
+\begin{align*}
+	\tlength{\trace}=
+	\begin{cases}
+	    0 & \text{if}~ \trace=\epsilon\\
+		1+\tlength{\trace'} & \text{if}~ \trace=\tplusminus{p} :: \trace', \tplusminus{} \in\{\tplus{}, \tminus{}\}
+	\end{cases}
+\end{align*}
+\begin{definition}\label{def:app-pt-t}
+Given a base type $t$ and a permission trace $\trace$, the \termEmph{application} of $\trace$ to $t$, denoted by $t\cdot\trace$,  is defined as:
+
+\begin{equation*}
+{t\cdot \trace =}
+\begin{cases}
+t & {\normalfont\text{if}}~\trace = \epsilon\\
+(t\uparrow_{p})\cdot \trace' & {\normalfont\text{if}}~\exists p, \trace', s.t.~\trace = \tplus{p} :: \trace'\\
+(t\downarrow_{p})\cdot \trace' & {\normalfont\text{if}}~\exists p, \trace', s.t.~\trace = \tminus{p} :: \trace'
+\end{cases}
+\end{equation*}
+\end{definition}
+
+We also extend the application of a permission trace $\trace$ to a typing environment $\Gamma$ (denoted by $\Gamma\cdot\trace$), such that $\forall x.\; (\Gamma\cdot{\trace})(x) = \Gamma(x)\cdot \trace$.
+Based on permission traces, we give the definition of \termEmph{partial subtyping relation}.
+\begin{definition}\label{def:partial-subtype}
+The \termEmph{partial subtyping relation} $\leq_{\trace} $, which is the subtyping relation applied on the permission trace, is defined as $s\leq_{\trace}  t \text{ iff. } s\cdot \trace \leq t\cdot \trace$.
+\end{definition}
+
+The application of permission traces to types preserves the subtyping relation. 
+\begin{lemma}\label{lem:monotrace}
+$\forall s, t \in \Tcal$, $s\leq t \implies s\leq_{\trace} t$ for all $\trace$.
+\end{lemma}
+
+
+
+
+The following four lemmas discuss the impact of permission checking order on the same or different permissions.
+
+\begin{lemma}\label{lem:traceorder}
+$\forall t\in\Tcal$, $p,q\in\PS$ s.t. $ p\neq q$ , $t \cdot (\tplusminus{p} \tplusminuss{q}) =  t \cdot (\tplusminuss{q}  \tplusminus{p}) $, where $\tplusminus{},\tplusminuss{}, \in\{\tplus{},\tminus{}\}$.
+\end{lemma}
+
+\begin{lemma}\label{lem:traceorder-whole}
+$\forall t\in\Tcal$,$(t\cdot \tplusminus{p} )\cdot \trace = (t\cdot\trace)\cdot \tplusminus{p}$, where $\tplusminus{}\in\{\tplus{}, \tminus{}\}$ and $p \notin \trace$.
+\end{lemma}
+
+\begin{lemma}\label{lem:tracepsame}
+$\forall t\in\Tcal$, $p\in\PS$,$(t \cdot \tplusminus{ p})\cdot\tplusminuss{ p} =  t \cdot (\tplusminus{ p}) $, where $\tplusminus{}, \tplusminuss{} \in \{\tplus{},\tminus{}\}$.
+\end{lemma}
+
+\begin{lemma}\label{lem:tracesame}
+$\forall t\in\Tcal$, $(t \cdot \trace)\cdot \trace =  t \cdot \trace $.
+\end{lemma}
+
+
+
+Lemmas \ref{lem:traceorder} and \ref{lem:traceorder-whole} state that the order of applications of promotions and demotions on \emph{different} permissions does not affect the result. Lemmas \ref{lem:tracepsame} and \ref{lem:tracesame} indicate that only the first application takes effect if there exist several (consecutive) applications of promotions and demotions on the \emph{same} permission $p$. Therefore, we can safely keep only the first application, by removing the other applications on the same permission.
+
+Let $occur(p,\trace)$ be the number of occurrences of $p$ in $\trace$.
+We say $\trace$ is \emph{consistent} iff. $occur(p,\trace) \in \{0,1\}$ for all $p\in\PS$.
+In the remaining, we assume that all permission traces are consistent.
+Moreover, to ensure that the traces collected from the derivations of commands are
+consistent, we assume that in nested permission checks of a function definition, each permission is checked at most once.
+
+\iffalse
+\begin{lemma}\label{lem:tracemerge}
+$\forall s,t\in\Tcal.\; \forall p\in\PS.  (\omerge{p}{s}{t})\cdot \trace = \omerge{p}{(s\cdot\trace)}{(t\cdot\trace)} $, where $p\notin \trace$.
+\end{lemma}
+
+\begin{lemma}\label{lem:tracesub}
+$\forall s,t\in\Tcal.\; \forall p\in\PS.$ $s\leq t\Leftrightarrow  s\cdot\tplus{ p}\leq t\cdot\tplus{ p}$ and $s\cdot\tminus{ p}\leq t\cdot\tminus{ p}$.
+\end{lemma}
+\fi
+
+\subsubsection{\textbf{Permission Trace Rules}}
+ We split the applications of the promotions and demotions into two parts  (i.e., typing environments and permission traces), and move the subsumption rules (guarded by permission traces) for expressions and commands to where they are needed.
+This yields the syntax-directed  typing rules, which we call the {\em permission trace rules} and are given in Fig.~\ref{fig:infer-rules}.
+The judgments of the trace rules are similar to those of typing rules, except that each trace rule is guarded by the permission trace $\trace$ collected from the context, which keeps track of the adjustments of variables depending on the permission checks,
+and that the subtyping relation in the trace rules is the partial subtyping one $\leq_{\trace}$.
+
+\begin{figure*}[t]
+\begin{small}
+\[
+\inference[TT-VAR]{}
+{\Gamma;\trace\vdash_{t} \leVAR{x} : \Gamma(x)}
+\qquad
+\inference[TT-OP]
+{\Gamma;\trace\vdash_{t} e_1: t_1 & \Gamma;\trace \vdash_{t} e_2: t_2}
+{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+\qquad
+\inference[TT-ASS]
+{\Gamma;\trace \vdash_{t} e : t & t \leq_{\trace} \Gamma(x)}
+{\Gamma;\trace \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+\]
+
+
+\[
+\inference[TT-IF]
+{
+\Gamma;\trace \vdash_{t} e : t &
+\Gamma;\trace; A \vdash_{t} c_1 : t_1 &
+\Gamma;\trace; A \vdash_{t} c_2 : t_2 &
+t \leq_{\trace} t_1\sqcap t_2
+}
+{\Gamma;\trace;  A \vdash_{t} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2}
+\qquad
+\inference[TT-SEQ]
+{\Gamma;\trace; A \vdash_{t} c_1 : t_1 \quad \Gamma;\trace; A \vdash_{t} c_2 : t _2}
+{\Gamma;\trace; A \vdash_{t} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2}
+\]
+
+\[
+\inference[TT-LETVAR]
+{\Gamma;\trace \vdash_{t} e : s &
+\Gamma[x:s']; \trace; A \vdash_{t} c : t & s \leq_{\trace} s' }
+{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c} :  t}
+\qquad
+\inference[TT-WHILE]
+{
+\Gamma;\trace \vdash_{t} e : s &
+\Gamma;\trace; A \vdash_{t} c : t &  s\leq_{\trace} t  }
+{\Gamma;\trace; A \vdash_{t} \lcWHILE{c}{e} : t }
+\]
+
+\[
+\inference[TT-CALL]
+{
+\FT(B.f) = \overline{t} \xrightarrow{} t'  &
+\Gamma;\trace \vdash_{t} \overline{e} : \overline{s} &
+\overline{s}\leq_{\trace} \overline{\app{t}{\Theta(A)}} &
+\app{t'}{\Theta(A)}\leq_{\trace} \Gamma(x)
+}
+{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+\]
+
+\[
+\inference[TT-CP]
+{\Gamma;\trace::\tplus{ p}; A \vdash_{t} c_1 : t_1 &
+\Gamma;\trace::\tminus{p}; A \vdash_{t} c_2 : t_2}
+{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p} {t_1}{t_2}}
+\qquad
+\inference[TT-FUN]
+{
+[\overline{ x}: \overline{t},\lpRES:t'];\epsilon; B \vdash_{t} c : s
+}
+{\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
+\]
+\end{small}
+\caption{Permission trace rules for expressions, commands and functions} \label{fig:infer-rules}
+\end{figure*}
+
+ 
+
+The next two lemmas show the trace rules are sound and complete with respect to the typing rules, i.e., an expression (command, function, resp.)  is typable under the trace rules, if and only if it is typable under the typing rules.
+
+\begin{lemma}\label{lem:ptrsound}
+\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
+\item\label{lem:ptrsound-1} If $\Gamma;\trace\vdash_{t} e : t$, then $\Gamma\cdot\trace\vdash e : (t\cdot\trace)$.\\
+\item\label{lem:ptrsound-2} If $\Gamma;\trace; A \vdash_{t} c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace)$.\\
+\item\label{lem:ptrsound-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$, then $ \vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$.
+\end{enumerate}
+\end{lemma}
+
+
+
+\iffalse
+To prove the completeness, we need to prove some auxiliary lemmas.
+\begin{lemma}\label{lem:typingtrace}
+Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
+\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+\item\label{lem:typingtrace-1} If $\Gamma \vdash e : t$, then $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace) $
+\item\label{lem:typingtrace-2} If $\Gamma;A \vdash c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace) $.
+\end{enumerate}
+\end{lemma}
+
+
+
+\begin{lemma}\label{lem:typingtrace1}
+\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+\item\label{lem:typingtrace1-1} If $\Gamma\cdot\trace \vdash e : t$, then $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace) $
+\item\label{lem:typingtrace1-2} If $(\Gamma\cdot\trace);A \vdash c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace) $.
+\end{enumerate}
+\end{lemma}
+\fi
+
+
+\begin{lemma}\label{lem:ptrcomplete}
+\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
+\item\label{lem:ptrcomplete-1} If $\Gamma\cdot\trace \vdash e : t\cdot \trace$, then there exists $s$ such that $\Gamma;\trace \vdash_{t} e : s$ and $s \leq_{\trace} t$.\\
+\item\label{lem:ptrcomplete-2} If $(\Gamma\cdot\trace); A \vdash c : t\cdot \trace$, then there exists $s$ such that $\Gamma;\trace;A \vdash_{t} c : s$ and $t \leq_{\trace} s$.\\
+\item\label{lem:ptrcomplete-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} s$, then $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{t}\xrightarrow{} s$.
+\end{enumerate}
+\end{lemma}
+
+
+
+\subsubsection{\textbf{Constraint Generation Rules}}
+To infer types for functions in System $\mathcal{S}$, we assign a function type $\overline{\alpha}\!\rightarrow\!\beta$ for each function $A.f$ whose type is unknown and a type variable $\gamma$ for each  variable $x$ with unknown type respectively, where $\overline{\alpha},\beta,\gamma$ are fresh type variables.
+Then according to permission trace rules, we try to build a derivation for each function in $\mathcal{S}$, in which we collect the side conditions (\emph{i.e.}, the partial subtyping relation $\leq_{\trace}$) needed by the rules.
+If the side conditions hold under a context, then $\FD(A.f)$ is typed by $\FT(A.f)$ under the same context for each function $A.f$ in $\mathcal{S}$.
+
+To describe the side conditions (\emph{i.e.},  $\leq_{\trace}$), we define the permission guarded constraints as follows:
+\begin{equation*}
+\begin{array}{lll}
+c &::=& (\trace, t_l \leq t_r)\\
+t_l &::=& \alpha~|~t_{g} ~ |~ t_l~\sqcup~t_l ~|~\app{t_l}{P}\\
+t_r &::=&\alpha~|~t_{g} ~|~t_r~\sqcap~t_r ~|~\omerge{p}{t_r}{t_r}~|~\app{t_r}{P}\\
+\end{array}
+\end{equation*}
+where $\trace$ is a permission trace, $\alpha$ is a fresh type variable and $t_{g}$ is a ground type.
+
+A \termEmph{type substitution} is a finite mapping from type variables to security types:
+$
+\theta ~::=~ \epsilon~|~\alpha \mapsto t,\theta
+$
+
+
+
+\begin{definition}
+Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \termEmph{solution} to $C$, denoted by $\theta \vDash C $, iff. for each $(\trace, t_l \leq t_r) \in C$, $t_l\theta \leq_{\trace} t_r\theta $ holds.
+\end{definition}
+
+The constraint generation rules are presented in Fig. \ref{fig:constraint-rules}, where
+$\FT_{C}$ is the extended function type table such that $\FT_{C}$ maps all function names to function types and their corresponding constraint sets.
+The judgments of the constraint rules are similar to those of trace rules, except that
+each rule generates a constraint set $C$, which consists of the side conditions needed by the typing derivation of $\mathcal{S}$.
+In addition,  as the function call chains starting from a command are finite, the constraint generation will terminate.
+
+\begin{figure*}[ht]
+\begin{small}
+\[
+\inference[TG-OP]
+{\Gamma;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
+ \Gamma;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
+{\Gamma;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
+\quad
+\inference[TG-ASS]
+{\Gamma;\trace \vdash_{g} e : t \leadsto C }
+{\Gamma;\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma(x)\leadsto C\cup \{ (\trace, t \leq_{} \Gamma(x))\} }
+\]
+
+
+
+\[
+\inference[TG-VAR]
+{}
+{\Gamma;\trace \vdash_{g} \leVAR{x} : \Gamma(x)\leadsto \emptyset}
+\quad
+\inference[TG-LETVAR]
+{\Gamma;\trace \vdash_{g} e : s \leadsto C_1 \\
+\Gamma[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \\
+C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
+}
+{\Gamma;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
+\]
+
+
+\[
+\inference[TG-WHILE]
+{
+\Gamma;\trace \vdash_{g} e : s  \leadsto C \\
+\Gamma;\trace; A \vdash_{g} c : t \leadsto C'
+}
+{\Gamma;\trace;  A \vdash_{g} \lcWHILE{e}{c} : t  \leadsto C\cup C' \cup\{(\trace,s\leq_{} t)\}}
+\quad
+\inference[TG-SEQ]
+{
+\Gamma;\trace; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+\Gamma;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2
+}
+{\Gamma;\trace; A \vdash_{g} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2 \leadsto C_1\cup C_2}
+\]
+
+\[
+\inference[TG-IF]
+{
+\Gamma;\trace; A \vdash_{g} c_1 : t_1 \leadsto C_1 \\
+\Gamma;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2 \\
+\Gamma;\trace \vdash_{g} e : t \leadsto C_e \\
+C = C_e\cup C_1\cup C_2 \cup \{(\trace, t \leq_{} t_1\sqcap t_2) \}}
+{\Gamma;\trace;  A \vdash_{g} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2 \leadsto C}
+\quad
+\inference[TG-CALL]
+{
+\FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
+\Gamma;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
+C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Gamma(x))\} }
+{
+\Gamma;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\leadsto C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
+}
+\]
+
+\[
+\inference[TG-CP]
+{
+\Gamma;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+ \Gamma;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
+ }
+{\Gamma;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
+\quad
+\inference[TG-FUN]
+{
+[\overline{x}: \overline{\alpha},\lpRES:\beta]; \epsilon; B \vdash_{g} c : s  \leadsto C
+}
+{
+\vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
+}
+\]
+\end{small}
+\caption{Constraint generation rules for expressions, commands and functions, given function type table $FT_C$.}
+\label{fig:constraint-rules}
+\end{figure*}
+
+
+
+ 
+The next two lemmas show the constraint rules are \emph{sound} and \emph{complete} with respect to permission trace rules, i.e., the constraint set generated by the derivation of an expression (command, function, resp.) under the constraint rules is solvable, if and only if an expression (command, function, resp.) is typable under trace rules.
+
+\begin{lemma}\label{lem:cgrsound}
+The following statements hold:
+\begin{enumerate}[label={(\alph*)}]
+\item\label{lem:cgrsound-1} If $\Gamma;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $\Gamma\theta;\trace \vdash_{t} e : t\theta $.
+
+\item\label{lem:cgrsound-2} If $\Gamma;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
+then  $\Gamma\theta;\trace;A \vdash_{t} c : t\theta.$
+
+\item\label{lem:cgrsound-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
+\[
+\vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta).
+\]
+
+\end{enumerate}
+\end{lemma}
+
+\begin{lemma}\label{lem:cgrcomplete}
+The following statements hold:
+\begin{enumerate}[label={(\alph*)}]
+
+\item\label{lem:cgrcomplete-1} If $\Gamma;\trace \vdash_{t} e : t$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta = t$.
+
+\item\label{lem:cgrcomplete-2} If $\Gamma;\trace; A \vdash_{t} c : t$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta = t$.
+
+\item\label{lem:cgrcomplete-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
+$$
+\vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{\alpha}\xrightarrow{} \beta \leadsto C,
+$$
+$\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
+\end{enumerate}
+\end{lemma}
+
+
+\iffalse
+\begin{lemma}\label{lem:cgrsound0}
+The following statements hold:
+\begin{enumerate}[label={(\alph*)}]
+\item\label{lem:cgrsound0-1} If $\Gamma;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $(\Gamma\theta\cdot\trace) \vdash e : (t\theta\cdot\trace) $.
+
+\item\label{lem:cgrsound0-2} If $\Gamma;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
+then  $(\Gamma\theta\cdot\trace);~A \vdash c : (t\theta\cdot\trace).$
+
+\item\label{lem:cgrsound0-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
+$\vdash \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta)$.
+
+\end{enumerate}
+\end{lemma}
+
+\begin{lemma}\label{lem:cgrcomplete0}
+The following statements hold:
+\begin{enumerate}[label={(\alph*)}]
+
+\item\label{lem:cgrcomplete0-1} If $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta \leq_{\trace} t$.
+
+\item\label{lem:cgrcomplete0-2} If $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t \leq_{\trace} t'\theta $.
+
+\item\label{lem:cgrcomplete0-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
+$$
+\vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{\alpha}\xrightarrow{} \beta \leadsto C,
+$$
+$\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
+\end{enumerate}
+\end{lemma}
+\fi
+
+
+Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
+\begin{lstlisting}[float=tp, caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
+A.getInfo() {
+   init r in { test(p) {
+         test(q) r = loc; else r = ""; }  else  {
+         test(q) r = id++loc; else r = ""; }
+      return r;   
+   }
+}
+B.fun() { init r in { letvar x = "" in { test(p) r = 0;  else x = call A.getInfo();
+if x == "" then r = 0;  else r = 1; }
+      return r;    
+   }
+}
+\end{lstlisting}
+Let us apply the constraint generation rules in Fig.~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
+\[
+\begin{array}{lcl}
+C_A & =  &\{(\oplus p\oplus q, l_1 \leq \alpha),(\oplus p\ominus q, L \leq \alpha), \\
+ & & (\ominus p\oplus q, H \leq \alpha), (\ominus p\ominus q, L \leq \alpha) \}\\
+C_B & =  & \{(\epsilon, L\leq\gamma), (\oplus p, L\leq\beta) ,(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma), \\
+& & (\epsilon, L\leq\beta),(\epsilon, \gamma\leq\beta)  \}
+\end{array}
+\]
+and the types $t_A =()\rightarrow \alpha$  and $t_B=()\rightarrow \beta$ for the functions  \textit{getInfo} and  \textit{fun}\footnote{Indeed, the constraint set for \textit{fun} is $C_A \cup C_B $, but here we focus on the constraints generated by the function itself.} respectively. Thus, the constraint set $C_{eg}$ for the whole program is $C_A \cup C_B$.
+
+ \subsection{Constraint Solving}\label{sec:constraint_solve}
+We now present an algorithm for solving the constraints generated by the rules in Fig.~\ref{fig:constraint-rules}.
+For these constraints, both types appearing on the two sides of subtyping are
+guarded by the \emph{same} permission trace. But during the process of solving these constraints, new constraints, whose two sides of subtyping are guarded by \emph{different} traces, may be generated.
+Take the constraint \cRawCond{\trace}{\app{t_l}{P}}{\app{\alpha}{Q}} for example,
+$t_l$ is indeed guarded by $P$ while $\alpha$ is guarded by $Q$, where $P$ and $Q$ are different permission sets.
+So for constraint solving, we use a generalized version of the permission guarded constraints, allowing types on the two sides to be guarded by different permission traces:
+$
+\cCond{\trace_l}{t_l}{\trace_r}{t_r}
+$
+where $t_l \not = t_r.$
+Likewise, a \emph{solution} to a generalized constraint set $C$ is a substitution $\theta$, denoted by $\theta \vDash C$,  such that for each $\cCond{\trace_l}{t_l}{\trace_r}{t_r} \in C$, $(t_l\theta\cdot \trace_l) \leq_{} (t_r\theta \cdot \trace_r)$ holds.
+
+It is easy to transform a permission guarded constraint set $C$ into a
+generalized constraint set $C'$: by rewriting each \cRawCond{\trace}{t_l}{t_r} as \cCond{\trace}{t_l}{\trace}{t_r}.
+Moreover, it is trivial that $\theta \vDash C \Longleftrightarrow \theta \vDash C'$.
+Therefore, we focus on solving generalized constraints in the following.
+For example, the constraint set $C_{eg}$ can be rewritten as
+{\small
+\begin{align*}
+&C_{eg} = \{\cCond{\epsilon}{L}{\epsilon}{\gamma},
+\cCond{\ominus p}{\app{\alpha}{\Theta(B)}}{\ominus p}{\gamma},\\
+&\cCond{\oplus p}{L}{\oplus p}{\beta},
+\cCond{\epsilon}{L}{\epsilon}{\beta},
+\cCond{\epsilon}{\gamma}{\epsilon}{\beta},\\
+&\cCond{\oplus p\oplus q}{l_1}{\oplus p\oplus q}{\alpha},
+\cCond{\oplus p\ominus q}{L}{\oplus p\ominus q}{\alpha},\\
+&\cCond{\ominus p\oplus q}{H}{\ominus p\oplus q}{\alpha},
+\cCond{\ominus p\ominus q}{L}{\ominus p\ominus q}{\alpha}\}
+\end{align*}
+}
+
+Given a permission set $P$ and a permission trace $\trace$, we say $P$ \termEmph{entails} $\trace$, denoted by $P \vDash \trace$, iff. $\forall \oplus p \in \trace. \; p\in P$ and $\forall \ominus p\in\trace.\; p\notin P$.
+A permission trace $\trace$ is \termEmph{satisfiable}, denoted by $\issatisfied{\trace}$, iff. there exists a permission set $P$ such that $P\vDash \trace$.
+We write $\trace_{P}$ for the permission trace that only $P$ can entail.
+
+A permission trace $\trace$ can be considered as a boolean logic formula on permissions, where $\oplus$ and $\ominus$ denote positive and negative respectively, and $\epsilon$ denotes $True$.
+In the remaining we shall use the logic connectives on permission traces freely.
+We also adopt the disjunctive normal form, i.e., a disjunction of conjunctive permissions, and denote it as $\dnf{\cdot}$. For example, $\dnf{(\oplus p) \land \neg (\oplus q \land \ominus r)}  = (\oplus p \land \ominus q) \lor (\oplus p \land \oplus r) $.
+
+The constraint solving consists of three steps: 1) \emph{decompose} types in constraints into ground types and type variables; 2) \emph{saturate} the constraint set by the transitivity of the subtyping relation; 3) solve the final constraint set by \emph{merging} the lower and upper bounds of same variables and \emph{unifying} them to emit a solution.
+
+
+\subsubsection{\textbf{Decomposition}}
+The first step \iffalse to solve the guarded constraints \fi is to decompose the types into the simpler ones, i.e., type variables and ground types, according to their structures.
+This decomposition is defined via the function $dec$ that takes a constraint (\cCondst{\trace_l}{t_l}{\trace_r}{t_r} for short) as input and generates a constraint set or $\bot$ (denoting unsastifiable):
+
+\begin{algorithmic}
+\STATE $dec(\cCondst{\trace_l}{t_l}{\trace_r}{t_r})=$
+\STATE \quad \textbf{if} $t_l \cong t_l^1 \sqcup t_l^2$,  \textbf{then return} $dec(\cCondst{\trace_l}{t_l^1}{\trace_r}{t_r}) \cup dec(\cCondst{\trace_l}{t_l^2}{\trace_r}{t_r})$
+\STATE \quad \textbf{if} $t_l \cong \app{t}{P}$, \textbf{then return} $dec(\cCondst{\trace_{P}}{t}{\trace_r}{t_r})$
+\STATE \quad \textbf{if} $t_r \cong t_r^1 \sqcap t_r^2$,  \textbf{then return} $dec(\cCondst{\trace_l}{t_l}{\trace_r}{t_r^1}) \cup dec(\cCondst{\trace_l}{t_l}{\trace_r}{t_r^2})$
+\STATE \quad \textbf{if} $t_r \cong \app{t}{P}$, \textbf{then return} $dec(\cCondst{\trace_l}{t_l}{\trace_{P}}{t})$
+\STATE \quad \textbf{if} $t_r \cong \omerge{p}{t_r^1}{t_r^2}$, \textbf{return} $dec(\cCondst{\trace_l::\oplus p}{t_l}{\trace_r::\oplus p}{t_r^1})$
+\STATE $\cup ~dec(\cCondst{\trace_l::\ominus p}{t_l}{\trace_r::\ominus p}{t_r^2})$
+\STATE \quad \textbf{if} both $t_l$ and $t_r$ are ground, \textbf{return} $\emptyset$ if $t_l\cdot\trace_l \leq t_r\cdot\trace_r$ or $\bot$ otherwise
+\STATE  \quad \textbf{return} $\{\cCondst{\trace_l}{t_l}{\trace_r}{t_r}\}$
+\end{algorithmic}
+
+After decomposition, constraints have one of the forms:
+
+\begin{align*}
+\cCond{\trace_l}{\alpha}{\trace_r}{t_g}, ~\cCond{\trace_l}{t_g}{\trace_r}{\beta}, ~\cCond{\trace_l}{\alpha}{\trace_r}{\beta}
+\end{align*}
+Considering the constraint set $C_{eg}$, only the constraint
+\begin{equation*}
+\cCond{\ominus p}{\app{\alpha}{\Theta(B)}}{\ominus p}{\gamma}
+\end{equation*}
+needs to be decomposed, yielding \cCond{\ominus p\oplus q}{\alpha}{\ominus p}{\gamma}.
+
+
+\subsubsection{\textbf{Saturation}}
+Considering a variable $\alpha$, to ensure any lower bound (e.g., \cCond{\trace_l}{t_l}{\trace_1}{\alpha}) is ``smaller'' than any of its upper bound (e.g., \cCond{\trace_2}{\alpha}{\trace_r}{t_r}, we need to saturate the constraint set by adding these conditions.
+However, since our constraints are guarded by permission traces, we need to consider lower-upper bound relations only when the traces of the variable $\alpha$ can be entailed by the same permission set, i.e., their intersection is satisfiable. \iffalse (i.e., $\issatisfied{\trace_1 \land \trace_2} $)\fi In that case, we extend the traces of both the lower and upper bound constraints such that the traces of $\alpha$ are the same (\emph{i.e.}, $\trace_1 \land \trace_2$), by adding the missing traces (\emph{i.e.}, $\trace_1 \land \trace_2 - \trace_1$ for lower bound constraint while $\trace_1 \land \trace_2 - \trace_2$ for the upper one, where $-$ denotes set difference).
+This is done by the function $sat$ defined as follows:
+
+\begin{algorithmic}
+\STATE $sat(\cCondst{\trace_l}{t_l}{\trace_1}{\alpha},\cCondst{\trace_2}{\alpha}{\trace_r}{t_r})=$
+\STATE \quad \textbf{if} $\trace_1 \land \trace_2$ is satisfiable,
+\textbf{then} let $\trace'_l = \trace_l\land (\trace_1 \land \trace_2-\trace_1)$ and $\trace'_r=\trace_r\land (\trace_1 \land \trace_2-\trace_2)$ \textbf{in} $dec(\cCondst{\trace'_l }{t_l}{ \trace'_r}{t_r}))$
+\STATE  \quad \textbf{return} $\emptyset$
+\end{algorithmic}
+
+
+
+Assume that there is an order $<$ on type variables and the smaller variable has a higher priority.
+If two variables $\alpha, \beta$ with $O(\alpha) < O (\beta)$ (the orderings) are in the same constraint $\beta \leq \alpha$, we consider the larger variable $\beta$ is a bound for the smaller one $\alpha$, but not vice-versa.
+There is a special case where both variables on two sides are the same, \emph{e.g.},  \cCond{\trace}{\alpha}{\trace'}{\alpha}.
+In that case, we regroup all the trace of the variable $\alpha$ as the trace set $\{\trace_i~|~i \in I\}$ such that the set is full (\emph{i.e.}, $\bigvee_{i\in I}\trace_i  = \epsilon$) and disjoint (\emph{i.e.}, $\forall i,j\in I. i\neq j \Rightarrow \neg\issatisfied{\trace_i\land\trace_j}$), and rewrite the constraints of $\alpha$ w.r.t. the set $\{\trace_i~|~i \in I\}$.  Then we treat each $(\trace_i, \alpha)$ as different fresh variables $\alpha_i$.
+Therefore, there are no loops like: $\cPair{\trace}{\alpha} \leq \ldots\leq \cPair{\trace'}{\alpha}$, with the ordering.
+
+Let us consider the constraint set $C_{eg}$ and assume that the order on variables is $O(\alpha) < O (\gamma) < O (\beta)$. There are four lower bounds and one upper bounds for $\alpha$. But only the lower bound $\cCond{\ominus p\oplus q}{H}{\ominus p\oplus q}{\alpha}$ shares the same satisfiable trace with the upper bound.
+So we saturate the set with the constraint $\cCond{\ominus p\oplus q}{H}{\ominus p}{\gamma}.$
+Likewise, there are two lower bounds (one of which is newly generated) and one upper bound for $\gamma$. Each lower bound has a satisfiable intersected trace with the upper bound, which yields the following constraints $\cCond{\epsilon}{L}{\epsilon}{\beta}$ and $\cCond{\ominus p\oplus q}{H}{\ominus p}{\beta}$ (extended by $\ominus p$).
+While there are no upper bounds for $\beta$, so no constraints are generated.
+After saturation, the example set $C_{eg}$ is
+
+\[
+{\small
+\begin{array}{l}
+\{\cCond{\oplus p\oplus q}{l_1}{\oplus p\oplus q}{\alpha}, \cCond{\oplus p\ominus q}{L}{\oplus p\ominus q}{\alpha}, \\
+\cCond{\ominus p\oplus q}{H}{\ominus p\oplus q}{\alpha},
+\cCond{\ominus p\ominus q}{L}{\ominus p\ominus q}{\alpha},\\
+\cCond{\ominus p\oplus q}{\alpha}{\ominus p}{\gamma},
+\cCond{\epsilon}{L}{\epsilon}{\gamma},\\
+\cCond{\ominus p\oplus q}{H}{\ominus p}{\gamma},
+\cCond{\epsilon}{\gamma}{\epsilon}{\beta}, \\
+\cCond{\oplus p}{L}{\oplus p}{\beta},
+\cCond{\epsilon}{L}{\epsilon}{\beta},
+\cCond{\ominus p\oplus q}{H}{\ominus p}{\beta}
+\}
+\end{array}
+}
+\]
+
+
+
+
+\iffalse
+\begin{lemma}\label{lem:tracesub1}
+Given two types $s,t$ and a permission trace $\trace$, then
+$s\leq t\Longleftrightarrow s\cdot\trace \leq t\cdot\trace$ and $\forall \trace' \in dnf(\neg\trace).\; s\cdot \trace' \leq t\cdot\trace'$.
+\end{lemma}
+\fi
+
+\iffalse
+\begin{lemma}\label{lem:consolcorrect}
+If $C\leadsto_{r} C'$, then $C\vDash C'$ and $C' \vDash C$, where $r\in \{d,s,m\}$.
+\end{lemma}
+\fi
+
+\subsubsection{\textbf{Unification}}
+Since our constraints are guarded by permission traces, we need to consider the satisfiability of (any subset of) the permission traces of a variable $\alpha$ under any permission set when constructing a type for it.
+Let us consider a variable $\alpha$ and assume that the constraints on it to be solved are
+ $\{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I}$ (\emph{i.e.}, the lower bounds) and
+  $\{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}$ (\emph{i.e.}, the upper bounds).
+This indicates that under a permission set $P$, $\alpha$ can take such a type $t$ that is bigger than $t_i^l\cdot\trace_i^l$ if $P\vDash \trace_i$ and is smaller than $t_j^r\cdot\trace_j^r$ if $P\vDash \trace_j$.
+Consequently, $t$ should be bigger than the union $\bigsqcup_{i\in I'} t_i^l\cdot\trace_i^l$ and smaller than the intersection $\bigsqcap_{j\in J'} t_j^r\cdot\trace_j^r$ if all the traces $\trace_i \in I'$ and $\trace_j \in J'$ are entailed by $P$.
+In other words, $\alpha$ can take any type ranging from $\bigsqcup_{i\in I'} t_i^l\cdot(\trace_i^l\wedge \trace'_i)$ to $\bigsqcap_{j\in J'} t_j^r\cdot(\trace_j^r\wedge\trace'_j)$ if only the intersection trace $\bigwedge_{i \in I'} \trace_i \wedge \bigwedge_{j\in J'}\trace_j$ is satisfiable, which indicates that $\alpha$ is equivalent to $(\bigsqcup_{i\in I'} t_i^l\cdot(\trace_i^l\wedge \trace'_i) \sqcup \alpha' )\sqcap \bigsqcap_{j\in J'} t_j^r\cdot(\trace_j^r\wedge \trace'_j)$, where $\trace'_i$ and $\trace'_j$ are the missing traces to extend  $\trace_i$ and $\trace_j$ to the intersection trace respectively, and $\alpha'$ is a fresh variable.
+The type above is exactly what we want.
+We define the construction of the type above via the function $merge$:
+{
+\begin{algorithmic}
+\STATE $merge(\{\cCondst{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I},\{\cCondst{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J})=$
+\STATE \quad \textbf{let} $\phi(I',J') = \{\trace\in dnf(\bigwedge_{i \in I'} \trace_i \wedge \bigwedge_{j\in J'}\trace_j\wedge \bigwedge_{i \in I\setminus I'} \neg \trace_i \wedge \bigwedge_{j\in J\setminus J'}\neg \trace_j) ~|~ \issatisfied{\trace}\}$ \textbf{in}
+\STATE  \quad \textbf{let} $t_{I',\trace}^{\sqcup} =\bigsqcup_{i\in I'} t_i^l\cdot(\trace_i^l\wedge (\trace-\trace_i))$ \textbf{in}
+\STATE  \quad \textbf{let} $t_{J',\trace}^{\sqcap} =\bigsqcap_{j\in J'} t_j^r\cdot(\trace_j^r\wedge (\trace-\trace_j))$ \textbf{in}
+\STATE  \quad $\{\trace \mapsto (t_{I',\trace}^{\sqcup} \sqcup \alpha_{\trace})\sqcap t_{J',\trace}^{\sqcap} \}_{I'\subseteq I, J'\subseteq J, \trace \in \phi(I',J')}$
+\end{algorithmic}
+(with the convention $t_{\emptyset,\trace}^{\sqcup} = L$ and $t_{\emptyset,\trace}^{\sqcap} = H$.)
+}
+
+Moreover, due to the absence of  loops in constraints and that the variables are in order, we can solve the constraints in reverse order on variables by unification. The unification algorithm $unify$ is presented as follows.
+{
+\begin{algorithmic}
+\STATE $unify(C)$ =
+\STATE \quad \textbf{let} $subst ~\theta~(\cCondst{\trace_l}{t_l}{\trace_r}{t_r})~ = (\cCondst{\trace_l}{t_l\theta}{\trace_r}{t_r\theta})$ \textbf{in}
+\STATE \quad select $\{\cCondst{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I}$ and $\{\cCondst{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}$ for the maximum variable $\alpha$ \textbf{if} exists, $merge$ them as $t_{\alpha}$
+\STATE \quad\quad \textbf{let} $C'$ be the remaining constraints \textbf{in} 
+\STATE \quad\quad \textbf{let} $C'' = List.map~ (subst~[\alpha \mapsto t_{\alpha}])~ C'$ \textbf{in} 
+\STATE \quad\quad \textbf{let} $\theta' = unify(C'')$ \textbf{in} $\theta'[\alpha \mapsto t_{\alpha}]$
+\STATE \quad \textbf{else} \textbf{return} $[]$
+\end{algorithmic}
+}
+
+Let us consider the constraint set $C_{eg}$ again and take the constraints on the maximum variable $\beta$, which are the following set without any upper bounds
+{\small
+$$
+\{\cCond{\oplus p}{L}{\oplus p}{\beta},
+\cCond{\epsilon}{L}{\epsilon}{\beta},
+\cCond{\ominus p\oplus q}{H}{\ominus p}{\beta}\}
+$$
+}
+By applying the function $merge$, we construct for $\beta$ the type $t_{\beta} = \{\oplus p \mapsto (L\sqcup \beta')\sqcap H, \ominus p \mapsto H\}$,  where only the common traces (\emph{i.e.}, $\oplus p$ and $\ominus p$ ) for the subsets $\{\epsilon, \oplus p\}$ and $\{\epsilon, \ominus p\} $ are satisfiable, and $\beta'$ is a fresh variable.
+For simplicity, we pick the least upper bound as possible when constructing types.
+So we take $\{\oplus p \mapsto L, \ominus p \mapsto H\}$ as $t_{\beta}$ instead.
+Next, we substitute $t_{\beta}$ for all the occurrences of $\beta$ in the remaining constraints and continue with the constraints on $\gamma$ and $\alpha$.
+Finally, the types constructed for $\gamma$ and $\alpha$ are $t_{\gamma} = t_{\beta}$ and $t_{\alpha} = \{\oplus p\oplus q \mapsto l_1, \oplus p\ominus q\mapsto L, \ominus p\oplus q \mapsto H, \ominus p\ominus q \mapsto L\}$, respectively.
+Therefore, the types we infer for \textit{A.getInfo} and \textit{B.fun} are $()\rightarrow t_{\alpha}$ and $()\rightarrow t_{\beta}$, respectively.
+
+
+Let $sol$ be the function for the constraint solving algorithm, that is, $sol(C) = unify(sat(dec(C)))$.
+It is provable that the constraint solving algorithm is sound and complete.
+
+
+
+
+
+To conclude, an expression (command, function, resp.) is typable, iff it is derivable under the constraint rules with a solvable constraint set by our algorithm.
+Therefore, our type inference system is sound and complete.
+Moreover, as the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by our algorithm in finite steps.
+Thus, our type inference system terminates.
+
+\begin{theorem}
+The type inference system is sound, complete and decidable.
+\end{theorem}
+
+ \section{Related work}
+There is a large body of work on language-based information flow security. We shall discuss only closely related work.
+
+We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:intro}.
+
+
+Flow-sensitive and value-dependent information flow type systems
+provide a general treatment of security types that may depend on other
+program variables or execution
+contexts~\cite{Toby2016csf,Polikarpova16,Dependent_SIFUM_Type_Systems-AFP,Dependent_SIFUM_Refinement-AFP,Murray:2015jm,Li:2016jb,Zhang:2015bc,Li:2015vw,Lourenco:2015:DIF,Lourenco13,Swamy13,Yang12POPL,MantelSS11,Nanevski11,SwamyCC10,Zheng:2007cd,Tse07,Li:csf17,Hunt:2006:FST:1111037.1111045}.
+Hunt and Sands~\cite{Hunt:2006:FST:1111037.1111045} proposed a
+flow-sensitive type system where order of execution is taken into
+account in the analysis, and demonstrated that the system is precise
+but can be simply described.
+Mantel et. al.~\cite{MantelSS11} introduced a rely-guarantee style
+reasoning for information flow security in which the same variable can
+be assigned different security levels depending on whether some
+assumption is guaranteed, which is similar to our notion of
+permission-dependent security types.
+Li and Zhang~\cite{Li:csf17} proposed 
+both flow-sensitive and path-sensitive information flow analysis with
+program transformation techniques and dependent types.
+Information flow type systems that may depend on execution contexts
+have been considered in work on program synthesis~\cite{Polikarpova16} and
+dynamic information flow control~\cite{Yang12POPL}. Our permission context can be seen as a
+special instance of execution context, however, our intended
+applications and settings are different from \cite{Yang12POPL,Polikarpova16},
+and issues such as parameter laundering does not occur in their
+setting. 
+Louren\c{c}o and Caires~\cite{Lourenco:2015:DIF} provided a precise dependent type
+system where security labels can be indexed by data structures, which
+can be used to encode the dependency of security labels on other
+values in the system.
+It may be possible to encode our notion of security types as a
+dependent type in their setting, by treating permission sets
+explicitly as an additional parameter to a function or a service, and
+to specify security levels of the output of the function as a type
+dependent on that parameter.  Currently it is not yet clear to us how
+one could give a general construction of the index types in their type
+system that would correspond to our security types, and how the merge
+operator would translate to their dependent type constructors, among
+other things.
+We leave the exact correspondence to the future work.
+
+
+Recent research on information flow has also been conducted to deal
+with Android security issues
+(\cite{Ernst:2014,Chin:2011wa,Nadkarni:2016tf,Lortz:2014ku,Gunadi:2015,Chaudhuri:2009ii,Fuchs2010}).
+SCandroid~\cite{Chaudhuri:2009ii,Fuchs2010} is a tool automating
+security certification of Android apps that focuses on typing
+communication between applications. Unlike our work, they do not
+consider implicit flows, and do not take into account access control
+in their type system. Ernst et al~\cite{Ernst:2014} proposed a
+verification model, SPARTA, for use in app stores to guarantee that
+apps are free of malicious information flows. Their approach requires
+the collaboration between software vendor and app store auditor and
+the additional modification of Android permission model to fit for
+their Information Flow Type-checker;
+soundness proof is also absent. Our work is done in the context of
+providing information flow security \emph{certificates} for Android
+applications, following the Proof-Carrying-Code  architecture by
+Necula and Lee~\cite{necula:pcc:1996} and does not require extra
+changes on existing Android application supply chain systems.
+
+
+ \section{Conclusion and Future Work}\label{sec:conclusion}
+
+We have provided a lightweight yet precise type system featuring Android permission model for enforcing secure information flow in an
+imperative language and proved its soundness with respect to non-interference.
+Compared to existing work, our type system can specify a broader range of security policies, including non-monotonic ones.
+We have also proposed a decidable type inference algorithm by reducing it to a constraint solving problem.
+
+We next discuss briefly several directions for future work.
+
+The immediate one is to extend our system to richer programming languages. We have been working on adding another security typing for global variables. The addition of global variables presents a potential side channel, i.e., when they are \emph{written} and \emph{read} by apps with different permission contexts, so they need to be treated differently than local variables. Other extensions include object-oriented feature (like~\cite{Sun:SAS04}), exceptions (like~\cite{Barthe:2006jh}), etc.
+
+We also plan to apply our type system to real Android applications to enforce permission-dependent information flow policies.
+A main challenge is to facilitate type inference so that a programmer does not need to type every variable and instead focuses only on 
+policy specifications of a service. To enable this, we need to be able to extract all permissions relevant to an app and to identify 
+all commands relevant to permission checking in an app. The former is straightforward since the permissions that can be granted to an app 
+is statically specified in the app's manifest file. For the latter, the permission checking code segments (typically library function calls) can be located with 
+pre-processed static analyses (e.g., \cite{Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357}). 
+
+Another interesting direction is in modeling runtime permission request. From Android 6.0 and above, several permissions are classified as \emph{dangerous permissions} and granting of these permissions is subject to users' approval at runtime. This makes enforcing non-monotonic policies impossible in some cases, e.g., when
+a policy specifies the absence of a dangerous permission in releasing sensitive information. However, an app can only request for a permission it has explicitly declared in the manifest file, so to this extent, we can statically determine whether a permission request is definitely \emph{not} going to be granted (as it is absent from the manifest), and whether it can {\em potentially} be granted. 
+And fortunately (but unfortunately from a security perspective) the typical scenarios are that users grant all the requested permissions during runtime when requested (in order to gain a better user experience with the app). Therefore one can assume optimistically that all permissions in the manifest are finally granted. In the future, we plan to resolve this issue with weaker assumptions. One feasible approach is to model dangerous permissions in a typing environment separately and allow policies to be non-monotonic on non-dangerous permissions only.
+
+Lastly, our eventual goal is to translate source code typing into Dalvik bytecode typing, following a similar approach done by Gilles Barthe et al~\cite{Barthe:2005ju,Barthe:2006jh,Barthe:2007fxa} from Java source to JVM bytecode. The key idea that we describe in the paper, i.e., precise characterizations of security of IPC channels that depends on permission checks, can still be applied to richer type systems such as those used in the Cassandra project~\cite{Lortz:2014ku} or Gunadi's type system~\cite{Gunadi:2015}. We envision our implementation can piggyback on, say, Cassandra system to improve the coverage of typable applications.
 
 
