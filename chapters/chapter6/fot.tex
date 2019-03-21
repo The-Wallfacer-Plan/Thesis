@@ -7,7 +7,7 @@
 
 Greybox fuzzing has become one of the most effective approaches~to detect vulnerabilities in a program under test (PUT).
 Compared~with whitebox and blackbox fuzzing, greybox fuzzing strikes a balance~between execution speed and effectiveness.
-The past years have witnessed a number of greybox fuzzing frameworks, e.g., {\AFL}~\cite{afl}, libFuzzer~\cite{libfuzzer}, and honggfuzz~\cite{honggfuzz}, followed by  various fuzzing extensions \cite{Bohme:2016:CGF, LiCMLLT17, Bohme:2017:DGF, collafl, nezha} to enhance their effectiveness and/or efficiency.
+The past years have witnessed a number of greybox fuzzing frameworks, e.g., {\AFL}~\cite{afl}, libFuzzer~\cite{libfuzzer}, and honggfuzz~\cite{honggfuzz}, followed by  various fuzzing extensions \cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,CollAFL,nezha} to enhance their effectiveness and/or efficiency.
 
 
 However, there lacks a fuzzing framework to easily reuse, integrate and compare different fuzzing techniques and~experiment with new ideas.
@@ -58,13 +58,13 @@ Interested readers can refer to {FOT}'s project site for more details:
 	\includegraphics[width=0.46\textwidth]{res/fot/FOT_overview}
 	\vspace{-5pt}
 	\caption{Overview of the {\FOT} Fuzzing Framework}
-	\label{fig:workflow}
+	\label{fig:fot_workflow}
 \end{figure}
 
 
 
 
-Figure~\ref{fig:workflow} depicts the overview of {\FOT}.
+Figure~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
 It consists of three parts, namely the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchain}.
 Components of the framework are represented with \emph{blue} rectangles. All these components are \textit{configurable} and \textit{extensible}.
 
@@ -257,29 +257,29 @@ Moreover, the mutation manager will favor fine-grained mutations once the target
 
 
 
-Table~\ref{tbl:cr_aflgo_binutils} compares the results of FOT with AFL and AFLGo on the c++filt tool in GNU Binutils (each experiment was conducted 20 times with 8 hours as the budget). {\utte} is the average time-to-exposure in seconds to trigger a vulnerability. We can see that {\dFOT} is able to decrease the exposure time greatly.
-
-\begin{table}[!t]
-	\small
-	\centering
-	\caption{Crash Reproduction in {\dFOT}, {\aflgo} and AFL Against Binutils (Taken from~\cite{hawkeye}).}
-	\label{tbl:cr_aflgo_binutils}
-	\vspace{-10pt}
-	\begin{tabular}{|c|c|r|r|c|}
-		\hline
-		\textbf{CVE-ID}   & \textbf{Tool}  & \textbf{Runs} & \utte (s)  & \textbf{Factor} \\ \hline\hline
-		\multirow{3}{*}{2016-4487}& FOT &   20    &   177   & -- \\ \cline{2-5} 
-		& AFLGo  &  20  & 390 & 2.20\\ \cline{2-5} 
-		&  AFL   &   20 & 630  &   3.56  \\ \hline
-\multirow{3}{*}{2016-4492} & FOT &     20      &                    477                                 &       --      \\ \cline{2-5} 
-		&   AFLGo  &     20   &  540  &                 1.21                                               \\ \cline{2-5} 
-		&    AFL   &     20   &                         960                            &                  2.01                                              \\ \hline
-		\multirow{3}{*}{2016-6131} & FOT &       9     &                     17314                                &                      --                                          \\ \cline{2-5} 
-		&   AFLGo  &                   6                                   &                      21180                               &                                1.22                                \\ \cline{2-5} 
-		& AFL   &                    2                                  &            26340                                         &             1.52                                                   \\ \hline
-		
-	\end{tabular}
-\end{table} 
+%Table~\ref{tbl:cr_aflgo_binutils} compares the results of FOT with AFL and AFLGo on the c++filt tool in GNU Binutils (each experiment was conducted 20 times with 8 hours as the budget). {\utte} is the average time-to-exposure in seconds to trigger a vulnerability. We can see that {\dFOT} is able to decrease the exposure time greatly.
+%
+%\begin{table}[!t]
+%	\small
+%	\centering
+%	\caption{Crash Reproduction in {\dFOT}, {\aflgo} and AFL Against Binutils (Taken from~\cite{hawkeye}).}
+%	\label{tbl:cr_aflgo_binutils}
+%	\vspace{-10pt}
+%	\begin{tabular}{|c|c|r|r|c|}
+%		\hline
+%		\textbf{CVE-ID}   & \textbf{Tool}  & \textbf{Runs} & \utte (s)  & \textbf{Factor} \\ \hline\hline
+%		\multirow{3}{*}{2016-4487}& FOT &   20    &   177   & -- \\ \cline{2-5} 
+%		& AFLGo  &  20  & 390 & 2.20\\ \cline{2-5} 
+%		&  AFL   &   20 & 630  &   3.56  \\ \hline
+%\multirow{3}{*}{2016-4492} & FOT &     20      &                    477                                 &       --      \\ \cline{2-5} 
+%		&   AFLGo  &     20   &  540  &                 1.21                                               \\ \cline{2-5} 
+%		&    AFL   &     20   &                         960                            &                  2.01                                              \\ \hline
+%		\multirow{3}{*}{2016-6131} & FOT &       9     &                     17314                                &                      --                                          \\ \cline{2-5} 
+%		&   AFLGo  &                   6                                   &                      21180                               &                                1.22                                \\ \cline{2-5} 
+%		& AFL   &                    2                                  &            26340                                         &             1.52                                                   \\ \hline
+%		
+%	\end{tabular}
+%\end{table} 
 
 
 
@@ -327,12 +327,12 @@ In this section, we first compare FOT with other fuzzing frameworks, and then di
 Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further more, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory). 
 \subsection{Relationship to Current Fuzzing Extensions}
 
-Most current fuzzing techniques can be easily integrated into {\FOT} thanks to its highly-modularized design. In fact, these techniques can be applied with some extensions to the different components in Figure~\ref{fig:workflow} and can be used together with the configuration interface. 
+Most current fuzzing techniques can be easily integrated into {\FOT} thanks to its highly-modularized design. In fact, these techniques can be applied with some extensions to the different components in Figure~\ref{fig:fot_workflow} and can be used together with the configuration interface. 
 
 \begin{enumerate}[1)]
 	\item AFLFast~\cite{Bohme:2016:CGF} can be implemented by applying a Markov Chain model based seed \emph{power scheduling} in the fuzzer. 
 	\item AFLGo~\cite{Bohme:2017:DGF} can be implemented by a combination of \emph{static analyzer}, \emph{instrumentation} and \emph{power scheduling}.
-	\item CollAFL~\cite{collafl} can be implemented by using a collision-resistant algorithm to increase the uniqueness of the path trace labeling during \emph{instrumentation}.
+	\item CollAFL~\cite{CollAFL} can be implemented by using a collision-resistant algorithm to increase the uniqueness of the path trace labeling during \emph{instrumentation}.
 	\item Skyfire~\cite{junjie:2017sp:skyfire}, Radamsa~\cite{radamsa}, Csmith~\cite{csmith} can be used in the preprocessor to generate seeds for the \emph{external seeds} and a structure-aware mutator assigned by \emph{mutation manager}.
 	\item Symbolic executors such as KLEE~\cite{klee} can be integrated in the Driller's~\cite{driller} style with the help of \emph{overall manager}.
 \end{enumerate}

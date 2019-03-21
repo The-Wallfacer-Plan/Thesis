@@ -2,7 +2,7 @@
 
 \chapter{\mtfuzz: Multi-threading Aware Fuzzing} \label{Chapter8}
 
-\section{Introduction}\label{sec:intro}
+\section{Introduction}\label{sec:mtfuzz_intro}
 
 Multithreading as a popular programming paradigm is an effective way of utilizing multi-core computation resources in modern processors. Meanwhile, the \emph{non-deterministic} behaviors caused by thread-interleavings also pose substantial challenges to vulnerability or bug detection in multithreaded programs~\cite{mtbugs_survey}. On one hand, the interleavings across threads inherently introduce multiple subtle concurrency bugs, e.g., data races, atomic violations, and deadlocks. These bugs can cause undefined program behaviors and sometimes can induce vulnerabilities such as use-after-free (CVE-2016-1972, CVE-2018-5873) and heap-buffer-overflow (CVE-2017-8244), denial-of-service (CVE-2018-0381). On the other hand, as multithreaded programs may accept some inputs, some bugs or vulnerabilities may be difficult or impossible to be triggered with limited seed inputs, regardless of whether such bugs are caused by concurrency bugs. 
 
@@ -83,23 +83,40 @@ The contributions of this paper are as follows:
 
 \begin{lstlisting}[language=c, float=tp, caption={A program abstracted from real-world multithreaded programs.}, label={lst:eg1},
 xleftmargin=.05\columnwidth, xrightmargin=.01\columnwidth,
-linebackgroundcolor={\ifnum\value{lstnumber}>0\ifnum\value{lstnumber}<3\mtcolor\fi\fi
+% xleftmargin=.08\columnwidth, xrightmargin=.03\columnwidth,
+% linewidth=.95\columnwidth, 
+linebackgroundcolor={%
+\ifnum\value{lstnumber}>0\ifnum\value{lstnumber}<3\mtcolor\fi\fi
 \ifnum\value{lstnumber}>8\ifnum\value{lstnumber}<12\mtcolor\fi\fi
 \ifnum\value{lstnumber}>12\ifnum\value{lstnumber}<14\mtcolor\fi\fi
 \ifnum\value{lstnumber}>14\ifnum\value{lstnumber}<16\mtcolor\fi\fi
 }]
-int g_var=1; void inc(int *pv) { *pv += 2; 
+int g_var=1; %\label{line:g_var_def}%
+void inc(int *pv) { *pv += 2; %\label{line:st_mt_func_start}%}
 
 void check(char * msg) {
-  if (msg[0] <= '1') exit(1);  }
+  if (msg[0] <= '1') exit(1);  %\label{line:st_func_start}%
+}
 
 int compute(void *s_var) {
-  *s_var += 3; *s_var *= 2; if (*s_var<2) inc(&g_var); pthread_mutex_lock(&m); inc((int*)(s_var)); pthread_mutex_unlock(&m); return *s_var; }
+  *s_var += 3; %\label{line:mt_func_start}%
+  *s_var *= 2; %\label{line:mt_func_assign}%
+  if (*s_var<2) inc(&g_var); %\label{line:mt_func_call}%
+  pthread_mutex_lock(&m); %\label{line:mt_func_lock}%
+  inc((int*)(s_var)); %\label{line:locked}%
+  pthread_mutex_unlock(&m); %\label{line:mt_func_unlock}%
+  return *s_var; %\label{line:mt_func_end}%
+}
 
 int main(int argc, char **argv) {
-  check(argv[1]); pthread_t T1, T2; pthread_create(T1,NULL,compute,argv[1]);  pthread_create(T2,NULL,compute,argv[1]);  ...
+  check(argv[1]); %\label{line:main_front}%
+  pthread_t T1, T2; %\label{line:main_pthread_t}%
+  pthread_create(T1,NULL,compute,argv[1]);  %\label{line:main_thread_fork_1}%
+  pthread_create(T2,NULL,compute,argv[1]);  %\label{line:main_thread_fork_2}%
+  ...
 }
 \end{lstlisting}
+
 
 
 Listing~\ref{lst:eg1} is a program abstracted from real-world multithreaded programs such as \emph{GraphicsMagick}. Before processing the input, it does a validation check inside \func{check} against some properties of \emph{argv}[1]. if the check fails, the program terminates immediately. The core functionality starts from two threads created at lines \ref{line:main_thread_fork_1} and \ref{line:main_thread_fork_2} respectively in \func{main} function. There are two shared variables: 1) the global variable \var{g\_var} has an initial value 1, 2) and input \var{argv}[1] is passed to both threads T1 and T2 through the thread-forking call to \func{pthread\_create}.

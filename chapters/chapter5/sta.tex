@@ -2,7 +2,7 @@
 
 \chapter{Type Checking Based Verification} \label{Chapter5}
 
-\section{Background and Introduction}\label{sec:intro}
+\section{Background and Introduction}\label{sec:sta_intro}
 
 Mobile security has become increasingly important for our daily life due to the pervasive use of mobile applications.
 Among the mobile devices that are currently in the market, Android devices account for the majority of them so analysis of their security
@@ -669,7 +669,7 @@ we type $c_1$ in a promoted typing environment for a successful permission check
 The challenge is how to combine the types of the two premises  to obtain the type
 for the conclusion. One possibility is to force
 the type of the two premises and the conclusion to be identical (i.e., treat permission check the same as other if-then-else statements and apply \ruleTagText{T-IF}).
-This, as we have seen in Section~\ref{sec:intro},
+This, as we have seen in Section~\ref{sec:sta_intro},
 leads to a loss in precision of the type for \textbf{test} construct. Instead, we consider
 a more refined \emph{merged} type $\omerge{p}{t_1}{t_2}$ for the conclusion,
 where $t_1$ ($t_2$ resp.) is the type of the left (right resp.) premise.
@@ -1638,7 +1638,7 @@ The type inference system is sound, complete and decidable.
  \section{Related work}
 There is a large body of work on language-based information flow security. We shall discuss only closely related work.
 
-We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:intro}.
+We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:sta_intro}.
 
 
 Flow-sensitive and value-dependent information flow type systems
