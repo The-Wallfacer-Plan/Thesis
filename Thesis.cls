@@ -262,7 +262,7 @@
       \vspace{1in}
       \begin{center}
       % cybersecurity vulnerabilities, software security vulnerabilities/weakness, cybersecurity violations/weakness, software security violations/weakness
-      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA VERIFICATION AND FUZZ TESTING \par}
+      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA FUZZ TESTING AND VERIFICATION \par}
      %\vfill
      \vspace{2.4in}
       %{\LARGE by \par}
@@ -294,7 +294,7 @@
               \centering
               \vspace{0.4in}
             \end{figure}            
-      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA VERIFICATION AND FUZZ TESTING \par}
+      {\Large \bf DETECTING SOFTWARE VULNERABILITIES \\ VIA FUZZ TESTING AND VERIFICATION \par}
       %{\LARGE by \par}
       \vspace{1.3in}
       %{\LARGE \authornames \par}
