@@ -1,13 +1,20 @@
 % !TeX root =../../main.tex
 
-\chapter{Introduction} \label{Chapter1}
+\chapter{Introduction} \label{ch:introduction}
+
+
+
+\section{Motivations and Challenges}
 
 \section{Main Work}
 
 \section{Contributions of the Thesis}
+
 
 \section{List of Materials Related to the Thesis}
 
 \section{Outline of the Thesis}
 
 The rest of this thesis is organized as follows.
+
+Chapter~\ref{ch:fot} describes the recent progress of fuzzing and several aspects of challenges, and introduces our grey-box fuzzing framework, \FOT, which aims to solve these issues. Chapter~\ref{ch:dfot} explains our directed grey-box fuzzer \dFOT built on top of \FOT; \dFOT is our attempt to guide the fuzzing process to specific program targets. Chapter~\ref{ch:mtfuzz} describes \mtfuzz based on \FOT, which aims to enhance the effectiveness of fuzzing on multithreaded programs. Chapter~\ref{ch:sta} describes our attempt to secure software systems based on verification, which applies a permission-dependent type system to enforce the non-interference property that prevents the information leakage in an Android-like system. Chapter~\ref{ch:discuss} discusses my reflection on the testing and verification based techniques. Chapter~\ref{ch:conclusion} concludes this thesis and describes the possible future work.

@@ -36,14 +36,17 @@ For example, if $y$ is of type $H$ and $x$ is of type $L$, the statement would n
 In designing an information flow type system for Android, we encounter
 a common pattern of conditionals that would not be typable using conventional type systems.
 Consider the pseudo-code in Listing~\ref{lst:eg_contact}.
-\begin{lstlisting}[float=tp, caption={Sample code for getting contact info with a permission check.}, label={lst:eg_contact}]
+\begin{figure}[ht]
+\begin{lstlisting}[caption={Sample code for getting contact info with a permission check.}, label={lst:eg_contact}]
 String getContactNo(String name) {
     String number;
     if(checkPermission(READ_CONTACT))
-       number = ... ; else number = "";
+       number = ... ;
+    else number = "";
     return number;
 }
 \end{lstlisting}
+\end{figure}
 Such a code fragment could be part of a phone dialer or a social network service app such as Facebook, WhatsApp, where \textit{getContactNo} provides
 a public interface to query the phone number associated with a name. The (implicit) security policy in this
 context is that contact information (the phone number) can only be released if the calling app has
@@ -132,6 +135,7 @@ that, \textit{getInfo} returns the location information for an advertising ID
 only if the caller \emph{does not} have access to device ID.
 To simplify discussion, let us assume that the permissions to access
 IMEI and location information are denoted by $p$ and $q$, respectively.
+\begin{figure}[ht]
 \begin{lstlisting}[caption={An example about non-monotonic policy.}, label={lst:eg_nonmonotonic}]
 String getInfo() {
    String r = "";
@@ -143,6 +147,7 @@ String getInfo() {
    return r;
 }
 \end{lstlisting}
+\end{figure}
 Here \textit{id} denotes a unique advertising ID  generated and stored by the app for
 the purpose of anonymizing user tracking and \textit{loc} denotes location
 information.
@@ -303,7 +308,7 @@ are either introduced by \textbf{letvar} or from the set $\{\overline{x}, r\}$.
 
 
 \begin{figure*}[ht]
-{\small
+{\tiny
 \[
 \inference[E-VAL]{}{\eta \vdash \leVAL{v}  \leadsto v}
 \qquad
@@ -439,6 +444,18 @@ We define an ordering $\leq_\Tcal$ on base types as follows:
 $s\leq_\Tcal t$ \text{iff} $\forall$ $P\in \PPS$, $s(P) \leq_{\SL} t(P)$.
 \end{definition}
 
+\begin{lemma}\label{lem:tleq_po}
+	$\leq_\Tcal$ is a partial order relation on $\Tcal$.
+\end{lemma}
+\begin{proof}
+\begin{ProofEnumDesc}[style=standard]
+	\item[\textbf{Reflectivity}] $\forall P, t(P)\leq_{\SL} t(P)$ therefore $t\leq_\Tcal t$.
+	\item[\textbf{Antisymmetry}] $t\leq_\Tcal s\wedge s\leq_\Tcal t\iff \forall P, t(P)\leq_{\SL} s(P)
+\wedge s(P) \leq_{\SL} t(P)$ therefore $\forall P, t(P)=s(P)$, which means that $s=t$.
+	\item[\textbf{Transitivity}] if $r\leq_\Tcal s$ and $s\leq_\Tcal t$, $\forall P, r(P) \leq_{\SL} s(P)$ and $s(P)\leq_{\SL} t(P)$ therefore $r(P) \leq_{\SL} t(P)$, which means that $r \leq_\Tcal t$.
+\end{ProofEnumDesc}
+\end{proof}
+
 As we shall see, if a variable is typed by a base type, the sensitivity of
 its content may depend on the permissions of the app which writes to the variable.
 In contrast, in traditional information flow type systems,
@@ -457,10 +474,24 @@ For $s, t\in\Tcal$, $s\sqcup t$ and $s\sqcap t$ are defined as
 \end{definition}
 
 
+\begin{lemma}\label{lem:bound}
+Given two base types $s$ and $t$, it follows that
+\begin{enumerate}[label*=(\alph*)]
+\item $s \leq_\Tcal s\sqcup t$ and $t\leq_\Tcal s\sqcup t$.
+\item $s\sqcap t \leq_\Tcal s$ and $s\sqcap t \leq_\Tcal t$.
+\end{enumerate}
+\end{lemma}
+ \begin{proof}
+Immediately from Definition~\ref{def:base_type}.
+ \end{proof}
 
 
-
-
+\begin{lemma}\label{lem:lattice}
+$(\Tcal, \leq_\Tcal)$ forms a lattice.
+\end{lemma}
+ \begin{proof}
+ $\forall s,t\in\PPS$, according to Lemma~\ref{lem:bound}, $s \sqcup t$ is their upper bound. Suppose $r$ is another upper bound of them, i.e., $s\leq_\Tcal r$ and $t\leq_\Tcal r$, which means $\forall P\in\PPS, (s\sqcup t)(P)=s(P)\sqcup t(P)\leq_{\SL} r(P)$, so $s\sqcup t\leq r$. Therefore $s\sqcup t$ is the least upper bound of $\left\{s,t\right\}$. Similarly, $s\sqcap t$ is $s$ and $t$'s greatest lower bound. This makes $(\Tcal, \leq_\Tcal)$ a lattice.
+ \end{proof}
 
 
 From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when no ambiguity arises.
@@ -470,10 +501,10 @@ From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when 
 \begin{definition}
 \label{def:embed}
 Given a security level $l$, we define $\hat{l}$ as follows:
-for all $P \in \PPS$, we have $\hat{l}(P) = l.$
+for all $P \in \PPS$, we have $\hat{l}(P) = l$.
 \end{definition}
-Accordingly, a security level $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
 
+Accordingly, a security level $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
 
 
 
@@ -481,6 +512,25 @@ Accordingly, a security level $l$ can be lifted to the base type $\hat{l}$ that 
    A \termEmph{function type} has the form $\overline{t} \rightarrow t$, where $\overline{t}=(t_1,\ldots,t_m)$, $m\geq 0$ and $t, t_i$ are base types.
    The types $\overline t$ are the types for the arguments of the function and $t$ is the return type of the function.
  \end{definition}
+
+\begin{lemma}\label{lem:promote-demote}
+Given $P\in\PPS$ and $p\in\PS$,
+%\leavevmode
+\begin{enumerate}[label*={(\alph*)}]
+  \item\label{lem:promote-demote-1} If $p \in P$, then $(t\uparrow_{p})(P) = t(P)$.
+	\item\label{lem:promote-demote-2} If $p \notin P$, then $(t\downarrow_{p})(P) = t(P)$.
+\end{enumerate}
+\end{lemma}
+ \begin{proof}
+If $p\in P$, $P\cup\{p\}=P$, therefore $(t\uparrow_{p}) (P) = t(P\cup \{p\})=t(P)$; if $p\notin P$, $P\setminus\{p\}=P$, therefore $(t\downarrow_{p}) (P) = t(P\setminus\{p\})=t(P)$.
+ \end{proof}
+
+\begin{lemma}\label{lem:pd-order}
+If $s\leq t$, then $s\uparrow_{p} \leq t\uparrow_{p}$ and $s\downarrow_{p} \leq t\downarrow_{p}$.
+\end{lemma}
+ \begin{proof}
+For $P\in\PS$, since $s\leq t$, $s(P\cup\{p\})\leq t(P\cup\{p\})$ and $s(P\setminus\{p\})\leq t(P\setminus\{p\})$, according to Definition~\ref{def:base_type} and Definition~\ref{def:updown}, the conclusion follows.
+ \end{proof}
 
 
 In our type system, security types of  expressions (commands, functions, resp.) may be
@@ -522,7 +572,7 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 
 
 \begin{figure*}
-\small
+\tiny
 \[
 \inference[T-VAR]{}
 {\Gamma \vdash \leVAR{x} : \Gamma(x)}
@@ -602,6 +652,7 @@ on $P$ is then written as
 \app{(t_1,\dots,t_n)}{P} = (\app{t_1}{P}, \dots, \app{t_n}{P}).
 \]
 \end{definition}
+
 \begin{definition}\label{def:merge}
 Given a permission $p$ and two types $t_1$ and $t_2$, the {\termEmph{merging}} of
 $t_1$ and $t_2$ along $p$, denoted as $\omerge {p} {t_1} {t_2}$, is:
@@ -712,7 +763,8 @@ the function call are typed according to the projection of $\overline{t}$ and $t
 Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially what is adopted in {\BN} system for method calls~\cite{Banerjee:2005ht}.
 
 Let us consider the example in Listing~\ref{lst:laundery}.
-\begin{lstlisting}[float=tp, label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
+\begin{figure}[ht]
+\begin{lstlisting}[label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
 A.f(x) {  init r = 0 in { r := call B.g (x); return r }
 }
 	
@@ -733,6 +785,7 @@ M.main() { init r = 0 in {
   }
 }
 \end{lstlisting}
+\end{figure}
 Let $\PS=\{p\}$ and $t$ be the base type $t =  \{\emptyset \mapsto L, \{p\} \mapsto H\}$,
 where $L$ and $H$ are bottom and top levels respectively. Here we assume \textit{P\_INFO} is a sensitive value
 of security level $H$ that needs to be protected, so function \textit{C.getsecret} is required to have type $() \rightarrow t$. That is, only apps that have the required permission $p$ may obtain
@@ -779,7 +832,7 @@ to another function if the app itself is authorized to access the content of the
 as formalized in the rule \ruleTagText{T-CALL}.
 
 \begin{figure*}[ht]
-\begin{small}
+\begin{scriptsize}
 \begin{prooftree}
 \AxiomC{$FT(B.g) = t \rightarrow \hat{L}$}
 \AxiomC{$x : t, r : \hat{L} \vdash x : t$}
@@ -816,14 +869,14 @@ Note that $t\uparrow_p = \hat{H}$, $t\downarrow_p = \hat{L} = \hat{L}\downarrow 
 		{\lpRES} : () \rightarrow t$}
 \end{prooftree}
 Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
-\end{small}
+\end{scriptsize}
 \caption{Typing derivations for functions A.f, B.g and C.getsecret}
 \label{fig:type1}
 \end{figure*}
 
 
 \begin{figure*}[ht]
-\begin{small}
+\begin{scriptsize}
 \begin{prooftree}
 \AxiomC{$r : \hat{L} \vdash 0 : t$}
 	\AxiomC{$\Gamma ; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
@@ -871,7 +924,7 @@ where $\Gamma = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves a
 \LeftLabel{T-CALL'}
 \TrinaryInfC{$\Gamma ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \end{prooftree}
-\end{small}
+\end{scriptsize}
 \caption{A typing derivation for function M.main}
 \label{fig:type2}
 \end{figure*}
@@ -894,11 +947,6 @@ Finally, the reader may check that if we fix the type of $B.g$ to $t \rightarrow
 $A.f$ can only be assigned type $\hat{L} \rightarrow \hat{L}.$ In no circumstances can
 $M.main$ be typed, since the statement $x_H := C.getsecret()$ forces $x_H$ to have
 type $\hat{H}$, and thus cannot be passed to $A.f$ as an argument.
-
-
-
-
-
 
 
 
@@ -947,11 +995,30 @@ for the non-dependent setting.
 
 
 
+\begin{lemma}\label{lem:ni-eq}
+$=_{\Gamma}^{l_{O}}$ is an equivalence relation on $EEnv$.
+\end{lemma}
+ \begin{proof}
+\begin{ProofEnumDesc}[style=standard]
+	\item [Reflexivity] Obviously $\eta=_{\Gamma}^{l_O}\eta$.
+	\item [Symmetry] Since $\forall x\in dom(\Gamma). (\Gamma(x)\leq\hat{l}_O\Rightarrow\eta'=_{\Gamma}^{l_O}\eta)$.
+	\item [Transitivity] If $\eta_1=_{\Gamma}^{l_O}\eta_2$ and $\eta_2=_{\Gamma}^{l_O}\eta_3$, for a given $x\in dom(\Gamma)$, when $\Gamma(x)\leq\hat{l_O}$, we have $\eta_1(x)=\eta_2(x)$ and $\eta_2(x)=\eta_3(x)$.
+	\begin{enumerate}[label={(\arabic*)}]
+	\item If $\eta_1(x)\neq\bot$, then $\eta_2(x)\neq\bot$ by the first equation, which in return requires $\eta_3(x)\neq\bot$ by the second equation; by transitivity $\eta_1(x)=\eta_3(x)$($\neq\bot$).
+	\item If $\eta_1(x)=\bot$, the first equation requires that $\eta_2(x)=\bot$, which makes $\eta_3(x)=\bot$, therefore both $\eta_1(x)=\eta_3(x)$($=\bot$).
+	\end{enumerate}
+	Therefore $\eta_1(x)=\eta_3(x)$.
+\end{ProofEnumDesc}
+ \end{proof}
 
-
-
-
-
+ \begin{lemma}\label{lem:proj}
+If $\eta =_{\Gamma}^{l_{O}} \eta'$
+then for each $P\in\PPS$,
+$\eta =_{\app{\Gamma}{P}}^{l_O} \eta'.$
+\end{lemma}
+ \begin{proof}
+$\forall x\in dom(\Gamma)$, we need to prove that when $\app{\Gamma}{P}(x)\leq l_O$ then $\eta(x)=\eta'(x)$. But $\app{\Gamma}{P}(x)=\app{\Gamma(x)}{P}=t(P)$, from the definition of $\eta(x)=\eta'(x)$, the conclusion holds.
+ \end{proof}
 
 
 
@@ -959,8 +1026,7 @@ We hereby give the definitions for well-typed property
 (Definition~\ref{def:cmd-welltype}) and non-interference for the type
 system (Defintion~\ref{def:ni} and Definition~\ref{def:sys-ni}),
 together with the final soundness conclusion
-(Theorem~\ref{thm:ni}). The detailed proofs are available
-in~\cite{Chen17arxiv}.
+(Theorem~\ref{thm:ni}).
 
 
 \begin{definition}\label{def:cmd-welltype}
@@ -971,6 +1037,235 @@ every function $A.f$, $\vdash \FD(A.f) : \FT(A.f)$ is derivable.
 \end{definition}
 
 
+Recall that we assume no (mutual) recursions, so every function call
+chain in a well-typed system is finite; this is formalized via the rank function below. We will use this
+as a measure in our soundness proof (Lemma~\ref{lem:comni}).
+%\begin{figure}[h]
+\begin{equation*}
+\arraycolsep=1.0pt\def\arraystretch{1}
+\begin{array}{lcl}
+\rank{\lcASS{x}{e}} & = &0\\
+\rank{\lcIF{e}{c_1}{c_2}} & = &max(\rank{c_1}, \rank{c_2)}\\
+\rank{\lcSEQ{c_1}{c_2}} & = &max(\rank{c_1}, \rank{c_2})\\
+\rank{\lcWHILE{e}{c}} & = &\rank{c} \\
+\rank{\lcLETVAR{x}{e}{c}} & = &\rank{c} \\
+\rank{\lcCALL{x}{A.f}{\overline{e}}} & = &
+   \rank{FD(A.f)} + 1\\
+\rank{\lcCP{p}{c_1}{c_2}} & = & max(\rank{c_1}, \rank{c_2})\\
+\rank{\lpFUN{A.f}{\overline x}{c}} &=& \rank{c}
+\end{array}
+\end{equation*}
+
+
+The next two lemmas relate projection, promotion/demotion
+and the indistinguishability relation.
+
+\begin{lemma}\label{lem:up}
+If $p \in P$, then $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$ iff $\eta =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \eta'$.
+\end{lemma}
+\begin{proof}
+  We first note that $dom(\app{\Gamma}{P}) = dom(\app{\Gamma\uparrow_{p}}{P})$ since both
+  promotion and projection do not change the domain of a typing environment.
+  We then show below that $\app{\Gamma}{P} = \app{\Gamma\uparrow_p}{P}$, from which the
+  lemma follows immediately.
+  Given any $x \in dom(\app{\Gamma\uparrow_{p}}{P})$,
+  for any $Q \in \PPS$, we have
+  $$
+  \begin{array}{ll}
+    \app{\Gamma\uparrow_p}{P}(x)(Q) & \\
+    = (\app{\Gamma\uparrow_p(x)}{P})(Q) & \mbox{ by Def.\ref{def:tenv-pd} }\\
+    = (\Gamma\uparrow_p(x))(P) & \mbox{ by Def. \ref{def:projection} }\\
+    = \Gamma(x)(P \cup \{p\}) & \mbox { by Def. \ref{def:updown} } \\
+    = \Gamma(x)(P) & \mbox{ by assumption $p \in P$ }\\
+    = (\app{\Gamma(x)}{P})(Q) & \mbox{ by Def. \ref{def:projection} }\\
+    = \app{\Gamma}{P}(x)(Q) & \mbox{ by Def. \ref{def:tenv-pd} }
+  \end{array}
+  $$
+  Since this holds for arbitrary $Q$,it follows that $\app{\Gamma\uparrow_p}{P} = \app{\Gamma}{P}.$
+\end{proof}
+
+\begin{lemma}\label{lem:down}
+If $p \notin P$, then $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta' \Longleftrightarrow \eta =_{\app{\Gamma\downarrow_{p}}{P}}^{l_{O}} \eta'$.
+\end{lemma}
+\begin{proof}
+Similar to the proof of Lemma~\ref{lem:up}.
+\end{proof}
+
+
+%%%%%%%%%
+
+\begin{lemma}\label{lem:expsafe}
+Suppose $\Gamma\vdash e : t$. For $P\in\PPS$, if~$t(P)\leq l_{O}$ and
+$\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$,  $\eta\vdash e\leadsto v$ and $\eta'\vdash e\leadsto v'$, then $v = v'$.
+\end{lemma}
+\begin{proof}
+Consider any $P$ which satisfies $t(P)\leq l_{O}$ and $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$.
+The proof proceeds by induction on the derivation
+of $\Gamma;A \vdash e : t$.
+\begin{ProofEnumDesc}
+%\item[T-VAL] Trivial.
+%%%%%%%%%%%%%%%%%%
+\item[T-VAR] We have $\Gamma \vdash \leVAR{x} :\Gamma(x) = t$.
+Since $t(P) \leq l_{O}$ and $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$,
+it is deducible that $v = \eta(x) = \eta'(x) = v'$.
+%%%%%%%%%%%%%%%%%%
+\item[T-OP] We have
+\begin{equation*}
+\inference
+{\Gamma \vdash e_1 : t & \Gamma \vdash e_2 : t}
+{\Gamma \vdash \leOP{e_1}{e_2} : t}
+\end{equation*}
+and
+\begin{equation*}
+\inference{\eta \vdash e_i \leadsto v_i}{\eta\vdash \leOP{e_1}{e_2}\leadsto v_1~op~v_2} ~
+\inference{\eta' \vdash e_i \leadsto v'_i}{\eta'\vdash \leOP{e_1}{e_2}\leadsto v'_1~op~v'_2}
+\end{equation*}
+By induction on $e_i$, we can get $v_i = v'_i$. Therefore $v = v'$.
+%%%%%%%%%%%%%%%%%%
+\item[T-SUB$_e$] we have
+\begin{equation*}
+\inference
+{\Gamma\vdash e : s & s \leq t}
+{\Gamma\vdash e : t}
+\end{equation*}
+since $s(P)\leq t(P)$ and $t(P)\leq l_{O} $, then $s(P)\leq l_{O}$ as well,
+thus the result follows by induction on $\Gamma\vdash e : s$.
+\end{ProofEnumDesc}
+\end{proof}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{lemma}\label{lem:comsafe}
+Suppose $\Gamma; A \vdash c : t$. Then for any $P\in\PPS$,
+if $t(P)\nleq l_{O}$ and $\eta;A; P \vdash c \leadsto \eta' $, then
+$\eta =_{\app{\Gamma}{P}} \eta'$.
+\end{lemma}
+\begin{proof}
+By induction on the derivation of $\Gamma; A \vdash c : t$, with subinduction
+on the derivation of $\eta;A; P \vdash c \leadsto \eta'.$
+
+\begin{ProofEnumDesc}
+\item[T-ASS]
+In this case $t = \Gamma(x)$ and
+the typing derivation has the form:
+\begin{equation*}
+\inference
+{\Gamma \vdash e : \Gamma(x)}
+{\Gamma; A  \vdash \lcASS{x}{e} : \Gamma(x)}
+\end{equation*}
+and the evaluation under $\eta$ takes the form:
+$$
+\inference
+{\eta \vdash v}
+{\eta; A; P \vdash \lcASS{x}{e} \leadsto \eta[x \mapsto v] }
+$$
+That is, $\eta' = \eta[x \mapsto v].$
+So $\eta$ and $\eta'$ differ possibly
+only in the mapping of $x$.
+Since $\Gamma(x)(P) = t(P) \nleq l_{O}$,
+that is $\app{\Gamma}{P}(x) \nleq \hat{l_{O}}$,
+the difference in the valuation of $x$ is not observable
+at level $l_O.$
+It then follows from Definition~\ref{def:envequ}
+that $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta' $.
+
+\item[T-CALL] In this case
+the command $c$ has the form
+$\lcCALL{x}{B.f}{\overline{e}}$
+and the typing derivation
+takes the form:
+$$
+\setpremisesspace{7pt}
+\setpremisesend{3pt}
+\inference
+{
+\FT(B.f) = \overline{s} \rightarrow {s'} &
+\Gamma \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
+\app{s'}{\Theta(A)} \leq \Gamma(x)}
+{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x) }
+$$
+and we have that
+$t = \Gamma(x).$
+The evaluation under $\eta$ is derived as follows:
+$$
+\inference{
+\FD(B.f) = \lpFUN{B.f}{\overline{y}}{c_1} \\
+\eta\vdash\overline{e} \leadsto \overline{v} \quad
+[\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c_1
+\leadsto \eta_1
+%% \quad\eta_1 \vdash {\lpRES} \leadsto v'
+}
+{\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+\eta [x \mapsto \eta_1(r) ]}
+$$
+Since $t(P) \not \leq l_O$ and $\Gamma(x) = t$, we have
+$\Gamma(x)(P) \not \leq l_O$
+and therefore $\Gamma(x) \not \leq l_O$
+and
+$$\eta =^{l_O}_{\app{\Gamma}{P}} \eta[x \mapsto v'] = \eta'.$$
+
+\item[T-IF]
+This follows straightforwardly from the induction hypothesis.
+
+\item[T-WHILE]
+We look at the case where the condition of the while loop
+evaluates to true, otherwise it is trivial.
+In this case the typing derivation is
+$$
+\inference
+{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
+{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+$$
+and the evaluation derivation is
+$$
+\inference{
+\eta \vdash e \leadsto v\quad v\neq 0\quad
+\eta;A; P \vdash c \leadsto \eta_1\\
+\quad \eta_1 ; A ; P \vdash \lcWHILE{e}{c} \leadsto \eta'
+}
+{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta'}
+$$
+Applying the induction hypothesis (on typing derivation)
+and the inner induction hypothesis (on the evaluation derivation)
+we get $\eta =^{l_O}_{\app{\Gamma}{P}} \eta_1$ and $\eta_1 =^{l_O}_{\app{\Gamma}{P}} \eta'$; by transitivity of $=^{l_O}_{\app{\Gamma}{P}}$ we get $\eta =^{l_O}_{\app{\Gamma}{P}} \eta'.$
+
+\item[T-SEQ] This case follows from the induction hypothesis
+and transitivity of the indistinguishability relation.
+
+\item[T-LETVAR] This follows from the induction hypothesis
+and the fact that we can choose fresh variables for local
+variables, and that the local variables are not visible
+outside the scope of letvar.
+
+\item[T-CP]
+We have:
+$$
+\inference
+{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Gamma\downarrow_{p} ; A\vdash c_2 : t_2 &
+t = \omerge{p}{t_1}{t_2}}
+{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : t}
+$$
+There are two possible derivations for the evaluation.
+In one case, we have
+$$
+\inference{p\in P \quad \eta; A; P \vdash c_1 \leadsto \eta'}
+{\eta; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+$$
+Since $t(P) \nleq l_{O}$ and $p \in P$, by Definiton~\ref{def:merge},
+we have $t_1(P) \nleq l_{O}$.
+By induction hypothesis, we have $\eta =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \eta'$,
+by Lemma \ref{lem:up}, we have $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$.
+
+The case where $p \notin P$ can be handled similarly,
+making use of Lemma \ref{lem:down}.
+
+\item[T-SUB$_c$] Straightforward by induction.
+\end{ProofEnumDesc}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \begin{definition}\label{def:ni}
@@ -981,6 +1276,299 @@ if  $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, \; $\eta_1;A ; P\vdash c \lead
 then $\eta_2 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_2$.
 \end{definition}
 
+
+%%%%%%%%%
+\begin{lemma}\label{lem:comni}
+Suppose $\Gamma; A\vdash c : t$, for any $P\in\PPS$, if  $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, $\eta_1; A; P \vdash c \leadsto \eta_2$,
+and  $\eta'_1; A; P \vdash c \leadsto \eta'_2$,
+then  $\eta_2 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_2$.
+\end{lemma}
+\begin{proof}
+The proof proceeds by induction on \rank{c}, with subinduction
+on the derivations of $\Gamma;\Theta;A \vdash c : t$ and $\eta_1;\Theta;P;A\vdash c \leadsto \eta_2$.
+In the following, we shall omit the superscript $l_O$ from
+$=^{l_O}_{\app{\Gamma}{P}}$ to simplify presentation.
+
+\begin{ProofEnumDesc}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-ASS] In this case, $c \equiv x := e$ and the typing derivation takes the form:
+$$
+\inference
+{\Gamma \vdash e : \Gamma(x)}
+{\Gamma ; A \vdash \lcASS{x}{e} : \Gamma(x)}
+$$
+where $t = \Gamma(x)$, and suppose the two executions
+of $c$ are derived as follows:
+$$
+\inference{\eta_1 \vdash e \leadsto v}
+{\eta_1; A; P \vdash \lcASS{x}{e} \leadsto \eta_1 [ x \mapsto v_1 ]}
+$$
+$$
+\inference{\eta_2 \vdash e \leadsto v'}
+{\eta_1'; A; P \vdash \lcASS{x}{e} \leadsto \eta_1' [ x \mapsto v_2 ]}
+$$
+where $\eta_2 = \eta_1[x \mapsto v]$
+and $\eta_2' = \eta_1'[x \mapsto v'].$
+Note that if $\Gamma(x) \not \leq l_O$ then
+$\eta_2 =_{\app{\Gamma}{P}} \eta_2'$ holds trivially
+by Definition~\ref{def:ni}.
+So let us assume $\Gamma(x) \leq l_O$. Then applying Lemma~\ref{lem:expsafe}
+to
+$\eta_1 \vdash e \leadsto v$
+and $\eta_1' \vdash e \leadsto v'$
+we get
+$v = v'$, so it then follows that  $\eta_2 =_{\app{\Gamma}{P}} \eta_2'.$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% start of hongxu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-IF] In this case $c \equiv \lcIF{e}{c_1}{c_2}$ and we have
+$$
+\inference
+{\Gamma \vdash e : t & \Gamma ; A\vdash c_1 : t & \Gamma; A \vdash c_2 : t }
+{\Gamma; A \vdash \lcIF{e}{c_1}{c_2} : t}
+$$
+If $t(P)\not\leq l_{O}$, then the lemma follows easily from
+Lemma~\ref{lem:comsafe}. So we assume $t(P) \leq l_O.$
+
+The evaluation derivation under $\eta_1$
+takes either one of the following forms:
+$$
+\inference{\eta_1 \vdash e \leadsto v\quad v\neq 0\quad \eta_1; A; P \vdash c_1 \leadsto \eta_2}
+{\eta_1; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2}
+$$
+$$
+\inference{\eta_1 \vdash e \leadsto v\quad v = 0\quad \eta_1;A; P \vdash c_2 \leadsto \eta_2}
+{\eta;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2}
+$$
+We consider here only the case where $v\not = 0$; the case with $v=0$
+can be dealt with similarly.
+We first need to show that the evaluation of $c$ under $\eta_1'$
+would take the same if-branch. That is, suppose $\eta_1' \vdash e \leadsto v'$.
+Since $t(P) \leq l_O$, we can apply Lemma~\ref{lem:expsafe} to conclude
+that $v=v' \not = 0$, hence the evaluation of $c$ under $\eta_1'$ takes the
+form:
+$$
+\inference{\eta_1' \vdash e \leadsto v'\quad v'\neq 0\quad \eta_1'; A; P \vdash c_1 \leadsto \eta_2'}
+{\eta_1'; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2'}
+$$
+The lemma then follows straightforwardly from the induction hypothesis.
+
+%% By induction on the derivation of $e$, it can be concluded that the types of all the involved variables $v_1,\ldots, v_m$ have type $\Gamma(v_i)=t,i=1,\ldots,m$. Otherwise, since $\eta_1=_{\app{\Gamma}{P}}^{l_{O}}\eta_1'$, the execution will follow the same branch, by induction hypothesis, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-WHILE] $c\equiv\lcWHILE{e}{c_b}$ and we have
+$$
+\inference
+{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
+{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+$$
+If $t(P) \nleq l_{O}$, the conclusion holds by
+Lemma~\ref{lem:comsafe}. Otherwise, since
+$\eta_1=_{\app{\Gamma}{P}}^{l_{O}}\eta_1'$, by
+Lemma~\ref{lem:expsafe}, if
+$\eta_1 \vdash e \leadsto v$ and $\eta_1' \vdash e \leadsto v'$
+then $v=v'$.
+If both are $0$ then the conclusion holds according to
+(\ruleTagText{E-WHILE-F}). Otherwise, we have
+$$
+\inference{
+\eta_1 \vdash e \leadsto v\quad v\neq 0\quad
+\eta_1;A; P \vdash c_b \leadsto \eta_3\\
+\quad \eta_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2
+}
+{\eta;A; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2}
+$$
+
+$$
+\inference{
+\eta_1' \vdash e \leadsto v\quad v'\neq 0\quad
+\eta_1';A; P \vdash c_b \leadsto \eta_3'\\
+\quad \eta_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'
+}
+{\eta;A; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'}
+$$
+Applying the induction hypothesis to $\Gamma ; A\vdash c : t$,
+$\eta_1;A; P \vdash c_b \leadsto \eta_3$ and
+$\eta_1';A; P \vdash c_b \leadsto \eta_3'$, we obtain
+$\eta_3 =_{\app{\Gamma}{P}} \eta_3'.$ Then applying the inner
+induction hypothesis to $\eta_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2$
+and $\eta_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'$,
+we obtain $\eta_2 =_{\app{\Gamma} P} \eta_2'.$
+
+%% In one run of $c_b$, suppose that $\eta_1;A;P\vdash c\leadsto \eta_{1b}$ and $\eta_1';A;P\vdash c\leadsto \eta_{1b}'$, it is deducible that $\eta_{1b}=_{\app{\Gamma}{P}}\eta_{1b}'$. Since there are only finite runs of while body; and by induction on the derivation of typing rules on $c_b$, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-SEQ] In this case we have
+  $c\equiv\lcSEQ{c_1}{c_2}$ and $\Gamma;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-LETVAR]
+  In this case we have $c\equiv\lcLETVAR{x}{e}{c_b}.$
+  If $t(P) \nleq l_O$ then the lemma follows from Lemma \ref{lem:comsafe}.
+  Otherwise, this case follows from the induction hypothesis and the fact
+  that the mapping for the local variable $x$ is removed
+  in $\eta_2$ and $\eta_2'.$
+%% only introduces a fresh variable $v$ and its binding is limited to
+%% $c_b$, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$ can be achieved from
+%% induction on $c_b$ according to the type of $e$, respectively.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% end of hongxu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\item[T-CALL]
+In this case, $c$ has the form
+$\lcCALL{x}{B.f}{\overline{e}}$. Suppose the typing
+derivation is the following (where we label the premises
+for ease of reference later):
+$$
+\inference
+{
+\FT(B.f) = \overline{s} \rightarrow s' \\
+(\mathbf{T_1}) ~ \Gamma \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
+(\mathbf{T_2}) ~ \app{s'}{\Theta(A)} \leq \Gamma(x)}
+{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+ \Gamma(x)  }
+$$
+where $t = \Gamma(x)$,
+and the executions under $\eta_1$ and $\eta_1'$ are
+derived, respectively, as follows:
+$$
+\inference{
+(\mathbf{E_1}) ~ \eta_1\vdash\overline{e} \leadsto \overline{v_1} \\
+(\mathbf{E_2}) ~ [\overline{y} \mapsto \overline{v_1}, r \mapsto 0] ; B;
+  \Theta(A) \vdash c_1 \leadsto \eta_3
+}
+{\eta_1; A; P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+              \eta_1 [x \mapsto \eta_3(r) ]}
+$$
+and
+$$
+\inference{
+(\mathbf{E_1'}) ~ \eta_1'\vdash\overline{e} \leadsto \overline{v_2}
+\\
+(\mathbf{E_2'}) ~ [\overline{y} \mapsto \overline{v_2}, r \mapsto 0] ; B;
+\Theta(A) \vdash c_1 \leadsto \eta_3'}
+{\eta_1';A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+              \eta_1' [x \mapsto \eta_3'(r) ]}
+$$
+where
+$\FD(B.f) = \lpFUN{B.f}{\overline{x}}{c_1}$,
+$\eta_2 = \eta_1[x \mapsto \eta_3(r)]$
+and $\eta_2' = \eta_1'[x \mapsto \eta_3'(r)].$
+
+Moreover, since we consider only well-typed systems,
+the function $\FD(B.f)$ is also typable:
+$$
+\inference
+    {
+      (\mathbf{T_3}) ~ [\overline{y}:\overline{s}, r : s']; B\vdash c_1 : s
+      % &
+      % (\mathbf{T_4}) ~ \overline{y}:\overline{t} \vdash \lpRES : t'
+    }
+    {
+      \Theta \vdash \lpFUN{B.f}{\overline{y}}{c_1} :
+      \overline{s}\rightarrow s'
+    }
+$$
+First we note that if $t(P) \nleq l_O$ then the result
+follows from Lemma~\ref{lem:comsafe}.
+So in the following, we assume $t(P) \leq l_O$.
+Since $t = \Gamma(x)$, it follows that
+$\Gamma(x)(P) \leq l_O.$
+
+Let $\Gamma' = \app{[\overline{y} : \overline{t}, r : s]}{\Theta(A)}.$
+We first prove several claims:
+\begin{itemize}
+\item Claim 1:
+$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
+=_{\Gamma'} [\overline{y} \mapsto \overline{v_2}, r\mapsto 0].$
+
+Proof:
+Let $\rho = [\overline{y} \mapsto \overline{v_1}, r \mapsto 0]$
+and $\rho' = [\overline{y} \mapsto \overline{v_2}, r \mapsto 0]$.
+We only need to check that the two mappings
+agree on mappings of $\overline{y}$ that are of type $\leq \hat{l}_O.$
+Suppose $y_u$ is such a variable, i.e., $\Gamma'(y_u) = u \leq \hat{l}_O$,
+and suppose $\rho(y_u) = v_u$ and
+$\rho'(y_u) = v_u'$ for some $y_u \in \overline{y}.$
+From $(\mathbf{E_1})$ we have
+$\eta_1 \vdash e_u \leadsto v_u$
+and from $(\mathbf{E_2})$
+we have $\eta_1' \vdash e_u \leadsto v_u'$,
+and from $(\mathbf{T_1})$ we have $\Gamma \vdash e_u : u.$
+Since $u \leq \hat{l}_O$, applying Lemma~\ref{lem:expsafe},
+we get $v_u = v_u'$.
+
+
+\item Claim 2: $\eta_3 =_{\Gamma'} \eta_3'.$
+
+Proof: From Claim 1, we know that
+$$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
+=_{\Gamma'} [\overline{y} \mapsto \overline{v_2}, r \mapsto 0].$$
+Since $\rank{c_1}<\rank{c}$, we can apply the outer induction
+hypothesis to $(\mathbf{E_2})$, $(\mathbf{E_2'})$
+and $(\mathbf{T_3})$ to obtain
+$\eta_3 =_{\Gamma'} \eta_3'.$
+
+\item Claim 3: $\eta_3(r) = \eta_3'(r).$
+
+Proof: We first note that from $(\mathbf{T_2})$
+and the assumption that $\Gamma(x)(P) \leq l_O$, we get
+$(\app{s'}{\Theta(A)})(P) \leq l_O$.
+The latter, by Definition~\ref{def:projection}, implies  that $s'(\Theta(A)) \leq l_O.$
+Since $r \in dom(\Gamma')$, it is obvious that
+$\Gamma' \vdash r : s'$,
+$\eta_3 \vdash r \leadsto \eta_3(r)$
+and $\eta_3' \vdash r \leadsto \eta_3'(r).$
+From Claim 2 above, we have $\eta_3 =_{\Gamma'} \eta_3'$.
+Therefore by Lemma~\ref{lem:expsafe}, we have
+$\eta_3(r) = \eta_3'(r).$
+%% Using this and $(\mathbf{T_4})$, $(\mathbf{E_3})$.
+%% $(\mathbf{E_6})$, and Lemma~\ref{lem:expsafe},
+%% we obtain $v' = v''.$
+\end{itemize}
+The statement we are trying to prove, i.e., $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$,
+follows immediately from Claim 3 above.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% start of hongxu
+\item[T-CP] $c\equiv\lcCP{p}{c_1}{c_2}$ and we have
+$$
+\inference
+{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Gamma\downarrow_{p} ; A\vdash c_2 : t_2 &
+t=\omerge {p} {t_1} {t_2}}
+{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : t}
+$$
+We need to consider two cases, one where $p \in P$
+and the other where $p \not \in P$.
+
+Assume that $p \in P.$
+Then the evaluation of $c$ under $\eta_1$ and $\eta_1'$
+are respectively:
+$$
+\inference{p\in P \quad \eta_1; A; P \vdash c_1 \leadsto \eta_2}
+{\eta_1; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta_2}
+$$
+and
+$$
+\inference
+    {p\in P \quad \eta_1'; A; P \vdash c_1 \leadsto \eta_2'}
+    {\eta_1'; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta_2'}
+$$
+Since $\eta_1 =_{\app{\Gamma}{P}} \eta_1'$ and since $p \in P$,
+by Lemma~\ref{lem:up}, we have $\eta_1 =_{\app{\Gamma\uparrow_p}{P}} \eta_1'$.
+Therefore by the induction hypothesis applied to $\Gamma\uparrow_p ; A \vdash c_1 : t_1$,
+$\eta_1; A; P \vdash c_1 \leadsto \eta_2$ and
+$\eta_1'; A; P \vdash c_1 \leadsto \eta_2'$, we obtain
+$\eta_2 =_{\app{\Gamma\uparrow_p}{P}} \eta_2'$, and by Lemma~\ref{lem:up},
+we get $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$.
+
+For the case where $p \not \in P$, we apply a similar reasoning as above,
+but using Lemma~\ref{lem:down} in place of Lemma~\ref{lem:up}.
+%% If $p\in\Theta(A)$, then $t=t_1$, the conclusion holds by induction on $c_1$. Otherwise, the conclusion holds by induction on $c_2$.
+% end of hongxu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{ProofEnumDesc}
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{definition}\label{def:sys-ni}
 Let $\mathcal{S}$ be a system.
@@ -1005,6 +1593,10 @@ in $\mathcal{S}$ are non-interferent.
 \begin{theorem}\label{thm:ni}
 Well-typed systems are non-interferent.
 \end{theorem}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
  \section{Type Inference}\label{sec:constraint_gen}
 This section describes a decidable inference algorithm for the language  in Section~\ref{sec:language}.
 Section~\ref{sec:constraint-gen-rules} firstly rewrites the typing
@@ -1037,6 +1629,7 @@ and its length, denoted by $\tlength{\trace}$, is defined as:
 		1+\tlength{\trace'} & \text{if}~ \trace=\tplusminus{p} :: \trace', \tplusminus{} \in\{\tplus{}, \tminus{}\}
 	\end{cases}
 \end{align*}
+
 \begin{definition}\label{def:app-pt-t}
 Given a base type $t$ and a permission trace $\trace$, the \termEmph{application} of $\trace$ to $t$, denoted by $t\cdot\trace$,  is defined as:
 
@@ -1060,8 +1653,19 @@ The application of permission traces to types preserves the subtyping relation.
 \begin{lemma}\label{lem:monotrace}
 $\forall s, t \in \Tcal$, $s\leq t \implies s\leq_{\trace} t$ for all $\trace$.
 \end{lemma}
-
-
+\begin{proof}
+By induction on $\tlength{\trace}$.\\
+\begin{itemize}
+\item $\trace=\epsilon$.
+%When $\tlength{\trace}=0$, i.e., $\trace=\epsilon$,
+Since $s\cdot\trace=s$ and $t\cdot\trace=t$, the conclusion holds trivially.
+\item
+$\trace=\tplus{p} :: \trace'$ or $\trace=\tminus{p} :: \trace'$. Assume it is the former case, the latter is similar.
+By the hypothesis and Lemma \ref{lem:pd-order}, $s\uparrow_{p}\leq t\uparrow_{p}$.
+Then by induction, $s\uparrow_{p}\cdot\trace'\leq t\uparrow_{p}\cdot\trace'$,
+that is, $s\cdot\trace\leq t\cdot\trace$.
+\end{itemize}
+\end{proof}
 
 
 The following four lemmas discuss the impact of permission checking order on the same or different permissions.
@@ -1069,20 +1673,83 @@ The following four lemmas discuss the impact of permission checking order on the
 \begin{lemma}\label{lem:traceorder}
 $\forall t\in\Tcal$, $p,q\in\PS$ s.t. $ p\neq q$ , $t \cdot (\tplusminus{p} \tplusminuss{q}) =  t \cdot (\tplusminuss{q}  \tplusminus{p}) $, where $\tplusminus{},\tplusminuss{}, \in\{\tplus{},\tminus{}\}$.
 \end{lemma}
+\begin{proof}
+We only prove $t\cdot(\tminus{p} \tplus{ q})=t\cdot (\tplus{ q} \tminus{ p})$, the other cases are similar.
+Consider any $P\in\PPS$,
+\begin{equation*}
+\begin{array}{lcl}
+	 t\cdot(\tminus{p} \tplus{ q})(P)
+	 &=&((t\downarrow_{p})\uparrow_{q})(P)\\
+	 &=&(t\downarrow_{p}(P\cup\{q\}))\\
+	 &=&t((P\cup\{q\})\setminus\{p\})\\
+\end{array}
+\end{equation*}
+and
+\begin{equation*}
+\begin{array}{lcl}
+t\cdot(\tplus{ q} \tminus{ p})(P)
+	&=&((t\uparrow_{q})\downarrow_{p})(P)\\
+	&=&t((P\setminus\{p\})\cup \{q\})\\
+	&=&t((P\cup\{q\})\setminus(\{p\}\setminus\{q\}))\\
+	&=&t((P\cup\{q\})\setminus\{p\})\\
+\end{array}
+\end{equation*}
+Therefore, $t\cdot(\tminus{ p} \tplus{ q})=t\cdot(\tplus{ q} \tminus{ p})$.
+\end{proof}
 
 \begin{lemma}\label{lem:traceorder-whole}
 $\forall t\in\Tcal$,$(t\cdot \tplusminus{p} )\cdot \trace = (t\cdot\trace)\cdot \tplusminus{p}$, where $\tplusminus{}\in\{\tplus{}, \tminus{}\}$ and $p \notin \trace$.
 \end{lemma}
+\begin{proof}
+By induction on $\tlength{\trace}$. The conclusion holds when $\tlength{\trace}=0$ and $\tlength{\trace}=1$ by Lemma~\ref{lem:traceorder}. Suppose $\tlength{\trace}>1$, there exists $\trace'$ and $q$ such that $\trace=\tplusminuss{q} :: \trace'$ where $\tplusminuss{}\in\{\tplus{}, \tminus{}\}$.
+\begin{equation*}
+\begin{array}{lcll}
+&&(t\cdot\tplusminus{p})\cdot \trace &\\
+&=& ((t\cdot \tplusminus{ p})  \cdot \tplusminuss{ q}) \cdot \trace'&\text{(by Definition~\ref{def:app-pt-t})}\\
+              &=& (t\cdot(\tplusminus{ p}\tplusminuss{ q} )) \cdot \trace' &\text{(by Definition~\ref{def:app-pt-t})}\\
+              &=& (t\cdot(\tplusminuss{ q} \tplusminus{ p})) \cdot \trace' &\text{(by Lemma \ref{lem:traceorder})}\\
+              &=& ((t\cdot\tplusminuss{ q}) \cdot \tplusminus{ p}) \cdot \trace' &\text{(by Definition~\ref{def:app-pt-t})}\\
+              &=& ((t\cdot\tplusminuss{ q}) \cdot \trace') \cdot \tplusminus{ p}  & \text{(induction hypothesis)}\\
+              &=& (t\cdot (\tplusminuss{ q} :: \trace')) \cdot \tplusminus{ p} &\text{(by Definition~\ref{def:app-pt-t})}\\
+              &=& (t\cdot \trace) \cdot \tplusminus{p} & \text{}
+\end{array}
+\end{equation*}
+\end{proof}
 
+%%%%%%%
 \begin{lemma}\label{lem:tracepsame}
 $\forall t\in\Tcal$, $p\in\PS$,$(t \cdot \tplusminus{ p})\cdot\tplusminuss{ p} =  t \cdot (\tplusminus{ p}) $, where $\tplusminus{}, \tplusminuss{} \in \{\tplus{},\tminus{}\}$.
 \end{lemma}
+\begin{proof}
+By case analysis.
+\begin{itemize}
+\item $((t\cdot \tplus{ p})\cdot \tplus{ p})(P)=t(P\cup\{p\}\cup\{p\})  = t(P\cup\{p\}) =t\cdot(\tplus{ p})$ for each $P\in\PPS$.
+\item $((t\cdot \tplus{ p})\cdot \tminus{ p})(P)=t((P\setminus\{p\})\cup\{p\})  = t(P\cup\{p\}) =t\cdot(\tplus{ p})$ for each $P\in\PPS$.
+\item $((t\cdot \tminus{ p})\cdot \tplus{ p})(P) = t((P\cup\{p\})\setminus\{p\})=t(P\setminus\{p\})=t\cdot(\tminus{ p})$ for each $P\in\PPS$.
+\item $((t\cdot \tminus{ p})\cdot \tminus{ p})(P) = t((P\setminus\{p\})\setminus\{p\})=t(P\setminus\{p\})=t\cdot(\tminus{ p})$ for each $P\in\PPS$.
+\end{itemize}
+\end{proof}
 
+%%%%%%%
 \begin{lemma}\label{lem:tracesame}
 $\forall t\in\Tcal$, $(t \cdot \trace)\cdot \trace =  t \cdot \trace $.
 \end{lemma}
-
-
+\begin{proof}
+By induction on $\tlength{\trace}$. The conclusion holds trivially for $\tlength{\trace}=0$ and for $\tlength{\trace} = 1$ by Lemma \ref{lem:tracepsame} . When $\tlength{\trace}>1$, without loss of generality, assume $\trace=\tplus {p} :: \trace'$.
+\begin{equation*}
+\begin{array}{lcll}
+&&t\cdot\trace\cdot\trace&\\
+&=&(t\cdot (\tplus{ p} \cdot \trace')) \cdot (\tplus{ p}::\trace') &\\
+&=&(t\cdot (\trace'\cdot\tplus{ p}))\cdot (\tplus{ p}::\trace') & \text{(by Lemma~\ref{lem:traceorder-whole})}\\
+&=&(((t\cdot\trace')\cdot \tplus{ p})\cdot\tplus{ p})\cdot\trace' &\text{(by Definition~\ref{def:app-pt-t})}\\
+&=&((t\cdot\trace')\cdot \tplus{ p})\cdot\trace' &\text{(by Lemma~\ref{lem:tracepsame})}\\
+&=&((t\cdot \tplus{ p})\cdot\trace')\cdot\trace' &\text{(by Lemma~\ref{lem:traceorder-whole})}\\
+&=&(t\cdot \tplus{ p}) \cdot \trace' & \text{(induction hypothesis)}\\
+&=&t\cdot (\tplus{ p}::\trace') & \text{(by Definition~\ref{def:app-pt-t})}\\
+&=&t\cdot\trace
+\end{array}
+\end{equation*}
+\end{proof}
 
 Lemmas \ref{lem:traceorder} and \ref{lem:traceorder-whole} state that the order of applications of promotions and demotions on \emph{different} permissions does not affect the result. Lemmas \ref{lem:tracepsame} and \ref{lem:tracesame} indicate that only the first application takes effect if there exist several (consecutive) applications of promotions and demotions on the \emph{same} permission $p$. Therefore, we can safely keep only the first application, by removing the other applications on the same permission.
 
@@ -1092,15 +1759,43 @@ In the remaining, we assume that all permission traces are consistent.
 Moreover, to ensure that the traces collected from the derivations of commands are
 consistent, we assume that in nested permission checks of a function definition, each permission is checked at most once.
 
-\iffalse
+\iftrue
 \begin{lemma}\label{lem:tracemerge}
 $\forall s,t\in\Tcal.\; \forall p\in\PS.  (\omerge{p}{s}{t})\cdot \trace = \omerge{p}{(s\cdot\trace)}{(t\cdot\trace)} $, where $p\notin \trace$.
 \end{lemma}
+\begin{proof}
+By induction on $\tlength{\trace}$.
+\begin{ProofEnumDesc}
+\item[$\tlength{\trace} = 0$:] Trivially.
+\item[$\tlength{\trace} > 0$:] In this case we have $\trace = \trace'::\tplus{q}$ or $\trace'::\tminus{q}$, where $\tlength{\trace'} \geq 0$, $p\notin \trace' $, $q\neq p$. We only prove $\trace'::\tplus{q}$, the other case is similar. Consider any $P$, we have
+$$
+\begin{array}{rlll}
+&&((\omerge{p}{s}{t})\cdot (\trace'::\tplus{q}))(P)&\\
+&= & ((\omerge{p}{s}{t})\cdot\trace')(P\cup\{q\}) & \\
+ &= & (\omerge{p}{(s\cdot\trace')}{(t\cdot\trace')})(P\cup\{q\})~~~~~(\textrm{By induction}) & \\
+& = & \left \{ \begin{array}{ll} (s\cdot\trace')(P\cup \{q\})  & p\in P \\ (t\cdot\trace')(P\cup \{q\})  & p\notin P \end{array} \right.&\\
+& = & \left \{ \begin{array}{ll} (s\cdot(\trace'::\tplus{q}))(P)  & p\in P \\ (t\cdot(\trace'::\tplus{q}))(P)  & p\notin P \end{array} \right.&\\
+&= & (\omerge{p}{(s\cdot(\trace'::\tplus{q}))}{(t\cdot(\trace'::\tplus{q}))})(P) &\\
+\end{array}
+$$
+\end{ProofEnumDesc}
+\end{proof}
+
 
 \begin{lemma}\label{lem:tracesub}
 $\forall s,t\in\Tcal.\; \forall p\in\PS.$ $s\leq t\Leftrightarrow  s\cdot\tplus{ p}\leq t\cdot\tplus{ p}$ and $s\cdot\tminus{ p}\leq t\cdot\tminus{ p}$.
 \end{lemma}
+\begin{proof}
+($\Rightarrow$) by applying Lemma \ref{lem:monotrace} with $\trace=\tplus{ p}$ and $\trace=\tminus{p}$ respectively.\\
+($\Leftarrow$) $\forall P\in\PPS$,
+\begin{enumerate}[label=(\arabic*)]
+	\item If $p\in P$, by Lemma~\ref{lem:promote-demote}\ref{lem:promote-demote-1}, $s(P)=(s\uparrow_{p})(P)=(s\cdot\tplus{ p})(P)$ and $t(P)=(t\uparrow_{p})(P)=(t\cdot\tplus{ p})(P)$, since $s\cdot\tplus{ p}\leq t\cdot\tplus{ p}$, then $s(P)\leq t(P)$.
+	\item If $p\not\in P$, by Lemma~\ref{lem:promote-demote}\ref{lem:promote-demote-2}, $s(P)=(s\downarrow_{p})(P)=(s\cdot\tminus{ p})(P)$ and $t(P)=(t\downarrow_{p})(P)=(t\cdot\tminus{ p})(P)$, since $s\cdot\tminus{ p}\leq t\cdot\tminus{p}$, then $s(P)\leq t(P)$.
+\end{enumerate}
+This indicates that $s\leq t$.
+\end{proof}
 \fi
+
 
 \subsubsection{\textbf{Permission Trace Rules}}
  We split the applications of the promotions and demotions into two parts  (i.e., typing environments and permission traces), and move the subsumption rules (guarded by permission traces) for expressions and commands to where they are needed.
@@ -1109,7 +1804,7 @@ The judgments of the trace rules are similar to those of typing rules, except th
 and that the subtyping relation in the trace rules is the partial subtyping one $\leq_{\trace}$.
 
 \begin{figure*}[t]
-\begin{small}
+\begin{tiny}
 \[
 \inference[TT-VAR]{}
 {\Gamma;\trace\vdash_{t} \leVAR{x} : \Gamma(x)}
@@ -1175,7 +1870,7 @@ t \leq_{\trace} t_1\sqcap t_2
 }
 {\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
 \]
-\end{small}
+\end{tiny}
 \caption{Permission trace rules for expressions, commands and functions} \label{fig:infer-rules}
 \end{figure*}
 
@@ -1257,7 +1952,7 @@ each rule generates a constraint set $C$, which consists of the side conditions 
 In addition,  as the function call chains starting from a command are finite, the constraint generation will terminate.
 
 \begin{figure*}[ht]
-\begin{small}
+\begin{tiny}
 \[
 \inference[TG-OP]
 {\Gamma;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
@@ -1336,7 +2031,7 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
 }
 \]
-\end{small}
+\end{tiny}
 \caption{Constraint generation rules for expressions, commands and functions, given function type table $FT_C$.}
 \label{fig:constraint-rules}
 \end{figure*}
@@ -1413,20 +2108,33 @@ $\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overlin
 
 
 Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
-\begin{lstlisting}[float=tp, caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
+\begin{figure}
+\begin{lstlisting}[caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
 A.getInfo() {
-   init r in { test(p) {
-         test(q) r = loc; else r = ""; }  else  {
-         test(q) r = id++loc; else r = ""; }
-      return r;   
+   init r in { 
+     test(p) {
+       test(q) r = loc;
+       else r = "";
+     } else {
+       test(q) r = id++loc;
+       else r = ""; }
+   return r;   
    }
 }
-B.fun() { init r in { letvar x = "" in { test(p) r = 0;  else x = call A.getInfo();
-if x == "" then r = 0;  else r = 1; }
-      return r;    
-   }
+B.fun() { 
+  init r in {
+    letvar x = "" in { 
+    test(p) r = 0;  
+    else x = call A.getInfo();
+    if x == "" then r = 0;
+    else r = 1; 
+  }
+  return r;    
+  }
 }
 \end{lstlisting}
+\end{figure}
+
 Let us apply the constraint generation rules in Fig.~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
 \[
 \begin{array}{lcl}
