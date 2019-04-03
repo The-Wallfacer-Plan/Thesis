@@ -1885,10 +1885,127 @@ The next two lemmas show the trace rules are sound and complete with respect to 
 \item\label{lem:ptrsound-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$, then $ \vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$.
 \end{enumerate}
 \end{lemma}
+\begin{proof}
+The proof of {\ref{lem:ptrsound-1}}, by induction on $\Gamma;\trace \vdash_{t} e: t$.
+\begin{ProofEnumDesc}
+\item[TT-VAR] Trivially.
+\item[TT-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{t} e_1: t_1 & \Gamma;\trace\vdash_{t} e_2: t_2}
+{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+\end{equation*}
+By induction on $e_i$, we can get $\Gamma\cdot\trace \vdash e_i : (t_i\cdot\trace)$.
+By Lemma \ref{lem:monotrace} and  $t_i \leq t_1\sqcup t_2$, we have $t_i\cdot \trace \leq (t_1\sqcup t_2)\cdot\trace $.
+By subsumption, we have $\Gamma\cdot\trace \vdash e_i : ((t_1\sqcup t_2)\cdot\trace) $.
+Finally, by applying Rule {(T-OP)}, we get $\Gamma\cdot\trace \vdash  \leOP{e_1}{e_2} :((t_1\sqcup t_2)\cdot\trace)  $.
+\end{ProofEnumDesc}
+%%%%%%%%%%
+The proof of {\ref{lem:ptrsound-2}}:
+\begin{ProofEnumDesc}
+
+\item[TT-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T_1}) ~ \Gamma;\trace \vdash_{t} e : t & (\mathbf{T_2}) ~ t \leq_{\trace} \Gamma(x)}
+{\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+\end{equation*}
+By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Gamma\cdot\trace \vdash e : (t\cdot \trace)$.
+From $(\mathbf{T_2})$, we get $ t\cdot \trace \leq (\Gamma\cdot\trace)(x)$.
+So by subsumption, $\Gamma\cdot\trace \vdash e : (\Gamma\cdot\trace)(x)$.
+Finally, by Rule {(T-ASS)}, the result follows.
+
+\item[TT-LETVAR] %by induction and Rules {(T-SUB$_{c}$)}, {(T-LETVAR)}.
+In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T_1}) ~\Gamma;\trace \vdash_{t} e : s &
+(\mathbf{T_2}) ~s \leq_{\trace} s'  \\
+(\mathbf{T_3}) ~\Gamma[x:s']; \trace; A \vdash_{t} c' : t }
+{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
+\end{equation*}
+By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Gamma\cdot\trace \vdash e : (s\cdot \trace)$.
+From $(\mathbf{T_2})$, we get $ s\cdot \trace \leq s'\cdot\trace$.
+So by subsumption, $\Gamma\cdot\trace \vdash e : s'\cdot\trace$.
+By induction on $(\mathbf{T_3})$,  we have $(\Gamma[x:s']\cdot \trace); A \vdash c' : t \cdot \trace$, that is $(\Gamma\cdot \trace)[x:s'\cdot \trace]; A \vdash c' : t\cdot \trace $.
+Finally, by Rule {(T-LETVAR)}, the result follows.
+
+\item[TT-IF] By induction and Rules {(T-SUB$_{c}$)}, {(T-IF)}.
+\item[TT-WHILE] By induction and Rules {(T-SUB$_{c}$)}, {(T-WHILE)}.
+\item[TT-SEQ] By induction and Rules {(T-SUB$_{c}$)}, {(T-SEQ)}.
+
+\item[TT-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\begin{equation*}
+\inference
+{
+(\mathbf{T_1})~\FT(B.f) = \overline{t} \xrightarrow{} t'  &
+(\mathbf{T_2})~\Gamma;\trace \vdash_{t} \overline{e} : \overline{s}\\
+(\mathbf{T_3})~\overline{s}\leq_{\trace} \overline{\app{t}{\Theta(A)}} &
+(\mathbf{T_4})~\app{t'}{\Theta(A)}\leq_{\trace} \Gamma(x)
+}
+{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+\end{equation*}
+By \ref{lem:ptrsound-3} on $(\mathbf{T_1})$, $\vdash B.f : \overline{t} \xrightarrow{} t'$.
+By \ref{lem:ptrsound-1} on $(\mathbf{T_2})$ , $\Gamma\cdot\trace \vdash \overline{e} : \overline{s\cdot\trace}$.
+From $(\mathbf{T_3})$, we get
+$\overline{s\cdot \trace}\leq_{} \overline{(app(t,\Theta(A))\cdot \trace)} = \overline{app(t,\Theta(A))} $.
+So by subsumption, $\Gamma\cdot\trace \vdash \overline{e} : \overline{app(t,\Theta(A))}$.
+Similarly, from $(\mathbf{T_4})$, we get $app(t', \Theta(A))\leq_{} (\Gamma\cdot\trace)(x) $. Then by Rule {(T-ASS)}, $(\Gamma\cdot\trace); A \vdash_{} \lcCALL{x}{B.f}{\overline{e}} : (\Gamma\cdot\trace)(x) $.
+
+\item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace::\tplus p;  A \vdash_{t} c_1 : t_1 &
+\Gamma;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
+{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+\end{equation*}
+By induction on $c_i$, we have
+\begin{gather*}
+(\Gamma\cdot(\trace :: \tplus {p}));  A \vdash c_1 : (t_1\cdot(\trace::\tplus{p}) )\\
+(\Gamma\cdot (\trace:: \tminus {p})); A \vdash c_2 : (t_2\cdot(\trace::\tminus{ p}))
+\end{gather*}
+which is equivalent to
+\begin{gather*}
+(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : (t_1\cdot\trace)\uparrow_{p}\\
+(\Gamma\cdot \trace)\downarrow_{p}; A \vdash c_2 : (t_2\cdot \trace)\downarrow_{p}
+\end{gather*}
+Let $t'$ be $\omerge{p}{(t_1\cdot\trace)\uparrow_{p}}{(t_2\cdot\trace)\downarrow_{p}}$.
+By Rule {(T-CP)}, we have
+$$
+(\Gamma\cdot\trace);  A \vdash \lcCP{p}{c_1}{c_2} : t'.
+$$
+Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p\notin \trace$.
+Let's consider any $P$.
+If $p \in P$, then
+$$
+\begin{array}{rlll}
+t'(P) &=&  (t_1\cdot\trace)\uparrow_{p}(P) & (p\in P)\\
+&=& (t_1\cdot\trace)(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
+&=&(\omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)})(P) &(p\in P)\\
+&=&((\omerge{p}{t_1}{t_2})\cdot \trace)(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
+\end{array}
+$$
+Similarly, if $p \notin P$, $t'(P) =((\omerge{p}{t_1}{t_2})\cdot \trace)(P)$.
+Therefore,  $t' = (\omerge{p}{t_1}{t_2})\cdot \trace$ and thus the result follows.
+
+\end{ProofEnumDesc}
+%%%%%%%%%%%
+The proof of \ref{lem:ptrsound-3} :\\
+Clearly, we have
+\begin{equation*}
+\inference
+{
+[\overline{x}: \overline{t},\lpRES:t'];\epsilon; B \vdash_{t} c : s &
+%s \leq t_b
+}
+{\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
+\end{equation*}
+Applying \ref{lem:ptrsound-2} on $c$, $[\overline{x}: \overline{t}, \lpRES:t'] ; B \vdash c : s$.
+Finally, by Rule {(T-FUN)}, the result follows.
+\end{proof}
 
 
 
-\iffalse
 To prove the completeness, we need to prove some auxiliary lemmas.
 \begin{lemma}\label{lem:typingtrace}
 Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
@@ -1898,6 +2015,110 @@ Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
 \end{enumerate}
 \end{lemma}
 
+\begin{proof}
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma \vdash e : t$.
+\begin{ProofEnumDesc}
+\item[T-VAR] Trivially.
+
+\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma \vdash e_1 : t & \Gamma \vdash e_2 : t}
+{\Gamma \vdash \leOP{e_1}{e_2} : t}
+\end{equation*}
+By induction on $e_i$, $(\Gamma\cdot\trace) \vdash e_i : (t\cdot\trace)$.
+By Rule {(T-OP)}, we have $(\Gamma\cdot\trace)\vdash_{t} \leOP{e_1}{e_2} : (t\cdot\trace)$.
+
+\item[T-SUB$_e$] In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma \vdash e : s & (\mathbf{T2})~s \leq t}
+{\Gamma \vdash e : t}
+\end{equation*}
+By induction on $(\mathbf{T1})$, $(\Gamma\cdot\trace) \vdash_{t} e : (s\cdot\trace)$.
+From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, we get $s\cdot\trace\leq t\cdot\trace $. So by subsumption, the result follows.
+\end{ProofEnumDesc}
+
+%%%%%%%%%%
+The proof of \ref{lem:typingtrace-2}: by induction on $\Gamma; A \vdash c: t$.
+\begin{ProofEnumDesc}
+\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma \vdash e : \Gamma(x)}
+{\Gamma; A \vdash \lcASS{x}{e} : \Gamma(x)}
+\end{equation*}
+By \ref{lem:typingtrace-1} on $e$,  $(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)$.
+Then by Rule {(T-ASS)},  the result follows.
+
+\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
+In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma \vdash e : s &
+\Gamma[x:s]; A \vdash c' : t }
+{\Gamma; A\vdash \lcLETVAR{x}{e}{c'} :  t}
+\end{equation*}
+By \ref{lem:typingtrace-1} on $e$, $(\Gamma\cdot\trace) \vdash e :  (s\cdot\trace)$.
+By induction on $c$, $((\Gamma[x:s])\cdot\trace);A \vdash c' :  (t\cdot\trace)$,
+that is $(\Gamma\cdot\trace)[x:s\cdot\trace];A \vdash c' :  (t\cdot\trace)$.
+Then by Rule {(T-LETVAR)}, the result follows.
+
+\item[T-IF] By induction and Rule {(T-IF)}.
+\item[T-WHILE] By induction and Rule {(T-WHILE)}.
+\item[T-SEQ] By induction and Rule {(T-SEQ)}.
+
+\item[T-CALL] in this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\begin{equation*}
+\inference
+{
+\FT(B.f) = \overline{t} \xrightarrow{} t'  \\
+(\mathbf{T1})~\Gamma \vdash \overline{e} : \overline{\app{t}{\Theta(A)}} &
+(\mathbf{T2})~\app{t'}{\Theta(A)}\leq \Gamma(x)
+}
+{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+\end{equation*}
+By \ref{lem:typingtrace-1} on $(\mathbf{T1})$, $(\Gamma\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}\cdot\trace}$, that is, $(\Gamma\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}}$.
+From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, $\app{t'}{\Theta(A)}\cdot\trace \leq (\Gamma\cdot\trace)(x)$, that is, $\app{t'}{\Theta(A)} \leq (\Gamma\cdot\trace)(x)$.
+Then by Rule {(T-CALL)}, $(\Gamma\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Gamma\cdot\trace)(x)$.
+
+
+\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma\uparrow_{p};  A \vdash c_1 : t_1 &
+\Gamma\downarrow_{p}; A \vdash c_2 : t_2}
+{\Gamma; A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+\end{equation*}
+By induction on $c_1$ and $c_2$, we have
+\begin{equation*}
+((\Gamma\uparrow_{p})\cdot \trace); A \vdash c_1 : t_1\cdot\trace
+\quad
+((\Gamma\downarrow_{p})\cdot \trace); A \vdash c_2 : t_2\cdot\trace
+\end{equation*}
+Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
+By Lemma \ref{lem:traceorder-whole},
+$(\Gamma\uparrow_{p})\cdot \trace= (\Gamma\cdot \trace)\uparrow_{p}$
+and $(\Gamma\downarrow_{p})\cdot \trace= (\Gamma\cdot \trace)\downarrow_{p}$.
+Then by Rule {(T-CP)}, we have
+$$
+(\Gamma\cdot \trace); A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)}.
+$$
+Finally, by Lemma \ref{lem:tracemerge}, $(\omerge{p}{t_1}{t_2})\cdot \trace = \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)} $, and thus the result follows.
+
+\item[T-SUB$_c$] %by induction and Lemma \ref{lem:monotrace}.
+In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma;A \vdash c : s & (\mathbf{T2})~t \leq s}
+{\Gamma;A  \vdash c : t}
+\end{equation*}
+By induction on $(\mathbf{T1})$,  $(\Gamma\cdot\trace);A \vdash c : (s\cdot\trace)$.
+From $(\mathbf{T2})$ and by Lemma \ref{lem:monotrace}, $t\cdot\trace\leq  s\cdot\trace$.
+Then by subsumption, the result follows.
+\end{ProofEnumDesc}
+\end{proof}
+
 
 
 \begin{lemma}\label{lem:typingtrace1}
@@ -1906,7 +2127,166 @@ Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
 \item\label{lem:typingtrace1-2} If $(\Gamma\cdot\trace);A \vdash c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace) $.
 \end{enumerate}
 \end{lemma}
-\fi
+\begin{proof}
+By Lemma \ref{lem:typingtrace} and Lemma \ref{lem:tracesame}.
+\end{proof}
+
+\begin{proof}
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma\cdot\trace \vdash e : t\cdot \trace $.
+\begin{ProofEnumDesc}
+\item[T-VAR] Trivially with $s = \Gamma(x)$.
+
+
+\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma\cdot\trace\vdash e_1 : t\cdot\trace & \Gamma\cdot\trace \vdash e_2 : t\cdot\trace}
+{\Gamma\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
+\end{equation*}
+By induction on $e_i$, there exists $s_i$ such that $\Gamma; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
+By Rule {(TT-OP)}, we have $\Gamma; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
+Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
+
+\item[T-SUB$_e$] In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
+{\Gamma\cdot\trace \vdash e : t\cdot\trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vdash e : s\cdot \trace$.
+Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
+\end{ProofEnumDesc}
+%%%%%%%%%%
+The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
+\begin{ProofEnumDesc}
+\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)}
+{(\Gamma\cdot\trace);A \vdash \lcASS{x}{e} : (\Gamma\cdot\trace)(x)}
+\end{equation*}
+By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
+$\Gamma; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Gamma(x)$.
+Then by Rule {(TT-ASS)},  $\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} :\Gamma(x)$.
+
+\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
+In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T_1}) ~(\Gamma\cdot\trace) \vdash e : s &
+(\mathbf{T_2}) ~(\Gamma\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
+{(\Gamma\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Gamma\cdot\trace) \vdash e : s\cdot\trace$.
+Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Gamma\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
+And by Lemma \ref{lem:tracesame}, we have $(\Gamma[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
+Then by induction, there exists $t'$ such that $\Gamma[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
+Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
+
+\item[T-IF] By induction and Rule {(TT-IF)}.
+\item[T-WHILE] By induction and Rule {(TT-WHILE)}.
+\item[T-SEQ] By induction and Rule {(TT-SEQ)}.
+
+\item[T-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\begin{equation*}
+\inference
+{
+\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
+(\mathbf{T1})~\Gamma\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
+(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Gamma\cdot\trace)(x)
+}
+{\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
+\end{equation*}
+%where $t\cdot \trace = (\Gamma\cdot\trace)(x)\sqcap \app{t_b}{\Theta(A)}$.\\
+From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
+Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
+From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
+Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
+%Finally, it is easy to deduce $t \leq_{\trace} \Gamma(x)\sqcap \app{t_b}{\Theta(A)} $.
+
+\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
+\begin{equation*}
+\inference
+{(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
+(\Gamma\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
+{(\Gamma\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
+\end{equation*}
+where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
+
+%By Lemma \ref{lem:traceorder-whole},
+Clearly,
+$(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
+and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
+Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
+\begin{equation*}
+\begin{array}{l}
+(\Gamma\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
+(\Gamma\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
+\end{array}
+\end{equation*}
+By induction, there exist $s_1$ and $s_2$ such that
+\begin{equation*}
+\begin{array}{l}
+\Gamma; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
+t_1 \leq_{\trace::\tplus p} s_1 \\
+\Gamma; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
+t_2 \leq_{\trace::\tminus p} s_2
+\end{array}
+\end{equation*}
+%Let $s$ be $$.
+%a type such that $s(P) = s_1(P)$ if $p\in P$, otherwise $s(P) =s_2 (P)$.
+Then by Rule {(TT-CP)}, we have
+$$
+\Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
+$$
+The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
+Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
+Consider any $P$. If $p \in P$, then
+$$
+\begin{array}{rlll}
+&&((\omerge{p}{s_1}{s_2})\cdot\trace)(P) &\\
+&=&(\omerge{p}{(s_1\cdot\trace)}{(s_2\cdot\trace)})(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
+&=&(s_1\cdot\trace)(P) & (p\in P)\\
+&=&(s_1\cdot(\trace::\tplus{p}))(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
+&\geq&(t_1\cdot(\trace::\tplus{p}))(P) & (t_1 \leq_{\trace::\tplus{p}} s_1)\\
+& = & (t_1\cdot\trace)(P) &(\textrm{Lemma \ref{lem:promote-demote}})\\
+& = & (\omerge{p}{(t_1\cdot\trace)}{(t_2\cdot\trace)})(P)&(p\in P)\\
+& = & ((\omerge{p}{t_1}{t_2})\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracemerge}})\\
+& = & ((t\cdot\trace)\cdot\trace)(P)&\\
+& = & (t\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracesame}})\\
+\end{array}
+$$
+Similarly, if $p\notin P$, we also have $(t \cdot \trace)(P)\leq ((\omerge{p}{s_1}{s_2})\cdot\trace)(P)$.
+Therefore, the result follows.
+
+\item[T-SUB$_c$] In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
+{\Gamma\cdot\trace; A\vdash c : t\cdot \trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace; A\vdash c : s\cdot\trace$.
+Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
+From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
+
+\end{ProofEnumDesc}
+%%%%%%%%%%
+The proof of \ref{lem:ptrcomplete-3}: \\
+Clearly, we have
+\begin{equation*}
+\inference
+{
+[\overline{x}: \overline{t}, \lpRES: t']; B \vdash c : s
+}
+{\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
+\end{equation*}
+By \ref{lem:ptrcomplete-2} on $c$, there exists $t_b$ such that $[\overline{x}: \overline{t}, \lpRES: t']; B \vdash_{t} c : t_b$ and $s \leq_{} t_b $.
+By Rule {(TT-FUN)},
+$$\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'$$
+\end{proof}
+
 
 
 \begin{lemma}\label{lem:ptrcomplete}
@@ -1916,6 +2296,162 @@ Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
 \item\label{lem:ptrcomplete-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} s$, then $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{t}\xrightarrow{} s$.
 \end{enumerate}
 \end{lemma}
+
+\begin{proof}
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma\cdot\trace \vdash e : t\cdot \trace $.
+\begin{ProofEnumDesc}
+\item[T-VAR] Trivially with $s = \Gamma(x)$.
+
+
+\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma\cdot\trace\vdash e_1 : t\cdot\trace & \Gamma\cdot\trace \vdash e_2 : t\cdot\trace}
+{\Gamma\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
+\end{equation*}
+By induction on $e_i$, there exists $s_i$ such that $\Gamma; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
+By Rule {(TT-OP)}, we have $\Gamma; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
+Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
+
+\item[T-SUB$_e$] In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
+{\Gamma\cdot\trace \vdash e : t\cdot\trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vdash e : s\cdot \trace$.
+Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
+\end{ProofEnumDesc}
+%%%%%%%%%%
+The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
+\begin{ProofEnumDesc}
+\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)}
+{(\Gamma\cdot\trace);A \vdash \lcASS{x}{e} : (\Gamma\cdot\trace)(x)}
+\end{equation*}
+By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
+$\Gamma; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Gamma(x)$.
+Then by Rule {(TT-ASS)},  $\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} :\Gamma(x)$.
+
+\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
+In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T_1}) ~(\Gamma\cdot\trace) \vdash e : s &
+(\mathbf{T_2}) ~(\Gamma\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
+{(\Gamma\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Gamma\cdot\trace) \vdash e : s\cdot\trace$.
+Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Gamma\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
+And by Lemma \ref{lem:tracesame}, we have $(\Gamma[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
+Then by induction, there exists $t'$ such that $\Gamma[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
+Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
+
+\item[T-IF] By induction and Rule {(TT-IF)}.
+\item[T-WHILE] By induction and Rule {(TT-WHILE)}.
+\item[T-SEQ] By induction and Rule {(TT-SEQ)}.
+
+\item[T-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\begin{equation*}
+\inference
+{
+\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
+(\mathbf{T1})~\Gamma\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
+(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Gamma\cdot\trace)(x)
+}
+{\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
+\end{equation*}
+%where $t\cdot \trace = (\Gamma\cdot\trace)(x)\sqcap \app{t_b}{\Theta(A)}$.\\
+From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
+Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
+From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
+Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
+%Finally, it is easy to deduce $t \leq_{\trace} \Gamma(x)\sqcap \app{t_b}{\Theta(A)} $.
+
+\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
+\begin{equation*}
+\inference
+{(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
+(\Gamma\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
+{(\Gamma\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
+\end{equation*}
+where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
+
+%By Lemma \ref{lem:traceorder-whole},
+Clearly,
+$(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
+and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
+Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
+\begin{equation*}
+\begin{array}{l}
+(\Gamma\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
+(\Gamma\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
+\end{array}
+\end{equation*}
+By induction, there exist $s_1$ and $s_2$ such that
+\begin{equation*}
+\begin{array}{l}
+\Gamma; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
+t_1 \leq_{\trace::\tplus p} s_1 \\
+\Gamma; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
+t_2 \leq_{\trace::\tminus p} s_2
+\end{array}
+\end{equation*}
+%Let $s$ be $$.
+%a type such that $s(P) = s_1(P)$ if $p\in P$, otherwise $s(P) =s_2 (P)$.
+Then by Rule {(TT-CP)}, we have
+$$
+\Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
+$$
+The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
+Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
+Consider any $P$. If $p \in P$, then
+$$
+\begin{array}{rlll}
+&&((\omerge{p}{s_1}{s_2})\cdot\trace)(P) &\\
+&=&(\omerge{p}{(s_1\cdot\trace)}{(s_2\cdot\trace)})(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
+&=&(s_1\cdot\trace)(P) & (p\in P)\\
+&=&(s_1\cdot(\trace::\tplus{p}))(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
+&\geq&(t_1\cdot(\trace::\tplus{p}))(P) & (t_1 \leq_{\trace::\tplus{p}} s_1)\\
+& = & (t_1\cdot\trace)(P) &(\textrm{Lemma \ref{lem:promote-demote}})\\
+& = & (\omerge{p}{(t_1\cdot\trace)}{(t_2\cdot\trace)})(P)&(p\in P)\\
+& = & ((\omerge{p}{t_1}{t_2})\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracemerge}})\\
+& = & ((t\cdot\trace)\cdot\trace)(P)&\\
+& = & (t\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracesame}})\\
+\end{array}
+$$
+Similarly, if $p\notin P$, we also have $(t \cdot \trace)(P)\leq ((\omerge{p}{s_1}{s_2})\cdot\trace)(P)$.
+Therefore, the result follows.
+
+\item[T-SUB$_c$] In this case we have the following derivation
+\begin{equation*}
+\inference
+{(\mathbf{T1})~\Gamma\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
+{\Gamma\cdot\trace; A\vdash c : t\cdot \trace}
+\end{equation*}
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace; A\vdash c : s\cdot\trace$.
+Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
+From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
+
+\end{ProofEnumDesc}
+%%%%%%%%%%
+The proof of \ref{lem:ptrcomplete-3}: \\
+Clearly, we have
+\begin{equation*}
+\inference
+{
+[\overline{x}: \overline{t}, \lpRES: t']; B \vdash c : s
+}
+{\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
+\end{equation*}
+By \ref{lem:ptrcomplete-2} on $c$, there exists $t_b$ such that $[\overline{x}: \overline{t}, \lpRES: t']; B \vdash_{t} c : t_b$ and $s \leq_{} t_b $.
+By Rule {(TT-FUN)},
+$$\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'$$
+\end{proof}
 
 
 
@@ -1939,7 +2475,7 @@ $
 \theta ~::=~ \epsilon~|~\alpha \mapsto t,\theta
 $
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 \begin{definition}
 Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \termEmph{solution} to $C$, denoted by $\theta \vDash C $, iff. for each $(\trace, t_l \leq t_r) \in C$, $t_l\theta \leq_{\trace} t_r\theta $ holds.
@@ -2057,6 +2593,141 @@ then  $\Gamma\theta;\trace;A \vdash_{t} c : t\theta.$
 \end{enumerate}
 \end{lemma}
 
+\begin{proof}
+The proof of \ref{lem:cgrsound-1}: by induction on the derivation of $\Gamma;\trace \vdash_{g} e : t\leadsto C$. %\\
+\begin{ProofEnumDesc}
+\item[TG-VAR:] In this case we have the following derivation
+\begin{equation*}
+\inference{}
+{\Gamma;\trace\vdash_{g} x : \Gamma(x)\leadsto \emptyset}
+\end{equation*}
+Clearly, for any $\theta$, $\theta \vDash \emptyset$.
+By Rule {(TT-VAR)}, we have
+\begin{equation*}
+\inference{}
+{\Gamma\theta;\trace; A \vdash_{t} \leVAR{x} : \Gamma\theta(x)}
+\end{equation*}
+
+\item[TG-OP] In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
+ \Gamma;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
+{\Gamma;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
+\end{equation*}
+Since $\theta \vDash C_1\cup C_2$, $\theta\vDash C_1$ and $\theta\vDash C_2$.
+Then by induction on $e_i$, $\Gamma\theta;\trace \vdash_{t} e_i: t_i\theta$.
+So by Rule {(TT-OP)}, we have $\Gamma\theta;\trace \vdash_{t} \leOP{e_1}{e_2}: t_1\theta\sqcup t_2\theta $.
+Clearly, $t_1\theta\sqcup t_2\theta = (t_1\sqcup t_2)\theta$.
+\end{ProofEnumDesc}
+%%%%%%%%%%%%%%%%
+The proof of \ref{lem:cgrsound-2}:%\\
+\begin{ProofEnumDesc}
+\item[TG-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{g} e : t \leadsto C_{e} }
+{\Gamma;\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma(x)\leadsto C_{e}\cup \{ (\trace, t \leq_{} \Gamma(x))\} }
+\end{equation*}
+Since $\theta\vDash C_{e}\cup \{ (\trace, t \leq_{} \Gamma(x))\}$,
+$\theta\vDash C_{e}$ and $t\theta \leq_{\trace} \Gamma(x)\theta $.
+By \ref{lem:cgrsound-1} on $e$, $\Gamma\theta;\trace \vdash_{t} e : t \theta$.
+By Rule {(TT-ASS)}, $\Gamma\theta;\trace; A \vdash_{t} x := e : \Gamma\theta(x)$.
+
+\item[TG-LETVAR] In this case we have $c \cong  \lcLETVAR{x}{e}{c'} $ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{g} e : s \leadsto C_1&
+\Gamma[x:\alpha]; \trace; A \vdash_{g} c' : t \leadsto C_2 \\
+C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
+}
+{\Gamma;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
+\end{equation*}
+Since $\theta \vDash C$, $\theta \vDash C_1$, $\theta\vDash C_2$, and $s\theta \leq_{\trace} \theta(\alpha)$.
+By \ref{lem:cgrsound-1} on $e$, $\Gamma\theta;\trace \vdash_{t} e : s \theta $.
+By induction on $c'$,  $\Gamma\theta[x:\theta(\alpha)]; \trace; A \vdash_{t} c' : t\theta$.
+Finally, by Rule {(TT-LETVAR)}, $\Gamma\theta; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c}: t\theta $.
+
+\item[TG-CALL] In this case we have $c \cong  \lcCALL{x}{B.f}{\overline{e}} $ and the following derivation
+\begin{equation*}
+\inference
+{
+\FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
+\Gamma;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
+C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Gamma(x))\} \\
+C = C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
+}
+{
+\Gamma;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\leadsto C
+}
+\end{equation*}
+Since $\theta \vDash C$, then $\theta \vDash C_{f}$, $\theta\vDash \overline{C_{e}}$,
+$\overline{s\theta}\leq_{\trace} \overline{\app{t\theta}{\Theta(A)}}$,
+and $\app{t'\theta}{\Theta(A)}\leq_{\trace} \Gamma\theta(x))$.
+By \ref{lem:cgrsound-3} on $B.f$,  we have
+$$
+\vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{t\theta}\xrightarrow{} t'\theta
+$$
+that is, $\FT(B.f) =  \overline{t\theta}\xrightarrow{} t'\theta$.
+By \ref{lem:cgrsound-1} on $\overline{e}$,
+$$\Gamma\theta;\trace; A \vdash_{t} \overline{e} : \overline{s\theta}.$$
+Finally, by Rule  {(TT-CALL)},
+$$
+\Gamma\theta;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma\theta(x)
+$$
+
+\item[TG-CP] In this case we have $c \cong \lcCP{p}{c_1}{c_2}$ and the following derivation
+\begin{equation*}
+\inference
+{
+\Gamma;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+ \Gamma;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
+ }
+{\Gamma;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
+\end{equation*}
+Since $\theta \vDash C_1 \cup C_2$, then $\theta\vDash C_1$ and $\theta \vDash C_2$.
+By induction on $c_1$ and $c_2$, we get
+$$
+\begin{array}{l}
+\Gamma\theta;(\trace::\tplus p);  A \vdash_{t} c_1 : t_1\theta\\
+\Gamma\theta;(\trace::\tminus p); A \vdash_{t} c_2 : t_2\theta
+\end{array}
+$$
+By Rule {(TT-CP)}, we have
+$$
+\Gamma\theta;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1\theta}{t_2\theta}
+$$
+Moreover, it is clear that $(\omerge{p}{t_1}{t_2})\theta = \omerge{p}{(t_1\theta)}{(t_2\theta)}$.
+
+\item[others] By induction.
+\end{ProofEnumDesc}
+%%%%%%%%%%%%%%%%%
+The proof of \ref{lem:cgrsound-3}:\\
+\begin{equation*}
+\inference
+{
+[\overline{x}: \overline{\alpha},\lpRES:\beta]; \epsilon; B \vdash_{g} c : s  \leadsto C \\
+%C = C' \cup \{(\epsilon, \alpha_b \leq s)\}
+}
+{
+\vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
+}
+\end{equation*}
+Since $\theta \vDash C$,  %$\theta\vDash C'$ and $\theta(\alpha_b)\leq_{\trace}s\theta$.
+by \ref{lem:cgrsound-2} on $c$, we have
+$$
+[\overline{ x}: \overline{\theta(\alpha)},\lpRES:\theta(\beta)];\epsilon; B \vdash_{t} c : s\theta
+$$
+Finally, by Rule {(TT-FUN)}, we get
+$$
+\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{} \theta(\beta)
+$$
+\end{proof}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{lemma}\label{lem:cgrcomplete}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
@@ -2072,9 +2743,195 @@ $$
 $\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
 \end{enumerate}
 \end{lemma}
+\begin{proof}
+The proof of \ref{lem:cgrcomplete-1}:
+Let $\Gamma_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Gamma) \} $
+and $\theta_{0} = \{\alpha_{x}\mapsto \Gamma(x)~|~x\in dom(\Gamma)\} $, where $\alpha_x$s are fresh type variables.
+Clearly,  we have $\Gamma_{0}\theta_{0} = \Gamma$.
+The remaining is to prove that
+\begin{equation*}
+\exists C, t'.~\Gamma_{0};\trace \vdash_{g} e : t' \leadsto C,~ \theta_{0}\vDash C  \textrm{ and } t'\theta_{0} = t \tag{1'}
+\end{equation*}
+%%%%%%%%
+\begin{ProofEnumDesc}
+\item[TT-VAR] In this case we have $e\cong \leVAR{x}$ and the following derivation
+\begin{equation*}
+\inference{}
+{\Gamma;\trace \vdash_{t} \leVAR{x} : \Gamma(x)}
+\end{equation*}
+By Rule {(TG-VAR)}, we have
+\begin{equation*}
+\inference{}
+{\Gamma_{0};\trace \vdash_{g} \leVAR{x} : \Gamma_{0}(x)\leadsto \emptyset}
+\end{equation*}
+Clearly, $\theta_{0} \vDash \emptyset$ and $\Gamma_{0}\theta_{0}(x) = \Gamma(x)$.
+
+\item[TT-OP] In this case we have $e\cong \leOP{e_1}{e_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{t} e_1: t_1 & \Gamma;\trace \vdash_{t} e_2: t_2}
+{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+\end{equation*}
+By induction on $e_i$, there exist $C_i, t'_i$ such that
+\begin{equation*}
+\Gamma_{0};\trace \vdash_{g} e_i: t'_i\leadsto C_i\quad\theta_{0} \vDash C_i\quad t'_i\theta_{0} = t_i.
+\end{equation*}
+By Rule {(TG-OP)}, we have
+\begin{equation*}
+\Gamma_{0};\trace \vdash_{g} \leOP{e_1}{e_2} : t'_1\sqcup t'_2 \leadsto C_1\cup C_2.
+\end{equation*}
+Moreover, it is clear that $\theta_{0} \vDash C_1\cup C_2$ and $(t'_1\sqcup t'_2)\theta_{0} = t_1\sqcup t_2 $.
+\end{ProofEnumDesc}
+%%%%%%%%%%%%%%%%%%%%
+The proof of \ref{lem:cgrcomplete-2}.
+Let $\Gamma_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Gamma) \} $
+and $\theta_{0} = \{\alpha_{x}\mapsto \Gamma(x)~|~x\in dom(\Gamma)\} $, where $\alpha_x$s are fresh type variables.
+Clearly,  we have $\Gamma_{0}\theta_{0} = \Gamma$.
+Assume that different parameters of different functions have different names.
+Let $V_1 ~\sharp~ V_2 $ denote $V_1\cap V_2 = \emptyset$.
+In the remaining we prove the following statement:
+\begin{gather*}
+\exists C, t',\theta.~\Gamma_{0};\trace; A \vdash_{g} c : t' \leadsto C,~ dom(\theta_{0})~\sharp~ dom(\theta),\\
+\theta_{0}\cup\theta \vDash C,  \textrm{ and } t'(\theta_{0}\cup\theta) = t \tag{2'}
+\end{gather*}
+%\Gamma_{0}(\theta_{0}\cup\theta) =\Gamma
+%%%%%%%
+\begin{ProofEnumDesc}
+\item[TT-ASS] In this case we have $c\cong  \lcASS{x}{e}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{t} e : t \quad   t \leq_{\trace} \Gamma(x) }
+{\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+\end{equation*}
+By $(1')$ on $e$, there exist $C, t'$ such that $\Gamma_{0};\trace \vdash_{g} e : t' \leadsto C$,
+$\theta_{0} \vDash C$ and $t'\theta_{0} = t$.
+By Rule {(TG-ASS)}, we get
+\begin{equation*}
+\Gamma_{0};\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma_{0}(x) \leadsto C \cup \{(\trace, t'\leq \Gamma_{0}(x)) \}.
+\end{equation*}
+Take $\theta = \emptyset $.
+Since $t'\theta_{0} = t \leq_{\trace} \Gamma(x) = \Gamma_{0}\theta_{0}(x)$,
+then $\theta_{0} \vDash \{ (\trace, t' \leq_{} \Gamma_{0}(x)) \} $,
+and thus $\theta_{0} \vDash C \cup  \{ (\trace, t' \leq_{} \Gamma_{0}(x)) \} $.
 
 
-\iffalse
+\item[TT-LETVAR] In this case we have $c\cong \lcLETVAR{x}{e}{c'}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace \vdash_{t} e : s &
+\Gamma[x:s']; \trace; A \vdash_{t} c' : t & s \leq_{\trace} s' }
+{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
+\end{equation*}
+By $(1')$ on $e$, there exist $C_{e}, s_{e}$ such that $\Gamma_{0};\trace \vdash_{g} e : s_{e} \leadsto C_{e}$,
+$\theta_{0} \vDash C_{e}$ and $s_{e}\theta_{0} = s$.\\
+Let $\Gamma'_{0} = \Gamma_{0}[x:\alpha_x]$ and $\theta'_{0} = \theta_0\cup\{\alpha_x \mapsto s'\}$, where $\alpha_x$ is fresh.
+By induction on $c'$, there exist $C', t',\theta$ such that $\Gamma'_{0};\trace; A \vdash_{g} c' : t' \leadsto C'$,  $dom(\theta'_{0})~\sharp~ dom(\theta)$,  $\theta'_{0}\cup\theta \vDash C'$,  and $t'(\theta'_{0}\cup\theta) = t$. \\
+By Rule (TG-LETVAR), we have
+$$
+\Gamma_0;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t'\leadsto C
+$$
+where $C = C_{e} \cup C' \cup \{ (\trace, s_{e} \leq_{} \alpha_x)\}$.
+Let $\theta' = \theta\cup \{\alpha_x\mapsto s'\}$. It is clear that $dom(\theta_{0})~\sharp~ dom(\theta')$
+and $\theta_{0}\cup\theta' = \theta'_{0}\cup\theta$.
+From the construction of $\theta'$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta')$ are collected from the types of the functions and (local) variables, which are fresh.
+So we also have $\theta_{0}\cup\theta'\vDash C_{e}$ and $\Gamma_{0}(\theta_{0}\cup\theta') =\Gamma_{0}\theta_{0}=\Gamma $.
+Moreover,  $s_{e}(\theta_{0}\cup\theta')=s_{e}\theta_{0}=s\leq_{\trace} s' = \alpha_x(\theta_{0}\cup\theta')$.
+Therefore, $\theta_{0}\cup\theta'\vDash C$.
+
+\item[TT-CALL] In this case we have $c\cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\begin{equation*}
+\inference
+{
+\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
+\Gamma;\trace \vdash_{t} \overline{e} : \overline{s}\\
+\overline{s}\leq_{\trace} \overline{\app{t_p}{\Theta(A)}} &
+\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)
+}
+{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+\end{equation*}
+By \ref{lem:cgrcomplete-3} on B.f, there exist $\alpha,\beta, C_{f}, \theta_{f}$ such that
+$$
+\vdash_{g}\lpPROG{B.f}{\overline{x}}{c}{\lpRES}:  \overline{\alpha}\xrightarrow{} \beta \leadsto C_{f},
+$$
+$\theta_f \vDash C_f $ and $(\overline{\alpha}\xrightarrow{} \beta)\theta_{f} = \overline{t_p}\xrightarrow{} t_r$. So we have $\FT_C(B.f) =(\overline{\alpha}\xrightarrow{} \beta, C_{f}) $.
+Since $\alpha_{x}$s are fresh, we can safely get $dom(\theta_{0}) ~\sharp~ dom(\theta_f)$.
+Therefore, $\theta_{0}\cup\theta_f \vDash C_{f}$ and $(\overline{\alpha}\xrightarrow{} \beta)(\theta_{0}\cup\theta_{f}) = \overline{t_p}\xrightarrow{} t_r$.\\
+By $(1')$ on $\overline{e}$, there exist $\overline{s'}, \overline{C_{e}}$ such that
+$\Gamma_{0};\trace; A \vdash_{g} \overline{e} : \overline{s'}\leadsto \overline{C_e}$, $\theta_{0} \vDash \overline{C_e} $, and $\overline{s'(\theta_{0})} = \overline{s}$.\\
+From the construction of $\theta_f$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_f)$ are collected from the types of functions and (local) variables, which are fresh.
+So we also have $\theta_{0}\cup \theta_f \vDash \overline{C}$,  $\overline{s'(\theta_{0}\cup\theta_f)} = \overline{s}$ and $\Gamma_{0}(\theta_{0}\cup \theta_f) = \Gamma$. \\
+By Rule {(TG-CALL)}, we have
+\begin{equation*}
+\Gamma_{0};\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma_{0}(x) \leadsto C
+\end{equation*}
+where $C'= \{(\trace, \overline{s'}\leq \overline{\app{\alpha}{\Theta(A)}}), (\trace, \app{\beta}{\Theta(A)}) \leq \Gamma_{0}(x)) \}$ and $C = C_{f} \cup \bigcup\overline{C} \cup C'$.
+Since $dom(\theta_f)$ are fresh, we have
+\begin{equation*}
+\overline{s'(\theta_{0}\cup \theta_f)} = \overline{s} \leq_{\trace} \overline{\app{t_p}{\Theta(A)}} = \overline{\app{\alpha(\theta_{0}\cup \theta_f)}{\Theta(A)}}
+\end{equation*}
+and
+\begin{equation*}
+\app{\beta(\theta_{0}\cup \theta_f)}{\Theta(A)} =  \app{t_r}{\Theta(A)}
+\leq_{\trace} \Gamma(x) = \Gamma_{0}(\theta_{0}\cup \theta_f)(x)
+\end{equation*}
+So $(\theta_{0}\cup \theta_f) \vDash C'$, and thus $(\theta_{0}\cup \theta_f)\vDash C$.
+Moreover, we also have
+$(\Gamma_{0}(x))(\theta_0\cup\theta_f)
+= \Gamma(x)$.
+Thus the result follows.
+
+\item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
+\begin{equation*}
+\inference
+{\Gamma;\trace::\tplus p; A \vdash_{t} c_1 : t_1  &
+\Gamma;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
+{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+\end{equation*}
+By induction on $c_i$, we have
+\begin{equation*}
+\begin{array}{l}
+\exists C_1, s_1,\theta_1.~\Gamma_{0};\trace::\tplus p; A \vdash_{g} c_1 : s_1 \leadsto C_1,~ \theta_{0}\cup\theta_1 \vDash C_1,\\
+\quad\quad dom(\theta_{0})\sharp dom(\theta_1)  \textrm{ and } s_1(\theta_{0}\cup\theta_{1}) = t_1\\
+\exists C_2, s_2,\theta_2.~\Gamma_{0};\trace::\tminus p; A \vdash_{g} c_2 : s_2 \leadsto C_2,~ \theta_{0}\cup\theta_2 \vDash C_2, \\
+\quad\quad dom(\theta_{0})\sharp dom(\theta_2)  \textrm{ and } s_2(\theta_{0}\cup\theta_{2}) = t_2\\
+\end{array}
+\end{equation*}
+By Rule {(TG-CP)}, we get
+\begin{equation*}
+\Gamma_{0};\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}\leadsto C_1\cup C_2
+\end{equation*}
+From the construction of $\theta_1$ and $\theta_2$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_1)$ and $dom(\theta_2)$ are collected from the types of functions and (local) variables, which are fresh. Moreover, if $\theta_1 \cap \theta_2 \neq \emptyset$, that is, they share some functions, then $\theta_1(\alpha_x) = \theta_2(\alpha_x) $ for all $\alpha_x \in dom(\theta_1) \cap dom(\theta_2)$.
+So we can safely get $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_i$ and  $s_i(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = t_i$, and $\Gamma_{0}(\theta_{0}\cup\theta_{1}\cup\theta_{2}) =\Gamma$.
+Therefore, $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_1\cup C_2$ and
+$(\omerge{p}{s_1}{s_2})(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = \omerge{p}{t_1}{t_2}$.
+
+\item[others] By induction.
+
+\end{ProofEnumDesc}
+
+The proof of \ref{lem:cgrcomplete-3}: \\
+\begin{equation*}
+\inference
+{[\overline{x}: \overline{t_p},\lpRES:t_r];\epsilon; B \vdash_{t} c : s }
+{\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t_p}\xrightarrow{} t_r}
+\end{equation*}
+Let $\Gamma_{0} = \{\overline{x} \mapsto \overline{\alpha}, r\mapsto \beta \} $
+and $\theta_{0} = \{\overline{\alpha}\mapsto \overline{t_p}, \beta\mapsto t_r\} $,
+where $\overline{\alpha},\beta$ are fresh.
+By $(2')$ on $c$, we have
+\begin{equation*}
+\begin{array}{l}
+\exists t, C_f, \theta .~ \Gamma_{0};\epsilon; B \vdash_{g} c : t\leadsto C_f,~ (\theta_{0}\cup\theta')\vDash C_f,\\
+\quad\quad dom(\theta_{0}) ~\sharp~ dom(\theta) \textrm{ and } t(\theta_{0}\cup\theta') = s.
+\end{array}
+\end{equation*}
+By Rule {(TG-FUN)}, we have
+\begin{gather*}
+\vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta\leadsto C_f
+\end{gather*}
+Finally, it is clear that $(\overline{\alpha}\xrightarrow{} \beta) (\theta_{0}\cup\theta' ) = \overline{t_p}\xrightarrow{} t_r$.
+\end{proof}
+
 \begin{lemma}\label{lem:cgrsound0}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
@@ -2088,11 +2945,13 @@ $\vdash \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\the
 
 \end{enumerate}
 \end{lemma}
+\begin{proof}
+By Lemma \ref{lem:ptrsound} and Lemma\ref{lem:cgrsound}.
+\end{proof}
 
 \begin{lemma}\label{lem:cgrcomplete0}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
-
 \item\label{lem:cgrcomplete0-1} If $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta \leq_{\trace} t$.
 
 \item\label{lem:cgrcomplete0-2} If $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t \leq_{\trace} t'\theta $.
@@ -2104,8 +2963,11 @@ $$
 $\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
 \end{enumerate}
 \end{lemma}
-\fi
+\begin{proof}
+By Lemma \ref{lem:ptrcomplete} and Lemma\ref{lem:cgrcomplete}.
+\end{proof}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
 \begin{figure}
@@ -2261,21 +3123,72 @@ After saturation, the example set $C_{eg}$ is
 }
 \]
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-\iffalse
 \begin{lemma}\label{lem:tracesub1}
 Given two types $s,t$ and a permission trace $\trace$, then
 $s\leq t\Longleftrightarrow s\cdot\trace \leq t\cdot\trace$ and $\forall \trace' \in dnf(\neg\trace).\; s\cdot \trace' \leq t\cdot\trace'$.
 \end{lemma}
-\fi
+\begin{proof}
+Generalized from Lemma \ref{lem:tracesub}.
+\end{proof}
 
-\iffalse
+
 \begin{lemma}\label{lem:consolcorrect}
 If $C\leadsto_{r} C'$, then $C\vDash C'$ and $C' \vDash C$, where $r\in \{d,s,m\}$.
 \end{lemma}
-\fi
+
+\begin{proof} By case analysis.
+\begin{ProofEnumDesc}
+\item[CD-CUP,~CD-CAP] Trivial.
+\item[CD-MERGE]
+By Lemma \ref{lem:tracesub}.
+\item[CD-LAPP,~CD-RAPP] By definition of projection.
+\item[CD-SVAR,~CD-SUB$_0$,~CD-SUB$_1$] Trivial.
+\item[CS-LU]
+It is clear that $C\cup C' \vDash C$.
+For the other direction, we only need to prove
+$\{(\trace_1, t_1 \leq \trace_r, \alpha ),(\trace_l, \alpha \leq \trace_2, t_2)\} \vDash
+\{(\trace_1\land\trace'_r, t_1\leq \trace_2\land\trace'_l, t_2) \}$, where $\trace'_l = (\trace_l\land \trace_r)  - \trace_r$, $\trace'_r =(\trace_l\land \trace_r) - \trace_l$ and $\issatisfied{\trace_l\land\trace_r}$.
+Assume that $\theta \vDash  \{(\trace_1, t_1 \leq \trace_r, \alpha ),(\trace_l, \alpha \leq \trace_2, t_2)\} $, that is,
+\begin{equation*}
+ (t_1\theta)\cdot\trace_{1} \leq \theta(\alpha)\cdot\trace_{l}
+\quad\quad
+ \theta(\alpha)\cdot\trace_{r} \leq (t_2\theta)\cdot\trace_{2}
+\end{equation*}
+Since $\issatisfied{\trace_l\land\trace_r}$, by Lemmas \ref{lem:monotrace} and \ref{lem:traceorder}, we have
+\begin{equation*}
+ (t_1\theta)\cdot\trace_{1} \land\trace'_r \leq \theta(\alpha)\cdot\trace_{l}\land\trace_r
+\quad
+ \theta(\alpha)\cdot\trace_{l}\land\trace_r \leq (t_2\theta)\cdot\trace_{2} \land\trace'_l
+\end{equation*}
+which deduces
+\begin{equation*}
+(t_1\theta)\cdot\trace_{1} \land\trace'_r \leq (t_2\theta)\cdot\trace_{2} \land\trace'_l
+\end{equation*}
+that is, $\theta \vDash \{(\trace_1\land\trace'_r, t_1\leq \trace_2\land\trace'_l, t_2) \}$.
+
+\item[CM-LU]
+\begin{align*}
+&\theta \vDash \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J} \\
+\Longleftrightarrow & \forall i \in I.\;  (~ (t_i^l\theta)\cdot \trace_i^l \leq \theta(\alpha) \cdot \trace_{i}  ~)  \text{ and }  \\
+&\forall j \in J.\;  (~ \theta(\alpha) \cdot \trace_{j}  \leq (t_j^r\theta)\cdot \trace_j^r ~) \\
+\Longleftrightarrow & \forall I' \subseteq I.\; \forall J' \subseteq J.\; \forall \trace \in \phi(I', J'). \; (~\\
+& \quad \forall i \in I'.\; ((t_i^l\theta)\cdot(\trace_i^l \land (\trace -\trace_{i})) \leq \theta(\alpha)\cdot \trace )\text{ and }\\
+& \quad\forall j \in J'.\; (\theta(\alpha)\cdot \trace \leq  (t_j^r\theta)\cdot(\trace_j^r \land (\trace -\trace_{j})))~\\
+&~)~\text{(Lemma \ref{lem:tracesub1})} \\
+\Longleftrightarrow & \forall I' \subseteq I.\; \forall J' \subseteq J.\; \forall \trace \in \phi(I', J'). \; (~\\
+& \quad ( \bigsqcup_{i\in I'} (t_i^l\theta)\cdot(\trace_i^l \land (\trace -\trace_{i})) \leq \theta(\alpha)\cdot \trace )\text{ and}\\
+& \quad (\theta(\alpha)\cdot \trace \leq  \bigsqcap_{j\in J'}(t_j^r\theta)\cdot(\trace_j^r \land (\trace -\trace_{j})))~)\\
+\Longleftrightarrow & \theta \vDash \{\cCond{\epsilon}{t_{I',\trace}^{\sqcup}}{\trace}{\alpha}, \cCond{\trace}{\alpha}{\epsilon}{t_{J',\trace}^{\sqcap}}\}_{I'\subseteq I, J'\subseteq J, \trace \in \phi(I', J') }
+\end{align*}
+%\item[CM-LUB] Similar to (CM-GLP).
+%\item[CM-BDS] Similar to (CM-GLP).
+%\item[CM-SBD] Trivial.
+\end{ProofEnumDesc}
+\end{proof}
 
 \subsubsection{\textbf{Unification}}
 Since our constraints are guarded by permission traces, we need to consider the satisfiability of (any subset of) the permission traces of a variable $\alpha$ under any permission set when constructing a type for it.
@@ -2326,12 +3239,77 @@ Next, we substitute $t_{\beta}$ for all the occurrences of $\beta$ in the remain
 Finally, the types constructed for $\gamma$ and $\alpha$ are $t_{\gamma} = t_{\beta}$ and $t_{\alpha} = \{\oplus p\oplus q \mapsto l_1, \oplus p\ominus q\mapsto L, \ominus p\oplus q \mapsto H, \ominus p\ominus q \mapsto L\}$, respectively.
 Therefore, the types we infer for \textit{A.getInfo} and \textit{B.fun} are $()\rightarrow t_{\alpha}$ and $()\rightarrow t_{\beta}$, respectively.
 
+\todo{explain lemmas}
+
+
+\begin{lemma}\label{lem:unifysound}
+If $unify(C) = \theta$, then $\theta \vDash C$.
+\end{lemma}
+\begin{proof}
+By induction on $|C|$.
+\begin{ProofEnumDesc}
+\item[$|C| = 0$] Trivial.
+\item[$|C| > 0$] In this case we have $C = \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}\cup C'$, where $O(\alpha)$ is the greatest. Let $t_\alpha$ be the type constructed from the constraints on $\alpha$ (denoted as $C_{\alpha}$)  and $C''$ be the constraint set obtained by replacing in $C'$ every occurrence of $\alpha$ by $t_{\alpha}$.
+Assume assume $unify(C'') = \theta'$. Thus $\theta = \theta'\cup\{\alpha\mapsto t_\alpha\}$.
+First, by Lemma \ref{lem:consolcorrect}, we have $\{\alpha \mapsto t_\alpha\} \vDash C_{\alpha}$, and thus $\theta \vDash C_{\alpha}$.
+Next, by induction, we have $\theta' \vDash C''$.
+Let's consider the constraints $\{\cCond{\trace_i^l}{s_i^l}{\trace_i}{\beta}\}_{i\in I} \cup \{\cCond{\trace_j}{\beta}{\trace_j^r}{s_j^r}\}_{j\in J}\subseteq C'$ of any other variable $\beta$. Then we have $\{\cCond{\trace_i^l}{s_i^l\{\alpha\mapsto t_\alpha\}}{\trace_i}{\beta}\}_{i\in I} \cup \{\cCond{\trace_j}{\beta}{\trace_j^r}{s_j^r\{\alpha\mapsto t_\alpha\}}\}_{j\in J}\subseteq C''$.
+$$
+\begin{array}{rlll}
+\theta(\beta)\cdot\trace_i &=&\theta'(\beta)\cdot\trace_i &(\text{Apply } \theta) \\
+&\geq&((s_i^l\{\alpha\mapsto t_\alpha\})\theta')\cdot\trace_i^l & (\theta'\vDash C'')\\
+& = &(s_i^l(\theta' \cup \{\alpha\mapsto t_\alpha\}))\cdot\trace_i^l& \\
+\end{array}
+$$
+and
+$$
+\begin{array}{rlll}
+\theta(\beta)\cdot\trace_j &=&\theta'(\beta)\cdot\trace_j &(\text{Apply } \theta) \\
+&\leq&((s_j^r\{\alpha\mapsto t_\alpha\})\theta')\cdot\trace_j^r & (\theta'\vDash C'')\\
+& = &(s_j^r(\theta' \cup \{\alpha\mapsto t_\alpha\}))\cdot\trace_j^r& \\
+\end{array}
+$$
+Therefore, the result follows.
+\end{ProofEnumDesc}
+\end{proof}
+
+\begin{lemma}\label{lem:unifycomplete}
+If $\theta \vDash C$, then there exist $\theta'$ and $\theta''$ such that $unify(C) = \theta'$ and $\theta = \theta'\theta''$.
+\end{lemma}
+\begin{proof}
+We prove that the statement $\theta = \theta'\theta$, which deduces the result. The statement holds trivially when $|C| = 0$. \\
+When $|C| > 0$, we have $C = \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}\cup C'$, where $O(\alpha)$ is the greatest.
+Let $t_\alpha$ be the type constructed from the constraints on $\alpha$ (denoted as $C_{\alpha}$) and $C_0$ be the constraint set obtained by replacing in $C'$ every occurrence of $\alpha$ by $t_{\alpha}$.
+Since $\theta \vDash C$, we have $\theta\vDash C'$ and $\theta \vDash  C_{\alpha}$,
+and  thus $\theta\vDash C_0$.
+By induction on $C_0$, there exists $\theta'_0$ such that $unify(C_0) = \theta'_0$ and $\theta = \theta'_0\theta$.
+According to the function $unify$, we get $unify(C) = \theta'_0\cup\{\alpha\mapsto t_\alpha\} =\theta'$.
+For any $\beta\notin dom(\theta')$, clearly $\beta(\theta'\theta) = \beta\theta$.
+Considering $\alpha$, since $\theta\vDash C_{\alpha}$, by Lemma \ref{lem:consolcorrect}, we have $\alpha\theta =  (t_\alpha)\theta$, and thus $\alpha\theta = \alpha(\theta'\theta)$.
+While for any other variable $\beta \in dom(\theta')$, we have
+$\beta(\theta'\theta) = \beta((\theta'_0\cup\{\alpha\mapsto t_\alpha\})\theta)
+= \beta(\theta'_0\theta)=\beta\theta$.
+\end{proof}
+
 
 Let $sol$ be the function for the constraint solving algorithm, that is, $sol(C) = unify(sat(dec(C)))$.
 It is provable that the constraint solving algorithm is sound and complete.
 
+\todo{combine lemma and description}
 
+\begin{lemma}\label{lem:solsound}
+If $sol(C) = \theta$, then $\theta \vDash C$.
+\end{lemma}
+\begin{proof}
+By Lemma  \ref{lem:consolcorrect} and Lemma \ref{lem:unifysound}.
+\end{proof}
 
+\begin{lemma}\label{lem:solcomplete}
+If $\theta \vDash C$, then there exist $\theta'$ and $\theta''$ such that $sol(C) = \theta'$ and $\theta = \theta'\theta''$.
+\end{lemma}
+\begin{proof}
+By Lemma  \ref{lem:consolcorrect} and Lemma \ref{lem:unifycomplete}.
+\end{proof}
 
 
 To conclude, an expression (command, function, resp.) is typable, iff it is derivable under the constraint rules with a solvable constraint set by our algorithm.
@@ -2342,6 +3320,14 @@ Thus, our type inference system terminates.
 \begin{theorem}
 The type inference system is sound, complete and decidable.
 \end{theorem}
+\begin{proof}
+\begin{itemize}
+\item \textbf{sound}: By Lemma  \ref{lem:cgrsound0} and Lemma \ref{lem:solsound}.
+\item \textbf{complete}: By Lemma  \ref{lem:cgrcomplete0} and Lemma \ref{lem:solcomplete}.
+\item \textbf{decidable}: as the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by $sol$ in finite steps. Thus, the type inference system terminates.
+\end{itemize}
+\end{proof}
+
 
  \section{Related work}
 There is a large body of work on language-based information flow security. We shall discuss only closely related work.
