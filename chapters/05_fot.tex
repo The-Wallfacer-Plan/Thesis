@@ -55,13 +55,18 @@ Interested readers can refer to {FOT}'s project site for more details:
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.46\textwidth]{res/fot/FOT_overview}
+	\includegraphics[width=0.6\textwidth]{res/fot/FOT_overview}
 	\vspace{-5pt}
 	\caption{Overview of the {\FOT} Fuzzing Framework}
 	\label{fig:fot_workflow}
 \end{figure}
 
-
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.6\columnwidth]{res/fot/mt_workflow}
+	\caption{Conductor with Multiple Fuzzing Instance}
+	\label{fig:mt_workflow}
+\end{figure}
 
 
 Figure~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
@@ -255,8 +260,6 @@ Moreover, the mutation manager will favor fine-grained mutations once the target
 
 
 
-
-
 %Table~\ref{tbl:cr_aflgo_binutils} compares the results of FOT with AFL and AFLGo on the c++filt tool in GNU Binutils (each experiment was conducted 20 times with 8 hours as the budget). {\utte} is the average time-to-exposure in seconds to trigger a vulnerability. We can see that {\dFOT} is able to decrease the exposure time greatly.
 %
 %\begin{table}[!t]
@@ -365,8 +368,5 @@ Most current fuzzing techniques can be easily integrated into {\FOT} thanks to i
 \section{Conclusions}
 
 We have proposed {\FOT}, a versatile, configurable, and extensible fuzzing framework to facilitate the reuse, integration, comparison and development of different fuzzing techniques. We briefly explained the workflow of {\FOT} and showed its applications in the aspects of static vulnerability analysis enhanced fuzzing and directed grey-box fuzzing. The experimental results have indicated that {\FOT} can be quite effective for different fuzzing scenarios.
- 
-\section*{Acknowledgment}
-This work is supported by the National Research Foundation, Prime Ministers Office, Singapore under its National Cybersecurity R\&D Program (Award No. NRF2016NCR-NCR002-026) and administered by the National Cybersecurity R\&D Directorate; the research of Dr Xue is also supported by Chinese Academy of Sciences (CAS) Pioneer Hundred Talents Program of China.
 
 
