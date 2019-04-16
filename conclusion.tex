@@ -1,4 +1,5 @@
 
 \chapter{Conclusion and Future Work} \label{ch:conclusion}
 
-\section{Summary}
+
+Testing and verification are two effective solutions to securing the software systems. In this thesis, we applied the grey-box fuzz testing on the programs that may suffer from low level implementation vulnerabilities. To fulfill this, we implemented our fuzzing framework, \FOT, which features configurability and extensibility to cater for various fuzzing scenarios. Based on \FOT, we proposed two extensions that particularly handle two fuzzing scenarios: we applied \dFOT to handle the directedness guidance during fuzzing, and \mtfuzz to improve the efficiency of fuzzing on multi-threaded programs. On the other hand, we applied the security type system verification to enforce the non-interference property in the Android like systems, which guarantees that the underlying software is free of information leakage as long as it can be well-typed. These two approaches are complementary to each other in that they secure the underlying systems with different levels of restrictions. Undoubtedly, both of these two approaches have their limitations. In the future, we plan to integrate both approaches to provide a comprehensive solution that stresses different levels of vulnerabilities.

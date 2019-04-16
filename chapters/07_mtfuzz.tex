@@ -744,47 +744,6 @@ This approach seems straightforward however is not quite practical. The reason i
 
 
 
-
-
-
-
-
-
-
- \section{Related Work}
-We limit our discussion to the most relevant work below.
-
-\subsection{Static Concurrency Bug Prediction}
-Static concurrency bug predictors aim to approximate the runtime behaviours of a concurrent program without actual execution. Several static approaches have been proposed for analyzing pthread and Java  programs~\cite{pratikakis2006locksmith,Vojdani2009,DBLP:conf/cgo/SuiDX16,Liupldi2018,racerdoopsla2018}. LOCKSMITH~\cite{pratikakis2006locksmith} uses existential types to correlate locks and data in dynamic heap structures for race detection. Goblint~\cite{Vojdani2009} relies on a thread-modular constant propagation and points-to analysis for detecting concurrent bugs by considering conditional locking schemes. FSAM~\cite{DBLP:conf/cgo/SuiDX16} proposes a sparse flow-sensitive pointer analysis for pthread C programs  using context-sensitive thread interleaving analysis. 
-D4~\cite{Liupldi2018} presents a real-time concurrency bug detection approach using parallel and incremental pointer analysis. 
-Currently \mtfuzz relies on lightweight static results to guide GBFs to perform three categories of instrumentation for efficient fuzzing. We envision that \mtfuzz can benefit more by integrating insights from these aforementioned static bug prediction techniques.
-
-\subsection{Dynamic Analysis on Concurrency Bugs}
-There also exists a large body of dynamic analyzers.
-Essentially these can be divided into two categories: the concurrency bug detection techniques and the strategies to trigger violation conditions that can be captured by these detection techniques.
-
-
-Dynamic detectors~\cite{pldi09_fasttrack,lockset_SavageABNS97,kcc:tsan,JinTLL10,YuNPP12} typically instrument target programs and monitor the memory and synchronization events~\cite{mtbugs_survey}. The two fundamentals are \emph{happens-before model}~\cite{pldi09_fasttrack} and \emph{lockset models}~\cite{lockset_SavageABNS97}; the former reports a race condition when two threads access a shared memory location and the accesses are
-causally unordered, and the latter considers a potential race if two threads access a shared memory location without locking. Modern detectors such as \ts~\cite{kcc:tsan}, Valgrind~\cite{helgrind} usually apply a hybrid strategy to combine these two models for accuracy and efficiency. Our work does not aim to improve the existing dynamic detection techniques. In fact, we rely on \ts to detect concurrency bugs.
-
-
-
-The other dynamic analyses focus on how to trigger the concurrency violation conditions. These include the random testings that mimic non-deterministic program executions~\cite{Sen07,Sen08,JoshiPSN09,ParkS08,CaiC12}, the regression testing methods~\cite{TerragniCZ15,YuHW18} that targets interleavings from code changes, the model checking~\cite{FlanaganG05,ZaksJ08,YangCGK07,yang2008inspect} and hybrid constraint solving~\cite{pldi14_maxmodel,Huang15,icse18_ufo} approaches that systematically checks or execute possible thread schedules, or heuristically avoid fruitless executions~\cite{GuoKWYG15,GuoKW16}. Our work differs from all these works in that our goal is to cover more execution paths in the programs by generating more valuable seeds. This has two benefits. On one hand, usually the provided seeds are not able to cover enough paths even when the PUTs are executed with single thread, and \mtfuzz fills the gap. On the other hand, seeds that execute different parts of the code segments tend to require different execution time, memory, and other resources, which influences the actual interleavings intrinsically. Indeed, we also provide the schedule-intervention instrumention. However the main goal is to diversify the schedule introduced interleavings (i.e., transitions).
-
-\subsection{Dynamic Fuzzing Techniques}
-There have been quite a few of fuzzing techniques to improve the effectiveness of exposing vulnerabilities.
-
-For general-purpose fuzzing~\cite{Bohme:2016:CGF,LiCMLLT17,CollAFL,Angora,FairFuzz,redqueen}, the most common strategies are to utilize more feedbacks for execution path explorations. Steelix~\cite{LiCMLLT17} applies a lightweight binary transformation to keep track of program states during magic byte comparisons, which helps guide where and how the mutations will be processed. Angora~\cite{Angora} distinguishes different calling context when calculating deputy instruction transitions and is able to keep more valuable seeds. \mtfuzz inspires from these two techniques in that it aims to provide more valuable feedback for multithreading environment: the stratified coverage-oriented instrumentation on suspicious interleaving scope \mtiscope bookkeeps more transitions for multithreading part, and the thread-context instrumentation additionally differentiates execution context of various threads.
-
-Other fuzzing techniques focus on detecting certain categories of bugs or vulnerabilities~\cite{Bohme:2017:DGF,hawkeye,perffuzz,slowfuzz,junjie:2017sp:skyfire,superion,smart_gbf}.  \mtfuzz focuses on the concurrently executed segments and aims to reveal more vulnerabilities and bugs in a multithreaded environment. Therefore, our strategies for seed selection, seed scheduling are all tuned for this purpose.
-
-There are some fuzzing work for multithreading induced vulnerabilities. RAZZER~\cite{razzer} uses the deterministic thread interleaving technique implemented at the hypervisor and generates tests that can trigger data races in Linux kernel. This is a kernel fuzzer whose generated tests correspond to sequences of syscalls; while \mtfuzz mutates the input file content of an application program. Liu et al~\cite{LiuZLZ018} is the most relevant to \mtfuzz in that it is also a file fuzzer that works for multithreaded user-space programs. One major difference is their work only detects concurrency bug induced vulnerabilities. In terms of methodologies, their work relies on heavyweight static analysis from LOCKSMITH~\cite{pratikakis2006locksmith} therefore it faces scalability issues. On the other hand, we propose our novel exploration-oriented instrumentation and the comprehensive strategies to generate more seeds relevant with multithreading. The approach is both scalable and effective.
-
-
-
-
-
-
 \section{Conclusion}
 This paper presented \mtfuzz, a novel technique that empowers thread-aware seed generation to GBF
 for fuzzing multithreaded programs. Our approach performs three categories of instrumentation guided by static analysis to explore new program paths that are relevant to thread-interleavings. Based on the additional feedback provided by these instrumentation, we apply a series of dynamic strategies optimized for exercising thread-interleaving related paths and generating multithreading relevant seeds. 

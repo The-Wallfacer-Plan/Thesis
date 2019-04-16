@@ -64,7 +64,7 @@ Interested readers can refer to {FOT}'s project site for more details:
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.6\columnwidth]{res/fot/mt_workflow}
-	\caption{Conductor with Multiple Fuzzing Instance}
+	\caption{Conductor with Multiple Fuzzing Instances}
 	\label{fig:mt_workflow}
 \end{figure}
 
@@ -319,16 +319,14 @@ Table~\ref{tbl:trophies} lists some of the 0-day vulnerabilities we found with {
 
   
 
-\section{Related Work}
+\section{Comparisons to Other Fuzzing Frameworks and Extensions}
+
 
 In this section, we first compare FOT with other fuzzing frameworks, and then discuss its relationship to current fuzzing extensions.
 
 
 
-\subsection{Comparisons to Other Fuzzing Frameworks}
-
-Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further more, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory). 
-\subsection{Relationship to Current Fuzzing Extensions}
+Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further more, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory).
 
 Most current fuzzing techniques can be easily integrated into {\FOT} thanks to its highly-modularized design. In fact, these techniques can be applied with some extensions to the different components in Figure~\ref{fig:fot_workflow} and can be used together with the configuration interface. 
 
