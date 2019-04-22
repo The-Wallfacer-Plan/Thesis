@@ -471,15 +471,15 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
 
 
 \begin{table}[h]
-\caption{Fuzzing and Replaying Results on \AFL}
-\label{tbl:afl_results}
+\caption{Fuzzing and Replaying Results on \AFL, \mtfuzzc, and \mtfuzz}
+\label{tbl:eval_overall}
 \centering
 \footnotesize
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
 \thickhline
 \multicolumn{2}{|c|}{\multirow{2}{*}{\textbf{ID}}} & \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{C-Bugs}} \\ \cline{3-8}
 \multicolumn{2}{|c|}{} & \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\textbf{\testsRatio}}  & \textbf{\vulsNUM} &  \textbf{\vulsMT} & \textbf{\vulsST} &  \\ \hline
-\multirow{12}{*}{\textbf{\mtfuzz}}     & \textbf{lbzip2-c} &  3350   & 753   &  22.5\%  &  0   & 0 & 0 & 1   \\ \cline{2-9} 
+\multirow{12}{*}{\textbf{\mtfuzz}}  & \textbf{lbzip2-c} &  3350   & 753   &  22.5\%  &  0   & 0 & 0 & 1   \\ \cline{2-9} 
     & \textbf{pbzip2-c} &  175    & 50    &  28.6\%  &  0   & 0 & 0 & 0    \\ \cline{2-9} 
     & \textbf{pbzip2-d} &  926    & 7     &  0.8\%   &  0   & 0 & 0 & 0  \\ \cline{2-9} 
     & \textbf{pigz-c} &  737    & 592   &  80.3\%  &  0   & 0 & 0 & 1   \\ \cline{2-9} 
@@ -491,31 +491,31 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
     & \textbf{vpxdec} &  13046  & 3117  &  23.9\%  &  345 & 1 & 2 & 1  \\ \cline{2-9} 
     & \textbf{x264} &  4465   & 4252  &  95.2\%  &  3   & 1 & 0 & 4  \\ \cline{2-9} 
     & \textbf{x265} &  6420   & 4701  &  73.2\%  &  \gres{49}  & 0 & 1 & 0  \\ \thickhline
-\multirow{12}{*}{\textbf{\mtfuzz}}    & \textbf{lbzip2-c} &  4155   &  1352  &  32.5\%  & 0   & 0 & 0 & 1  \\ \hline
-    & \textbf{pbzip2-c} &  227    &  59    &  26.0\%  & \gres{6}   & \gres{1} & 0 & 0   \\ \hline
-    & \textbf{pbzip2-d} &  982    &  11    &  1.2\%   & 0   & 0 & 0 & 0   \\ \hline
-    & \textbf{pigz-c} & \gres{921  } & \gres{789 } & \gres{85.7\%} &  0    &   0   &   0 & 1  \\ \hline
-    & \textbf{pxz-c} &  2804   &  1675  &  59.7\%  & 0   & 0 & 0 & 0  \\ \hline
-    & \textbf{xz-c} &  1359   &  268   &  19.7\%  & 0   & 0 & 0 & 0  \\ \hline
-    & \textbf{gm-cnvt} & \gres{4677 } & \gres{3265} & \gres{69.8\%} &  0    &   0   &   0 & \gres{5} \\ \hline
-    & \textbf{im-cnvt} &  4036   &  2092  &  51.8\%  & 0   & 0 & 0 & 4  \\ \hline
-    & \textbf{cwebp} &  5549   &  3095  &  55.8\%  & \gres{11}  & 0 & 1 & 0  \\ \hline
-    & \textbf{vpxdec} &  13927  &  3302  &  23.7\%  & \gres{364} & 1 & 2 & 1  \\ \hline
-    & \textbf{x264} &  4457   &  4197  &  94.2\%  & 6   & 1 & 0 & 6  \\ \hline
+\multirow{12}{*}{\textbf{\mtfuzzc}}    & \textbf{lbzip2-c} &  4155   &  1352  &  32.5\%  & 0   & 0 & 0 & 1  \\ \cline{2-9}
+    & \textbf{pbzip2-c} &  227    &  59    &  26.0\%  & \gres{6}   & \gres{1} & 0 & 0   \\ \cline{2-9}
+    & \textbf{pbzip2-d} &  982    &  11    &  1.2\%   & 0   & 0 & 0 & 0   \\ \cline{2-9}
+    & \textbf{pigz-c} & \gres{921  } & \gres{789 } & \gres{85.7\%} &  0    &   0   &   0 & 1  \\ \cline{2-9}
+    & \textbf{pxz-c} &  2804   &  1675  &  59.7\%  & 0   & 0 & 0 & 0  \\ \cline{2-9}
+    & \textbf{xz-c} &  1359   &  268   &  19.7\%  & 0   & 0 & 0 & 0  \\ \cline{2-9}
+    & \textbf{gm-cnvt} & \gres{4677 } & \gres{3265} & \gres{69.8\%} &  0    &   0   &   0 & \gres{5} \\ \cline{2-9}
+    & \textbf{im-cnvt} &  4036   &  2092  &  51.8\%  & 0   & 0 & 0 & 4  \\ \cline{2-9}
+    & \textbf{cwebp} &  5549   &  3095  &  55.8\%  & \gres{11}  & 0 & 1 & 0  \\ \cline{2-9}
+    & \textbf{vpxdec} &  13927  &  3302  &  23.7\%  & \gres{364} & 1 & 2 & 1  \\ \cline{2-9}
+    & \textbf{x264} &  4457   &  4197  &  94.2\%  & 6   & 1 & 0 & 6  \\ \cline{2-9}
     & \textbf{x265} &  \gres{6743} & {5007}  &  74.3\%  & 43  & 0 & 1 & 0  \\ \thickhline
-\multirow{12}{*}{\textbf{\mtfuzz}}    & \textbf{lbzip2-c} & \gres{4503 } & \gres{1637} & \gres{36.4\%} &  0    &   0   &   0 & 1   \\ \hline
-    & \textbf{pbzip2-c} & \gres{253  } & \gres{78  } & \gres{30.8\%} &  4    &   \gres{1}   &  0 & 0   \\ \hline
-    & \textbf{pbzip2-d} & \gres{1231 } & \gres{47  } & \gres{3.8\% } &  \gres{5}    &   \gres{1} & 0  & 0  \\ \hline
-    & \textbf{pigz-c} & \gres{921  } & \gres{789 } & \gres{85.7\%} &  0    &   0   &   0 & 1  \\ \hline
-    & \textbf{pxz-c} & \gres{3658 } & \gres{2523} & \gres{69.0\%} &  0    &   0   &   0 & 0  \\ \hline
-    & \textbf{xz-c} & \gres{1598 } & \gres{493 } & \gres{30.9\%} &  0    &   0   &   0 & 0  \\ \hline
-    & \textbf{gm-cnvt} & \gres{4677 } & \gres{3265} & \gres{69.8\%} &  0    &   0   &   0 & \gres{5} \\ \hline
-    & \textbf{im-cnvt} & \gres{4355 } & \gres{3671} & \gres{84.3\%} &  \gres{21} &  \gres{4} &  1 & \gres{3}  \\ \hline
-    & \textbf{cwebp} & \gres{5701 } & \gres{3347} & \gres{58.7\%} &  8    &   0   &   1 & 0  \\ \hline
-    & \textbf{vpxdec} & \gres{14665} & \gres{3656} & \gres{24.9\%} &  336  &   \gres{2}   &   2 & \gres{3}  \\ \hline
-    & \textbf{x264} & \gres{5023 } & \gres{4832} & \gres{96.2\%} &  \gres{7}    &   1   &   0 & \gres{9}  \\ \hline
-    & \textbf{x265} & 6433  & \gres{5012}  & \gres{78.0\%}  &  29   &   0   &   1 & 0  \\ \hline
-    & \end{tabular}
+\multirow{12}{*}{\textbf{\AFL}}    & \textbf{lbzip2-c} & \gres{4503 } & \gres{1637} & \gres{36.4\%} &  0    &   0   &   0 & 1   \\ \cline{2-9}
+    & \textbf{pbzip2-c} & \gres{253  } & \gres{78  } & \gres{30.8\%} &  4    &   \gres{1}   &  0 & 0   \\ \cline{2-9}
+    & \textbf{pbzip2-d} & \gres{1231 } & \gres{47  } & \gres{3.8\% } &  \gres{5}    &   \gres{1} & 0  & 0  \\ \cline{2-9}
+        & \textbf{pigz-c} & \gres{921  } & \gres{789 } & \gres{85.7\%} &  0    &   0   &   0 & 1  \\ \cline{2-9}
+    & \textbf{pxz-c} & \gres{3658 } & \gres{2523} & \gres{69.0\%} &  0    &   0   &   0 & 0  \\ \cline{2-9}
+    & \textbf{xz-c} & \gres{1598 } & \gres{493 } & \gres{30.9\%} &  0    &   0   &   0 & 0  \\ \cline{2-9}
+    & \textbf{gm-cnvt} & \gres{4677 } & \gres{3265} & \gres{69.8\%} &  0    &   0   &   0 & \gres{5} \\ \cline{2-9}
+    & \textbf{im-cnvt} & \gres{4355 } & \gres{3671} & \gres{84.3\%} &  \gres{21} &  \gres{4} &  1 & \gres{3}  \\ \cline{2-9}
+    & \textbf{cwebp} & \gres{5701 } & \gres{3347} & \gres{58.7\%} &  8    &   0   &   1 & 0  \\ \cline{2-9}
+    & \textbf{vpxdec} & \gres{14665} & \gres{3656} & \gres{24.9\%} &  336  &   \gres{2}   &   2 & \gres{3}  \\ \cline{2-9}
+    & \textbf{x264} & \gres{5023 } & \gres{4832} & \gres{96.2\%} &  \gres{7}    &   1   &   0 & \gres{9}  \\ \cline{2-9}
+    & \textbf{x265} & 6433  & \gres{5012}  & \gres{78.0\%}  &  29   &   0   &   1 & 0  \\ \thickhline
+\end{tabular}
 \end{table}
 
  
@@ -716,7 +716,8 @@ This is because fuzzing is good at finding ``shallow bugs''~\cite{driller} even 
 feedback.
 
 The developers have confirmed all the 10 newly discovered vulnerabilities in Table~\ref{tbl:eval_overall} (the vulnerabilities inside \emph{vpxdec} no longer exists in its latest version.), 
-and 2 CVEs have been assigned\footnote{CVE-2018-XXXX (RESERVED) for ImageMagick, and CVE-2019-XXXX (RESERVED) for x264; exact CVE IDs are omitted for anonymity.}.
+and 2 CVEs have been assigned.
+%\footnote{CVE-2018-XXXX (RESERVED) for ImageMagick, and CVE-2019-XXXX (RESERVED) for x264; exact CVE IDs are omitted for anonymity.}.
 
 
 \begin{tcolorbox}[size=title]
