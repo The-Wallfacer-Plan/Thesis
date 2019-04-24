@@ -165,20 +165,20 @@ As observed from the above example, an ideal DGF should possess the following de
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.2\columnwidth]{res/dfot/eg_callchain.pdf}
+	\includegraphics[width=0.16\columnwidth]{res/dfot/eg_callchain.pdf}
 	\vspace{-5pt}
 	\caption{The fuzzing scenario modeled from Fig.~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$, and $\langle a, e, f , Z\rangle$ is a trace not passing $T$.}
 	\label{fig:call_chain}
 \end{figure}
 
-\subsubsection{\textbf{P1}. The DGF should define a \textbf{robust} distance-based mechanism that can guide the directed fuzzing by avoiding the bias to some traces and considering all traces to the targets.}  \label{subsec:p1}
+\subsubsection{\textbf{P1}. DGF should define a \textbf{robust} distance-based mechanism that can guide the directed fuzzing by avoiding the bias to some traces and considering all traces to the targets.}  \label{subsec:p1}
 Different from general GFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing inputs due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
 
 However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$\footnote{If we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target sites.}. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target site, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target site. 
 
 
 
-\subsubsection{\textbf{P2}. The DGF should strike a \textbf{balance} between overheads and utilities in static analysis.}\label{subsec:p2}  Effective static analysis can benefit the dynamic fuzzing procedure in two aspects: 1) In real world C/C++ programs, there are indirect function calls (e.g., passing a function pointer as a parameter in C, or using function objects and pointers to member functions in C++). In the presence of indirect calls, call sites cannot be observed directly from the source code or binary instructions. So the trade-offs between overheads and utilities need to be made for analyzing them. 2) Not all call relations should be treated equally. For example, some functions occur multiple times in its calling functions, implying  that they have higher chance to be called at runtime. From the static analysis perspective, we need to provide a way to distinguish these scenarios. As to function level distances between functions that have \emph{immediate} calling relations, it is intuitive that callees called in multiple times in different branches should be ``closer'' to the caller.
+\subsubsection{\textbf{P2}. DGF should strike a \textbf{balance} between overheads and utilities in static analysis.}\label{subsec:p2}  Effective static analysis can benefit the dynamic fuzzing procedure in two aspects: 1) In real world C/C++ programs, there are indirect function calls (e.g., passing a function pointer as a parameter in C, or using function objects and pointers to member functions in C++). In the presence of indirect calls, call sites cannot be observed directly from the source code or binary instructions. So the trade-offs between overheads and utilities need to be made for analyzing them. 2) Not all call relations should be treated equally. For example, some functions occur multiple times in its calling functions, implying  that they have higher chance to be called at runtime. From the static analysis perspective, we need to provide a way to distinguish these scenarios. As to function level distances between functions that have \emph{immediate} calling relations, it is intuitive that callees called in multiple times in different branches should be ``closer'' to the caller.
 
 
 To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a grey-box fuzzing setting.
@@ -198,12 +198,12 @@ To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired des
 
 
 
-\subsubsection{\textbf{P3}. The DGF should select and schedule the seeds to reach target sites \textbf{rapidly}.} \label{subsec:p3}
+\subsubsection{\textbf{P3}. DGF should select and schedule the seeds to reach target sites \textbf{rapidly}.} \label{subsec:p3}
  AFL determines how many new inputs should be generated (i.e., ``energy'') from a test seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular targets} as fast as possible. Hence, power scheduling in DGF should determine how many new inputs should be generated from a test seed in order to get a new mutated input that leads to the target sites~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of test seeds to reach target sites as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target sites. 
  
  For \emph{power scheduling}, the desired design is that the seed trace with a smaller distance to targets should be assigned more energy for fuzzing, as the trace closer to the target sites gets better chance to reach there. Therefore, $\langle a, e, T, Z\rangle$ should be allocated with similar energy with $\langle a, b, c, d, T, Z\rangle$, and $\langle a, e, f, Z\rangle$ should have less energy than the previous two. For \emph{seed prioritization}, seeds that have smaller distance (``closer'') to the targets should be fuzzed earlier in subsequent mutations. Therefore, $\langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be put ahead of $\langle a, e, f, Z\rangle$.
 
-\subsubsection{\textbf{P4}. The DGF should adopt an \textbf{adaptive} mutation strategy when the seeds cover the different program states.}  \label{subsec:p4}
+\subsubsection{\textbf{P4}. DGF should adopt an \textbf{adaptive} mutation strategy when the seeds cover the different program states.}  \label{subsec:p4}
  GFs usually apply different mutations, such as bitwise flip, byte rewrite, chunk replacement, to generate new test seeds from the existing one. 
 In general, these mutators can be categorized into two levels: fine-grained mutations (e.g., bitwise flip) and coarse-grained mutations (e.g., chunk replacement).
  Although there is no direct evidence that fine-grained mutations will likely preserve the execution traces, it is widely accepted that a coarse-grained random mutation has a high chance to change the execution trace greatly. Therefore, the desired design is that when a seed has already reached the target sites (including target lines, basic blocks or functions), it should be given less chances for coarse-grained mutations.
@@ -230,7 +230,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 
 
 \begin{figure*}[ht]
-	\includegraphics[width=.98\columnwidth]{res/dfot/overview.pdf}
+	\includegraphics[width=.99\columnwidth]{res/dfot/overview.pdf}
 %	\vspace{-20pt}
 	\caption{Approach Overview of \dFOT}
 	\label{fig:overview}

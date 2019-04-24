@@ -55,7 +55,7 @@ However, since there are \emph{multiple reasons} that can cause non-deterministi
 When fuzzing a multithreaded program, as long as the seeds can execute the multithreading segments, it always exhibits certain non-deterministic behaviors due to the interleavings across different threads. Compared with the seeds that cannot even entering the multithreading segments, we would \emph{prioritize} these seeds that have thread-interleavings since it is these seeds that 1) may themselves introduce vulnerabilities with different interleavings 2) are more likely to be mutated to seeds that can exercise similar paths~\cite{fuzz_survey}. On the other hand, preserving more multithreading relevant seeds will be more helpful for concurrency bug detectors to detect concurrency violations. Therefore, to enhance the effectiveness of grey-box fuzzing on multi-threading programs, we should provide \emph{thread-aware} analyses to help exercise more thread-interleaving paths and generating more multithreading relevant seeds.
 
 
-In this paper, we present \mtfuzz, a new grey-box fuzzing technique for multithreaded programs.
+We present \mtfuzz, a new grey-box fuzzing technique for multithreaded programs.
 The core of \mtfuzz is a novel thread-aware seed generation technique which
 effectively produces valuable seeds to test the multithreading context. 
 \mtfuzz relies on a set of thread-aware instrumentation methods consisting of a
@@ -63,7 +63,7 @@ stratified exploration-oriented instrumentation and two complementary instrument
 
 The experimental results demonstrate \mtfuzz significantly outperforms the state-of-the-art grey-box fuzzer AFL~\cite{afl} in generating multithreading relevant seeds, detecting multithreading relevant vulnerabilities, and exposing concurrency bugs via generated seeds. In particular, \mtfuzz detected 9 multithreading relevant vulnerabilities and 2 of them have been assigned CVE IDs. Additionally, \mtfuzz helped to expose 19 new concurrency previously bugs with the generated seeds. 
 
-The contributions of this paper are as follows:
+The contributions of this work are as follows:
 \begin{enumerate}[1)]
 \item We designed a novel stratified selective instrumentation strategy specifically designed for exploring thread-interleaving induced paths. This instrumentation significantly increases both the total number of multithreading relevant seeds and its percentage among all generated seeds.
 \item We introduced two other thread-aware instrumentations to exhibit more thread-interleavings as well as distinguish overall threading context. This helps increase the thread-interleaving induced coverage during calibration execution, as well as diversify the generated seeds.
@@ -518,6 +518,8 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
 \end{tabular}
 \end{table}
 
+\vspace{11pt}
+
  
 \section{Evaluation}
 
@@ -754,6 +756,7 @@ in Table~\ref{tbl:cbugs-tte}.
 
 
 \begin{table}[ht]
+\centering
 \caption{Time-to-Exposure of all ground truth concurrency bugs during 6 replay procedures with strategies \ding{182} and \ding{183}.}
 \label{tbl:cbugs-tte}
 \begin{tabular}{|c|c|c|c|c|c|c"c|c|}
@@ -798,7 +801,7 @@ This approach seems straightforward however is not quite practical. The reason i
 
 
 \section{Conclusion}
-This paper presented \mtfuzz, a novel technique that empowers thread-aware seed generation to GBF
+We presented \mtfuzz, a novel technique that empowers thread-aware seed generation to GBF
 for fuzzing multithreaded programs. Our approach performs three categories of instrumentation guided by static analysis to explore new program paths that are relevant to thread-interleavings. Based on the additional feedback provided by these instrumentation, we apply a series of dynamic strategies optimized for exercising thread-interleaving related paths and generating multithreading relevant seeds. 
 Experiments on 12 real-world programs demonstrate that \mtfuzz significantly outperforms the state-of-the-art grep-box fuzzer AFL in generating more valuable seeds, detecting more multithreading relevant vulnerabilities and concurrency bugs.
 

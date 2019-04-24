@@ -764,7 +764,7 @@ Notice that the type of the argument $\overline{e}$ must match the type of the f
 
 Let us consider the example in Listing~\ref{lst:laundery}.
 \begin{figure}[ht]
-\begin{lstlisting}[label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
+\begin{lstlisting}[label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}, basicstyle=\footnotesize]
 A.f(x) {  init r = 0 in { r := call B.g (x); return r }
 }
 	
@@ -2971,7 +2971,7 @@ By Lemma \ref{lem:ptrcomplete} and Lemma\ref{lem:cgrcomplete}.
 
 Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
 \begin{figure}
-\begin{lstlisting}[caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
+\begin{lstlisting}[caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}, basicstyle=\footnotesize]
 A.getInfo() {
    init r in { 
      test(p) {
