@@ -1,11 +1,12 @@
 \chapter{Related Work} \label{ch:related}
 
-
  \section{For \dFOT}\label{sec:dgf_related}
+ 
+ \todo{unify the format}
 
 Our study is related to the following lines of research:
 
-\noindent\textbf{Directed Grey-box Fuzzing}.
+\subsection{Directed Grey-box Fuzzing}
 Some other DGF techniques have been proposed besides \dFOT.
 \aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed grey-box fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to inputs that hold the trace closer to the target sites.
 In \aflgo, the authors proposed a novel idea of calculating the distance between the input traces and the target sites.
@@ -18,7 +19,7 @@ The core techniques of SeededFuzz are orthogonal to \dFOT because SeededFuzz foc
 
 Note that our proposed four properties can also be applied for DGF on programs where the source code is unavailable. In fact, we are extending {\dFOT} to be able to work on the binary-only fuzzing scenarios. Technically, the target sites can be determined by binary-code matching techniques on attack surface identification~\cite{bingo,tse18}; the static analysis can be achieved with binary analysis tools such as IDA~\cite{ida}; and the instrumentation can be done by dynamic binary instrumentators such as Intel Pin~\cite{pin}. We envision the extended {\dFOT} can piggyback on these techniques and demonstrate its effectiveness even further.
 
-\noindent\textbf{Directed Symbolic Execution}.
+\subsection{Directed Symbolic Execution}.
 Directed Symbolic Execution (DSE) is one of the most related techniques to DGF as it also aims to execute target sites of the PUT.
 Several works have been proposed for DSE~\cite{Godefroid:2005:DART, Ma:2011:DSE:2041552.2041563, Haller:2013:DOG, Jin:2012, Marinescu:2013:katch}.
 These DSE techniques rely on heavyweight program analysis and  constraint-solving to reach the target sites systematically.
@@ -36,7 +37,7 @@ Different from \dFOT, these techniques are not fed with \emph{given target sites
 Thus, such techniques do not have advantages in scenarios where the targets are clear, such as patch testing and crash reproduction. 
 
 
-\noindent\textbf{Coverage-based Grey-box Fuzzing}.
+\subsection{Coverage-based Grey-box Fuzzing}.
 The purposes of coverage-based grey-box fuzzing (CGF) and DGF are different. However, some techniques proposed to boost the performance of CGF could also be adopted by \dFOT.
 For example, CollAFL~\cite{CollAFL} utilizes a novel hash algorithm to solve AFL's instrumentation collision problem.
 Skyfire~\cite{junjie:2017sp:skyfire} learns a probabilistic context sensitive grammar (PGSG) to specify both syntax features and semantic rules, and then the second step leverages the learned PCSG to generate new test seeds.

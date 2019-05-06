@@ -15,39 +15,6 @@
 Multithreading as a popular programming paradigm is an effective way of utilizing multi-core computation resources in modern processors. Meanwhile, the \emph{non-deterministic} behaviors caused by thread-interleavings also pose substantial challenges to vulnerability or bug detection in multithreaded programs~\cite{mtbugs_survey}. On one hand, the interleavings across threads inherently introduce multiple subtle concurrency bugs, e.g., data races, atomic violations, and deadlocks. These bugs can cause undefined program behaviors and sometimes can induce vulnerabilities such as use-after-free (CVE-2016-1972, CVE-2018-5873) and heap-buffer-overflow (CVE-2017-8244), denial-of-service (CVE-2018-0381). On the other hand, as multithreaded programs may accept some inputs, some bugs or vulnerabilities may be difficult or impossible to be triggered with limited seed inputs, regardless of whether such bugs are caused by concurrency bugs. 
 
 
-
-\setlength{\textfloatsep}{0.1cm} 
-\begin{algorithm}[t]
- \small
-\SetKwInOut{Input}{input}
-	\SetKwInOut{Output}{output}
-	\Input{Program \ProgO, Initial input test files \Seeds}
-	\Output{Final test files \FinalSeeds, vulnerable test files \CrashSeeds}
-	\Prog = instrument(\ProgO) \tcp*{static instrumentation}
-	$\CrashSeeds \leftarrow~\emptyset$, $\FinalSeeds \leftarrow~\Seeds$\; 
-	\While {True} {
-		t = next\_seed(\FinalSeeds) \tcp*{seed selection}
-		\mutChance = get\_mutation\_chance(t) \tcp*{seed scheduling} \label{line:algo:energy}
-		\For {$i\in~1\ldots \mutChance$} {
-			t' = mutated\_input(t)  \tcp*{seed mutation}
-			res = run(\Prog, t', \Ncal)\tcp*{calibration execution}
-			\uIf {is\_crash(res)}{\label{line:algo:triage_start}
-				$\CrashSeeds = \CrashSeeds\cup\{t'\}$ \tcp*{report vulnerable seeds}
-			}\ElseIf {cov\_new\_trace(t', res)} {\label{line:algo:new_cov}
-				$\FinalSeeds = \FinalSeeds\cup\{t'\}$ \tcp*{save "good" seeds} \label{line:algo:triage_end}
-			}
-		}
-	}
-	\caption{Grey-Box Fuzzing}\label{algo:gbf}
-\end{algorithm}
-
-Recently, grey-box fuzzers (GBFs) have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. It is hereby fascinating to utilize GBFs to expose bugs and vulnerabilities for multithreaded programs.
-Algo.~\ref{algo:gbf} presents a typical grey-box fuzzing algorithm, which involves an instrumentation step and the fuzzing loop.
-Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. Then it enters the fuzzing loop:
-1) \emph{Seed selection} selects next running candidate from the seed queue. 2) \emph{Seed scheduling} decides how many mutations will be applied on the selected seed. 3) \emph{Seed mutation} mutates current running seed to generate new test inputs. 4) During \emph{calibration execution}, for each new seed $t'$, the fuzzer executes it \Ncal times to get the execution statistics. 5) \emph{Seed triaging} evaluates $t'$  based on the execution statistics and the coverage feedback from instrumentation to determine whether it is a vulnerable seed, or whether it should be put into the seed queue for subsequent fuzzing. Notably, \Ncal times of calibration executions are \emph{necessary} since GBF needs to collect average statistical 
-information such as execution traces, execution time for $t'$, which will be used to 
-calculate the mutation chances for seed scheduling in the next fuzzing iteration.
-
 A conventional GBF has no awareness of multithreading.
 In fact, the only symptom it observes is that a seed has non-deterministic behaviors in that the same seed exercises different traces during calibration execution.
 However, since there are \emph{multiple reasons} that can cause non-deterministic behaviors, a GBF typically does not have any countermeasures: all it can do is to increase \Ncal to execute the seeds more times to get more stable running statistics.
@@ -69,16 +36,6 @@ The contributions of this work are as follows:
 \item We introduced two other thread-aware instrumentations to exhibit more thread-interleavings as well as distinguish overall threading context. This helps increase the thread-interleaving induced coverage during calibration execution, as well as diversify the generated seeds.
 \item We integrated the dynamic fuzzing strategies with these thread-aware instrumentations and implemented our enhanced GBF, \mtfuzz, for fuzzing multithreaded programs. To the best of our knowledge, this is the first grey-box fuzzer that is optimized for detecting vulnerabilities and concurrency bugs in  multithreaded programs.
 \end{enumerate}
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -127,8 +127,8 @@ keywordstyle=\color[rgb]{0,0,1},
 %----------------------------------------------------------------------------------------
 %	additional commands
 %----------------------------------------------------------------------------------------
-%\newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
-\newcommand*{\todo}[1]{}
+\newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
+%\newcommand*{\todo}[1]{}
 \input{cmd-sta}
 \input{cmd-fuzz}
 
@@ -241,10 +241,6 @@ keywordstyle=\color[rgb]{0,0,1},
 \fancyhead[RE,LO]{\fancyplain{}{\emph{List of Tables}}}
 \listoftables % Write out the List of Tables
 
-%\fancyhead[LE,RO]{\thepage}
-%\fancyhead[RE,LO]{\fancyplain{}{\emph{List of Tables}}}
-%\listofalgorithms % Write out the List of Tables
-
 %----------------------------------------------------------------------------------------
 %	THESIS CONTENT - CHAPTERS
 %----------------------------------------------------------------------------------------
@@ -265,39 +261,39 @@ keywordstyle=\color[rgb]{0,0,1},
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Introduction}}{}}
-\input{chapters/01_intro}
+\input{chapters/intro}
+
+\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Preliminaries}}{}}
+\input{chapters/background}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Related Work}}{}}
-\input{chapters/02_related}
-
-%\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-%\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Preliminaries}}{}}
-%\input{chapters/03_preliminary}
+\input{chapters/related}
 
 %\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 %\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Vulnerability Detection Techniques}}{}}
-%\input{chapters/04_overall}
+%\input{chapters/overall}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{The FOT Fuzzing Framework}}{}}
-\input{chapters/05_fot}
+\input{chapters/fot}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{\dFOT: Directed Grey-box Fuzzing}}{}}
-\input{chapters/06_dfot}
+\input{chapters/dfot}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{\mtfuzz: Multi-threading Aware Fuzzing}}{}}
-\input{chapters/07_mtfuzz}
+\input{chapters/mtfuzz}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Security Type Checking for Android Access Control}}{}}
-\input{chapters/08_sta}
+\input{chapters/sta}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Hybrid Approach to Distributed Motion Control}}{}}
-\input{chapters/09_discuss}
+\input{chapters/discuss}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Conclusion and Future Work}}{}}

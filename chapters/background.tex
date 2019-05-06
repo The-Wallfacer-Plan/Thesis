@@ -1,0 +1,43 @@
+\chapter{Preliminary} \label{ch:preliminary}
+
+In this chapter, we describe some terminologies and preliminaries used throughout this thesis.
+
+\section{Grey-box Fuzz Testing}
+Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
+
+%\setlength{\textfloatsep}{0.1cm} 
+\begin{algorithm}[t]
+ \small
+\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	\Input{Program \ProgO, Initial input test files \Seeds}
+	\Output{Final test files \FinalSeeds, vulnerable test files \CrashSeeds}
+	\Prog = instrument(\ProgO) \tcp*{static instrumentation}
+	$\CrashSeeds \leftarrow~\emptyset$, $\FinalSeeds \leftarrow~\Seeds$\; 
+	\While {True} {
+		t = next\_seed(\FinalSeeds) \tcp*{seed selection}
+		\mutChance = get\_mutation\_chance(t) \tcp*{seed scheduling} \label{line:algo:energy}
+		\For {$i\in~1\ldots \mutChance$} {
+			t' = mutated\_input(t)  \tcp*{seed mutation}
+			res = run(\Prog, t', \Ncal)\tcp*{calibration execution}
+			\uIf {is\_crash(res)}{\label{line:algo:triage_start}
+				$\CrashSeeds = \CrashSeeds\cup\{t'\}$ \tcp*{report vulnerable seeds}
+			}\ElseIf {cov\_new\_trace(t', res)} {\label{line:algo:new_cov}
+				$\FinalSeeds = \FinalSeeds\cup\{t'\}$ \tcp*{save "good" seeds} \label{line:algo:triage_end}
+			}
+		}
+	}
+	\caption{Grey-Box Fuzzing}\label{algo:gbf}
+\end{algorithm}
+
+Recently, grey-box fuzzers (GBFs) have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. It is hereby fascinating to utilize GBFs to expose bugs and vulnerabilities for multithreaded programs.
+Algo.~\ref{algo:gbf} presents a typical grey-box fuzzing algorithm, which involves an instrumentation step and the fuzzing loop.
+Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. Then it enters the fuzzing loop:
+1) \emph{Seed selection} selects next running candidate from the seed queue. 2) \emph{Seed scheduling} decides how many mutations will be applied on the selected seed. 3) \emph{Seed mutation} mutates current running seed to generate new test inputs. 4) During \emph{calibration execution}, for each new seed $t'$, the fuzzer executes it \Ncal times to get the execution statistics. 5) \emph{Seed triaging} evaluates $t'$  based on the execution statistics and the coverage feedback from instrumentation to determine whether it is a vulnerable seed, or whether it should be put into the seed queue for subsequent fuzzing. Notably, \Ncal times of calibration executions are \emph{necessary} since GBF needs to collect average statistical 
+information such as execution traces, execution time for $t'$, which will be used to 
+calculate the mutation chances for seed scheduling in the next fuzzing iteration.
+
+\section{Type Checking Based Verification}
+
+
+\todo{add PCC and Android background}
