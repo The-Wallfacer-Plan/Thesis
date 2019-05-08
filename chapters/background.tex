@@ -1,21 +1,16 @@
 \chapter{Preliminary} \label{ch:preliminary}
 
-In this chapter, we describe some terminologies and preliminaries used throughout this thesis.
-
-\section{Grey-box Fuzz Testing}
-Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
-
 %\setlength{\textfloatsep}{0.1cm} 
 \begin{algorithm}[t]
  \small
 \SetKwInOut{Input}{input}
 	\SetKwInOut{Output}{output}
-	\Input{Program \ProgO, Initial input test files \Seeds}
-	\Output{Final test files \FinalSeeds, vulnerable test files \CrashSeeds}
-	\Prog = instrument(\ProgO) \tcp*{static instrumentation}
+	\Input{Program \ProgO, Initial input seeds \Seeds}
+	\Output{Final seeds \FinalSeeds, Vulnerable seeds \CrashSeeds}
+	\Prog = instrument(\ProgO) \tcp*{instrumentation}
 	$\CrashSeeds \leftarrow~\emptyset$, $\FinalSeeds \leftarrow~\Seeds$\; 
 	\While {True} {
-		t = next\_seed(\FinalSeeds) \tcp*{seed selection}
+		$t$ = next\_seed(\FinalSeeds) \tcp*{seed selection}
 		\mutChance = get\_mutation\_chance(t) \tcp*{seed scheduling} \label{line:algo:energy}
 		\For {$i\in~1\ldots \mutChance$} {
 			t' = mutated\_input(t)  \tcp*{seed mutation}
@@ -30,12 +25,24 @@ Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing
 	\caption{Grey-Box Fuzzing}\label{algo:gbf}
 \end{algorithm}
 
-Recently, grey-box fuzzers (GBFs) have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. It is hereby fascinating to utilize GBFs to expose bugs and vulnerabilities for multithreaded programs.
-Algo.~\ref{algo:gbf} presents a typical grey-box fuzzing algorithm, which involves an instrumentation step and the fuzzing loop.
-Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. Then it enters the fuzzing loop:
-1) \emph{Seed selection} selects next running candidate from the seed queue. 2) \emph{Seed scheduling} decides how many mutations will be applied on the selected seed. 3) \emph{Seed mutation} mutates current running seed to generate new test inputs. 4) During \emph{calibration execution}, for each new seed $t'$, the fuzzer executes it \Ncal times to get the execution statistics. 5) \emph{Seed triaging} evaluates $t'$  based on the execution statistics and the coverage feedback from instrumentation to determine whether it is a vulnerable seed, or whether it should be put into the seed queue for subsequent fuzzing. Notably, \Ncal times of calibration executions are \emph{necessary} since GBF needs to collect average statistical 
-information such as execution traces, execution time for $t'$, which will be used to 
-calculate the mutation chances for seed scheduling in the next fuzzing iteration.
+In this chapter, we describe some terminologies and preliminaries used throughout this thesis.
+
+\section{Grey-box Fuzz Testing}
+Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
+
+Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Compared to blackbox fuzzing, it at some extent knows about the program under test, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution, it is extremely lightweight and far more scalable to real-world projects.
+
+
+Algo.~\ref{algo:gbf} presents the core procedures of a typical grey-box fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop.
+Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual program under test is \Prog. Despite the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
+The instrumentation can be done statically or dynamically. For static source instrumentation, which is usually applied during the source compilation procedure, with the help of compilation infrastructure such as LLVM~\cite{Lattner:2004:LCF:977395.977673}, GCC~\cite{gcc}. For dynamic binary instrumentation (DBI), this is done with the help of DBI frameworks such as Valgrind~\cite{valgrind}, Intel PIN~\cite{pin}. Logically, this does not belong to a fuzzing but only is only used to collect the statistics for fuzzing.
+The fuzzing loop does the actual mutations and testings against the program.
+\begin{enumerate}
+	\item Based on the seed priority, \emph{seed selection} selects next candidate seed $t$ from the queue which is formed by \Seeds.
+	\item \emph{Seed mutation} procedure determines based on previous execution statistics on $t$ to determine how many mutation chances (\mutChance) will be provided for $t$.
+	\item It enters the \emph{monitored execution} against the variants of $t$ with \mutChance iterations. Firstly, it applies \emph{seed mutation} on $t$ to generate a seed $t'$. Secondly, it goes to the actual execution against $t'$; for statistics collection purpose, the fuzzer usually executes \Prog against $t'$ with continuously $\Ncal$ times. This is due to the fact that a single run on a specific seed may not be stable and the fuzzer needs to collect \emph{average statistics} for further scheduling. After the execution, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
+\end{enumerate}
+Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not ``know'' the program coverage itself. In practice, the fuzzing procedure is terminated manually.
 
 \section{Type Checking Based Verification}
 

@@ -21,7 +21,7 @@ Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017
 
 In general, the existing grey-boxing fuzzers (GFs) aim to cover as many program states as possible within a limited time budget.
 However, there exist several testing scenarios in which only particular program states are concerned and required to be sufficiently tested. 
-For example, if \emph{MJS}~\cite{mjs}(a JavaScript engine for embedded devices) has a vulnerability discovered on MSP432 ARM platform, similar vulnerabilities may occur in the corresponding code for the other platforms.
+For example, if \emph{MJS}~\cite{mjs} (a JavaScript engine for embedded devices) has a vulnerability discovered on MSP432 ARM platform, similar vulnerabilities may occur in the corresponding code for the other platforms.
 In such a situation, the fuzzer should be \emph{directed} to reproduce the bug at these locations.
 Another case is, when a bug is patched, the programmers need to check whether the patch completely fixes the bug. 
 This requires the fuzzer to focus its efforts on those patched code.
