@@ -11,7 +11,7 @@
 	$\CrashSeeds \leftarrow~\emptyset$, $\FinalSeeds \leftarrow~\Seeds$\; 
 	\While {True} {
 		$t$ = next\_seed(\FinalSeeds) \tcp*{seed selection}
-		\mutChance = get\_mutation\_chance(t) \tcp*{seed scheduling} \label{line:algo:energy}
+		\mutChance = get\_mutation\_chance(t) \tcp*{power scheduling} \label{line:algo:energy}
 		\For {$i\in~1\ldots \mutChance$} {
 			t' = mutated\_input(t)  \tcp*{seed mutation}
 			res = run(\Prog, t', \Ncal)\tcp*{calibration execution}
@@ -40,7 +40,12 @@ The fuzzing loop does the actual mutations and testings against the program.
 \begin{enumerate}
 	\item Based on the seed priority, \emph{seed selection} selects next candidate seed $t$ from the queue which is formed by \Seeds.
 	\item \emph{Seed mutation} procedure determines based on previous execution statistics on $t$ to determine how many mutation chances (\mutChance) will be provided for $t$.
-	\item It enters the \emph{monitored execution} against the variants of $t$ with \mutChance iterations. Firstly, it applies \emph{seed mutation} on $t$ to generate a seed $t'$. Secondly, it goes to the actual execution against $t'$; for statistics collection purpose, the fuzzer usually executes \Prog against $t'$ with continuously $\Ncal$ times. This is due to the fact that a single run on a specific seed may not be stable and the fuzzer needs to collect \emph{average statistics} for further scheduling. After the execution, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
+	\item It enters the \emph{monitored execution} against the variants of $t$ with \mutChance iterations. 
+	\begin{enumerate}
+	\item Firstly, it applies \emph{seed mutation} on $t$ to generate a seed $t'$. 
+	\item Secondly, it goes to the actual \emph{calibration execution} against $t'$; for statistics collection purpose, the fuzzer usually executes \Prog against $t'$ with continuously $\Ncal$ times. This is due to the fact that a single run on a specific seed may not be stable and the fuzzer needs to collect \emph{average statistics} for further scheduling.
+	\item Finally, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
+	\end{enumerate}
 \end{enumerate}
 Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not ``know'' the program coverage itself. In practice, the fuzzing procedure is terminated manually.
 
