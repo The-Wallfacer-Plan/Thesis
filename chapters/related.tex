@@ -38,11 +38,11 @@ Thus, such techniques do not have advantages in scenarios where the targets are 
 
 
 \subsection{Coverage-based Grey-box Fuzzing}.
-The purposes of coverage-based grey-box fuzzing (CGF) and DGF are different. However, some techniques proposed to boost the performance of CGF could also be adopted by \dFOT.
+The purposes of coverage-based grey-box fuzzing (CGBF) and DGF are different. However, some techniques proposed to boost the performance of CGBF could also be adopted by \dFOT.
 For example, CollAFL~\cite{CollAFL} utilizes a novel hash algorithm to solve AFL's instrumentation collision problem.
 Skyfire~\cite{junjie:2017sp:skyfire} learns a probabilistic context sensitive grammar (PGSG) to specify both syntax features and semantic rules, and then the second step leverages the learned PCSG to generate new test seeds.
 Xu \textit{et al.}~\cite{XuKMK:2017} proposed a set of new operating primitives to improve the performance of grey-box fuzzers.
-Another important topic in CGF is about guiding the fuzzer through path constraints. \cite{Stephens2016Driller, rawat:2017, LiCMLLT17, Angora, tfuzz} aim to help the CGFs to break through path constraints.
+Another important topic in CGBF is about guiding the fuzzer through path constraints. \cite{Stephens2016Driller, rawat:2017, LiCMLLT17, Angora, tfuzz} aim to help the CGBFs to break through path constraints.
 Moreover, Orthrus~\cite{Shastry:LNCS2017:Orthrus} applies static analysis on AST, CFG, and CG to extract complicated tokens via customizable queries. 
 \dFOT can benefit through combining with the aforementioned techniques.
 

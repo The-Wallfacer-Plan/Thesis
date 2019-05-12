@@ -30,7 +30,7 @@ In this chapter, we describe some terminologies and preliminaries used throughou
 \section{Grey-box Fuzz Testing}
 Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
 
-Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Compared to blackbox fuzzing, it at some extent knows about the program under test, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution, it is extremely lightweight and far more scalable to real-world projects.
+Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Compared to blackbox fuzzing, it at some extent knows about the program under test via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution, it is extremely lightweight and far more scalable to real-world projects.
 
 
 Algo.~\ref{algo:gbf} presents the core procedures of a typical grey-box fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop.
@@ -48,6 +48,9 @@ The fuzzing loop does the actual mutations and testings against the program.
 	\end{enumerate}
 \end{enumerate}
 Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not ``know'' the program coverage itself. In practice, the fuzzing procedure is terminated manually.
+
+In recent years, grey-box fuzzing has been effective
+
 
 \section{Type Checking Based Verification}
 

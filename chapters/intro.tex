@@ -32,10 +32,10 @@ With these two applied approaches, we aim to provide a comprehensive solution to
 \section{Contributions of the Thesis}
 The contributions of the thesis is as follows:
 \begin{enumerate}
-	\item We provided a grey-box fuzzing framework, \FOT, that is versatile in its configurability and extensibility.
-	\item We proposed a principled directed grey-box fuzzing technique \dFOT to allow for fuzzing on specific program targets and implemented it on top of \FOT.
-	\item We proposed a thread-aware fuzzing technique, \mtfuzz, which significantly improved the effectiveness of fuzzing on multi-threaded programs.
-	\item We provided a permission-dependent type system that can precisely enforce the access control based on the permission authentication, provided the soundness, the decidability of type inference, and implemented a prototype for securing Android system.
+	\item We provided a grey-box fuzzing framework, \FOT, that is versatile in its configurability and extensibility. Based on this framework, we have integrated several fuzzing techniques and have been successfully detected more than 200 vulnerabilities in real-world open source programs, among which 51 have been assigned CVE IDs.
+	\item We proposed a principled directed grey-box fuzzing technique \dFOT to allow for fuzzing on specific program targets and implemented it on top of \FOT. \dFOT innovatively provides the robust directedness mechanism, integrates with a static analysis to calculate the directedness utilities, optimizes the seed prioritization and scheduling, and applies adaptive mutation strategies across different distance states. This effectively improves the fuzzing effectiveness on the given program targets.
+	\item We proposed a thread-aware fuzzing technique, \mtfuzz, which significantly improved the effectiveness of fuzzing on multi-threaded programs. \mtfuzz utilizes the thread-aware analysis and applies three categories of instrumentation to explore thread-interleavings,  improve the thread-scheduling diversities across executions, as well as take account of threading context information; based on the feedback provided by the instrumentation, \mtfuzz generates more valuable seeds that can significantly help reveal multithreading relevant vulnerabilities and concurrency bugs.
+	\item We provided a permission-dependent type system that precisely enforces access control based on the permission authentication mechanism on Android and proved the soundness of the type system in term of the non-interference property. We also provided a series of decidable type inference rules to assist the type checking. Based on the type system, we implemented a prototype that stresses information leakage issues in Android system.
 \end{enumerate}
 
 

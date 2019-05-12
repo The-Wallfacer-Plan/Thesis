@@ -284,8 +284,8 @@ Finally, since \MTIns only selectively instruments the instructions inside \mtis
 Without specifying any schedule policy or priority, the operation systems usually determine the actual schedule dynamically~\cite{tlpi,posixstd}. As mentioned in \S\ref{sec:afl_issue_mt}, without scheduling intervention the calibration execution during fuzzing may not exhibit diverse interleavings, which is unsatisfactory for covering new transitions. 
 
 POSIX compliant systems such as Linux
-usually provide the APIs to control the low level process or thread schedulings~\cite{posixstd,tlpi}.
-In order to intervene the interleavings during the execution of the multithreading program, we adjust the thread priorities.
+usually provide the APIs to control the low level process or thread scheduling~\cite{posixstd,tlpi}.
+In order to intervene the interleavings during the execution of the multithreaded program, we adjust the thread priorities.
 This heavily resorts to the POSIX API \func{pthread\_setschedparam}. Our intervention of scheduling follows two principles: 1) the intervened schedule should be possible to happen in reality without this intervention; 2) the schedule should make the interleavings more diverse. We therefore instrument a function call \rtifunc at the start of the thread routine. This instrumented function does two things:
 \begin{enumerate}[(1)]
     \item For each newly mutated test input, it calls \func{pthread\_self} in the entry of \FSStart to collect the runtime thread IDs. This serves two purposes.
@@ -335,7 +335,7 @@ To implement $\func{cov\_new\_mt\_ctx(t)}$, we track the context of calling a mu
   \SetKwInOut{Output}{output}
   \Input{Seed queue~\Seeds, current seed in queue $t$}
   \Output{whether $t$ will be selected in this round}
-  \uIf{has\_new\_mt\_ctx(\Seeds) \text{||} has\_new\_trace(\Seeds)}{
+  \uIf{has\_new\_mt\_ctx(\Seeds) \textsc{or} has\_new\_trace(\Seeds)}{
       \uIf{cov\_new\_mt\_ctx($t$)}{
         \Return{true}\;
       } \uElseIf{\func{cov\_new\_trace($t$)}}{
