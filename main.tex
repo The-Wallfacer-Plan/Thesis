@@ -1,5 +1,5 @@
-\documentclass[12pt, a4paper, oneside]{Thesis} % Paper size, default font size and one-sided paper
-%\documentclass[12pt, a4paper, twoside]{Thesis} % Paper size, default font size and one-sided paper
+\documentclass[12pt, a4paper, oneside]{Thesis}
+
 
 \hypersetup{urlcolor=blue, colorlinks=true} % Colors hyperlinks in blue - change to black if annoying
 \title{\ttitle} % Defines the thesis title - don't touch this
@@ -130,8 +130,8 @@ keywordstyle=\color[rgb]{0,0,1},
 %----------------------------------------------------------------------------------------
 \newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
 %\newcommand*{\todo}[1]{}
-\input{cmd-sta}
 \input{cmd-fuzz}
+\input{cmd-sta}
 
 
 % PDF meta-data
@@ -265,7 +265,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \input{chapters/intro}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Preliminaries}}{}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Background}}{}}
 \input{chapters/background}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}

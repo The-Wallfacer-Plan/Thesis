@@ -3,10 +3,7 @@
 \chapter{\dFOT: Directed Grey-box Fuzzing} \label{ch:dfot}
 
 
-\section{Introduction}
-
-
-
+\section{Introduction and Motivation}
 
 
 
@@ -67,7 +64,7 @@ To emphasize the two aforementioned problems, an ideal DGF is expected to hold t
 \item The DGF should prioritize and schedule the seeds to reach target sites \emph{rapidly}.\item The DGF should adopt an \emph{adaptive} mutation strategy when the seeds cover different program states. \end{enumerate}
 
 
-In this paper, we propose our solutions to achieve the four desired properties for DGF. 
+We propose our solutions to achieve the four desired properties for DGF. 
 For \textbf{P1}, we propose to apply the static analysis results to augment the adjacent-function distance (\S\ref{subsec:functionDist}); and the function level distance and basic block level distance should be calculated based on the augmented adjacent-function distance to simulate the affinities between functions (\S\ref{subsec:UtilityComputation}).
 Meanwhile, during fuzzing, we calculate \emph{basic block trace distance} and \emph{covered function similarity} of the execution trace to that of the target functions (\S\ref{subsec:powerSche}) by integrating the static analysis results with the runtime execution information.
 For \textbf{P2}, we propose to apply the analysis based on call graph (CG) and control flow graph (CFG), i.e., the function level reachability analysis, the points-to analysis for function pointers (indirect calls), and the basic block metrics (\S\ref{subsec:graghCons}). 
@@ -80,7 +77,7 @@ Particularly, {\dFOT} can expose certain crashes up to 7 times faster than the s
 
 In practice, \dFOT has been successfully discovering crashes with the suspicious target sites reported by other vulnerability detection tools and successfully found more than 41 previously unknown crashes in projects Oniguruma~\cite{oniguruma}, MJS\cite{mjs}, etc. All these vulnerabilities have been confirmed and fixed; among them, 15 vulnerabilities have been assigned unique CVE IDs.
 
-The main contributions of this paper are summarized as follows:
+The main contributions of this work are summarized as follows:
 \begin{enumerate}[(1)] 
 \itemsep0em
 \item We analyzed the challenges in directed grey-box fuzzing and summarized the four desired properties for DGFs.
@@ -737,7 +734,7 @@ Compared to AFL, it also instruments basic block distance information.
 
 Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not publicly available (e.g., Angora~\cite{Angora}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
 
-In the experiments, all AFL based fuzzers (AFL, {\aflgo} and {\dGO}) are run in their ``fidgety'' mode~\cite{FidgetyAFL}. For both {\aflgo} and {\dGO}, ``time-to-exploitation'' is set to 45 minutes for the fuzzer. Except for the experiments against GNU Binutils (Table~\ref{tbl:cr_aflgo_binutils}) , where we follow exactly the setup in {\aflgo}'s paper~\cite{Bohme:2017:DGF} , all the other experiments are repeated 8 times, with a time budget of 4 hours. 
+In the experiments, all AFL based fuzzers (AFL, {\aflgo} and {\dGO}) are run in their ``fidgety'' mode~\cite{FidgetyAFL}. For both {\aflgo} and {\dGO}, ``time-to-exploitation'' is set to 45 minutes for the fuzzer. Except for the experiments against GNU Binutils (Table~\ref{tbl:cr_aflgo_binutils}) , where we follow exactly the setup in {\aflgo}~\cite{Bohme:2017:DGF} , all the other experiments are repeated 8 times, with a time budget of 4 hours. 
 We use ``time-to-exposure'' (TTE) to measure the length of the
 fuzzing campaign until the first test input is generated that triggers a given error (in~\S\ref{subsec:evalcrashrepro}) or reaches a target site (in~\S\ref{subsec:evalsrcloc}).
 We use \emph{hitting round} to measure the number of runs in which a fuzzer triggers the error or reaches the target.
@@ -974,8 +971,8 @@ The external threats rise from the choice of evaluation dataset and the CVEs for
 
 
 %
- \section{Conclusions}
-In this paper, we propose a novel directed grey-box fuzzer, \dFOT.
+ \section{Conclusion}
+We propose a novel directed grey-box fuzzer, \dFOT.
 The design of \dFOT embeds four desired properties for directed fuzzing by combining static analysis and dynamic fuzzing in an effective way.
 Equipped with a better evaluation of the distance between input execution traces and the user specified target sites, \dFOT can precisely and adaptively adjust its seed prioritization, power scheduling as well as mutation strategies to reach the target sites rapidly.
 A thorough evaluation showed that \dFOT can reach the target sites and reproduce the crashes much faster than existing state-of-the-art grey-box fuzzers.

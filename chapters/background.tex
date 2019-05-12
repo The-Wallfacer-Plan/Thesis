@@ -1,4 +1,4 @@
-\chapter{Preliminary} \label{ch:preliminary}
+\chapter{Background} \label{ch:background}
 
 %\setlength{\textfloatsep}{0.1cm} 
 \begin{algorithm}[t]
@@ -25,16 +25,16 @@
 	\caption{Grey-Box Fuzzing}\label{algo:gbf}
 \end{algorithm}
 
-In this chapter, we describe some terminologies and preliminaries used throughout this thesis.
+In this chapter, we briefly describes some preliminaries in this .
 
 \section{Grey-box Fuzz Testing}
 Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
 
-Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Compared to blackbox fuzzing, it at some extent knows about the program under test via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution, it is extremely lightweight and far more scalable to real-world projects.
+Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Specially, AFL~\cite{afl}, libFuzzer~\cite{libfuzzer} and the fuzzing infrastructure ClusterFuzz~\cite{clusterfuzz} have been able to detect more than 16,000 vulnerabilities or bugs in over 160 open source projects~\cite{afl,clusterfuzz}. Compared to blackbox fuzzing, grey-box fuzzing at some extent knows about the program under test via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution~\cite{dart,klee}, it is extremely lightweight and far more scalable to real-world projects.
 
 
 Algo.~\ref{algo:gbf} presents the core procedures of a typical grey-box fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop.
-Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual program under test is \Prog. Despite the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
+Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual program under test is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
 The instrumentation can be done statically or dynamically. For static source instrumentation, which is usually applied during the source compilation procedure, with the help of compilation infrastructure such as LLVM~\cite{Lattner:2004:LCF:977395.977673}, GCC~\cite{gcc}. For dynamic binary instrumentation (DBI), this is done with the help of DBI frameworks such as Valgrind~\cite{valgrind}, Intel PIN~\cite{pin}. Logically, this does not belong to a fuzzing but only is only used to collect the statistics for fuzzing.
 The fuzzing loop does the actual mutations and testings against the program.
 \begin{enumerate}
@@ -47,12 +47,90 @@ The fuzzing loop does the actual mutations and testings against the program.
 	\item Finally, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
 	\end{enumerate}
 \end{enumerate}
-Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not ``know'' the program coverage itself. In practice, the fuzzing procedure is terminated manually.
+Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not \emph{know} the program coverage itself. In practice, the fuzzing procedure is terminated manually.
 
-In recent years, grey-box fuzzing has been effective
+In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{fuzz_survey}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the grey-box fuzzing.
 
+\section{Security Type Checking on Android}
 
-\section{Type Checking Based Verification}
+\subsection{Security Type Checking Preliminaries}
 
+The starting point of security type checking based verification is the classification of program variables into different security levels. The most basic distinction is to classify some variables as $L$, meaning low security (public information); and other variables as $H$, meaning high security (private information). The goal is to prevent information in $H$ variables from being leaked improperly. Such leaks could take a variety of forms, but at least we need to prevent information in $H$ variables from \emph{flowing} to $L$ variables.
 
-\todo{add PCC and Android background}
+As to \emph{confidentiality}, it is widely accepted to treat the set of the security levels as a  \emph{lattice} and the information flows only upwards in the lattice~\cite{Denning:1977hwa}. For example, since $L\leq H$, we would allow flows from $L$ to $L$, from $H$ to $H$, and from $L$ to $H$, but we would disallow flows from $H$ to $L$.
+
+Below is an example taken from Denning~\cite{Denning:1976cl}. We assume \textsf{secret}$:H$ and \textsf{leak}$:L$, and the attacker can observe any variable at level $L$ but no variable at $H$.
+From the confidentiality requirement, $\textsf{leak:=secret}$ is illegal while the assignment $\textsf{secret:=leak}$ works fine. This is due to the fact in the former case the secret information may be observed by the attacker when he/she sees the value of \textsf{leak}, which has the same value as \textsf{secret} after the assignment and is accessible by the attacker who has observation level not less than $L$. The leak is caused by an explicit data flow and is so-called \emph{explicit flow}. On the other hand, control flow can also leads to \emph{implicit flow} leaks. For example,
+\begin{lstlisting}[language=c]
+if ((secret mod 2) == 0) {
+  leak := 0;
+} else {
+  leak := 1;	
+}  
+\end{lstlisting}
+
+Despite that the \textsf{if-else} construct is not intended for data transfer, this code is essentially equivalent to $\textsf{leak:=secret}$, which obviously violates the confidentiality. Therefore this is as dangerous as the direct assignment.
+
+Some complex data structures can lead to subtle information leaks. For example, if array \textsf{a} is initially all \textsf{0}s, then the program below is still leaking information due to the fact that after the execution, \textsf{leak} will be assigned to \textsf{i}, which is still the value of \textsf{secret}. There is also a leak from \textsf{secret} to \textsf{leak}.
+
+\begin{lstlisting}[language=c]
+a[secret] := 1;
+for (int i := 0; i < a.length; i++) {  if (a[i] == 1) leak := i;}
+\end{lstlisting}
+
+\subsubsection{Noninterference}
+At a program level, the security properties are described as \emph{noninterference}, which was described by Goguen and Meseguer in 1982~\cite{Goguen:1982ta}. The simplest form tells that a deterministic program $c$ satisfies noninterference, if and only if for any memories $\mu$ and $\nu$ that agree on $L$ variables, the memories produced by running $c$ on $\mu$ and on $\nu$ also agree on $L$ variables (provided that both runs terminate successfully). Basically, the program can be viewed as a state machine. If a low (uncleared) user is working on the machine, it will respond in exactly the same manner (on the low outputs) whether or not a high (cleared) user is working with sensitive data. The low user will not be able to acquire any information about the activities (if any) of the high ($H$) user by observing the values of low ($L$) variables.
+
+Typically, a security type system is introduced to prove the noninterference property. In addition to the regular types (such as integer, boolean, etc.), expressions and commands also contain security labels. And by applying the well-established typing derivation approach, it is fairly enough by reasoning over provided typing rules to verify the property, thus it provides a certificate to the underlying program.
+
+The noninterference property can also be applied to more complex systems when covert channels are considered. Implicit (control) flow can be seamlessly integrated into the typing rules by security typing on branching constructs. In fact, almost all security type systems handle implicit flows. Termination channels, which signal information through the termination or nontermination of a computation, can be handled by a revised termination-sensitive noninterference definition. Timing channels, probabilistic channels, resource exhaustion channels, and power channels, can also be encoded in a type system in order to preserve an adapted noninterference property.
+
+\subsubsection{Typing Principles}
+
+When applying type systems to guard information flows, a security label is typically associated with security type $\tau$ apart from the regular data type. The goal is to prove the soundness of the type system; that is, the problem survives the required security properties as long as it is well-typed in terms of the security types.
+
+In Bell-Lapadula Model~\cite{bell1973}, it requires the subject at a given level must not write to any object at a lower security level, and not read any object a higher security level, which is characterized by the phrase ``no read up, no write down'', and it is safe to treat data that is low confidential to be high. In term of language based secure type systems, this is termed as \emph{Simple Security} and \emph{Confinement Security}. The former applies to expressions and later applies to commands. If an expression $e$ can be given type $\tau$ in the system, then Simple Security says, for secrecy, that only variables at level $\tau$ or lower in $e$ will have their contents accessed (read) when $e$ is evaluated (``no read up''). On the other hand, if a command $c$ can be given type $\tau$, then Confinement says, for secrecy, that no variable below level $\tau$ is updated (modified, writen) in $c$ (``no write down'').
+
+The concrete security typing rules vary in the underlying type systems to guarantee these two properties. However, normally two subsumption rules are present in addition to the syntax-directed typing rules. That is, for expressions, it follows a co-variant view(\ruleTagText{Sub$_e$}); and for commands, it follows a contra-variant view(\ruleTagText{Sub$_c$}).
+
+\begin{equation*}
+\inference
+{e:\tau & \tau\leq\tau'}
+{e:\tau'}
+\ruleTagMath{Sub$_e$}
+\qquad
+\inference
+{c:\tau & \tau'\leq\tau}
+{c:\tau'}
+\ruleTagMath{Sub$_c$}
+\end{equation*}
+
+Intuitively, \ruleTagText{(Sub$_e$)} depicts the fact that it is always safe to read less confidential data as more confidential one; while \ruleTagText{(Sub$_c$)} discloses that if there is no variable below level $\tau$ updated in $c$, then there is surely no variable below $\tau'$ updated in $c$, as long as $\tau'\leq\tau$.
+
+\subsection{Android Security Model}
+Android's security model differs significantly from the standard desktop security models such as regular Bell-La Padula, mandatory access control (MAC), etc. On Android, applications are treated as mutually distrusting principals: they are isolated from each other and do not have access to each others' private data. The mechanism is achieved by Android discretionary access control (DAC), which originates from Linux's access control mechanism. We provide an overview of the Android security model and inter process communication (IPC) facilities next.
+
+\subsubsection{Thread Model}
+
+The Android Market contains a wide array of third-party applications, and a user may install applications with varying trust levels. Users install applications from unknown developers alongside trusted applications that handle private information such as financial data and personal photographs. For example, a user might install both a highly trusted banking application and a free game application. In most of the cases, the users would expect that the game application not to be able to obtain access to the user's bank account information.
+
+Under the Android security model, all applications are treated as potentially malicious. Each application runs in its own process with a low-privilege user ID, and applications can only access their own files by default. These isolation mechanisms aim to protect applications with sensitive information from malware.
+
+Despite their default isolation, applications can optionally communicate via message passing (which is by convention called inter-process/application communication), which has been and is being utilized by various malware. If a developer accidentally exposes functionality, then the application can be tricked into performing an undesirable action. If a developer sends data to the wrong recipient, it might leak sensitive data.
+
+\subsubsection{Application components and IPC Mechanism}
+
+Intents are delivered to application components, which are logical application building blocks. Android defines four types of components:
+
+\begin{description}
+	\item[Activity] components form the basis of the user interface. Usually, each window of the application is controlled by a certain activity.
+	\item[Service] components run in the background, and remain active even if windows are switched. Services can expose interfaces for communication with other applications.
+	\item[BroadcastReceiver] components react asynchronously to messages from other applications.
+	\item[ContentProvider] components store data relevant to the application, usually in a database. Such data can be shared across applications.
+\end{description}
+
+Android provides a sophisticated message passing system, in which \emph{intents} are used to link applications. An intent is an abstract description of an operation to be performed. It is a message that declares a recipient and optionally includes data. An intent can be thought of as a self-contained object that specifies a remote procedure to invoke and includes the associated arguments. Intents are widely used for both inter-application communication and intra-application communication. Additionally, the operating system sends intents to applications as event notifications. Some of these event notifications are system-wide events that can only be sent by the operating system.
+
+Intents can be sent between three of the four components: Activities, Services, and Broadcast Receivers. Intents can be used to start Activities; start, stop, and bind Services; and broadcast information to Broadcast Receivers. All of these forms of communication can be used with either explicit or implicit Intents. By default, a component receives only internal application Intents (and is therefore not externally invocable).
+
+Intents can be used for explicit or implicit communication. An explicit intent specifies that it should be delivered to a particular application specified by the Intent, whereas an implicit intent requests delivery to any application that supports a desired operation. In other words, an explicit intent identifies the intended recipient by name, whereas an implicit intent leaves it up to the Android platform to determine which application(s) should receive the intent, by the patterns (signatures) of the possible candidate recipients. For example, consider an application that stores contact information. When the user clicks on a contact's street address, the contacts application needs to ask another application to display a map of that location (in Android, it would be a \textsf{ACTION\_VIEW} action with the data URI of the scheme ``\textsf{geo:0,0?q=my+street+address}''). To achieve this, the contacts application could send an explicit intent directly to Google Maps (in most cases, it is enough to call \textsf{intent.setPackage("com.google.android.apps.maps")} followed by a \textsf{startActivity(intent)}), or it could send an implicit intent that would be delivered to any application that says it provides mapping functionality such as Yahoo! Maps (e.g., only \textsf{startActivity(intent)} is called). Using an explicit intent guarantees that it is delivered to the intended recipient, whereas implicit Intents allow for late runtime binding between different applications. {Typically, the resolution result is checked by calling of \textsf{intent.resolveActivity(getPackageManager())}, which is unknown until runtime.}

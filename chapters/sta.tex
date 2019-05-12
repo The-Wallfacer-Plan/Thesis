@@ -2,7 +2,7 @@
 
 \chapter{Type Checking Based Verification} \label{ch:sta}
 
-\section{Background and Introduction}\label{sec:sta_intro}
+\section{Introduction and Motivation}\label{sec:sta_intro}
 
 Mobile security has become increasingly important for our daily life due to the pervasive use of mobile applications.
 Among the mobile devices that are currently in the market, Android devices account for the majority of them so analysis of their security
@@ -216,7 +216,7 @@ Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational 
 constructs based on the abstract permission model.
 Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness with respect to a notion of non-interference.
 
-\subsection{A model of permission-based access control}
+\subsection{A Model of Permission-based Access Control}
 \label{sec:permission_model}
 
 Instead of taking all the language features and the library dependencies of Android apps into account, we focus on the permission model used in inter-component communications within and across apps. Such permissions are used to regulate access to protected resources, such as device id, location information, contact information, etc.
@@ -233,7 +233,7 @@ may impose permissions on other apps who want to
 access its services. Communication between apps is implemented
 through Binder IPC (inter-process communications)~\cite{Android-Binder-IPC}.
 
-In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this paper, however the focus is improving the precision of information leakage detection rather than non-interference certification.}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
+In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than non-interference certification.}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
 
 One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must be careful to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
 
@@ -266,7 +266,7 @@ function. The absence of recursion is not a restriction, since our
 functions are supposed to model communications in Android, which are
 rarely recursive. We denote with $\PS$ the finite set containing all permissions in
 the system. Each app is assigned a static set of permissions drawn
-from this set. The powerset of $\PS$ is written as $\PPS$.  
+from this set. The powerset of $\PS$ is written as~$\PPS$.  
 
 
 For simplicity, we consider only programs manipulating \emph{integers}, so the expressions in our language all have the integer type. Boolean values are encoded as 0 (false) and any non-zero values (true). The grammar for expressions is given below:
@@ -3352,6 +3352,6 @@ Another interesting direction is in modeling runtime permission request. From An
 a policy specifies the absence of a dangerous permission in releasing sensitive information. However, an app can only request for a permission it has explicitly declared in the manifest file, so to this extent, we can statically determine whether a permission request is definitely \emph{not} going to be granted (as it is absent from the manifest), and whether it can {\em potentially} be granted. 
 And fortunately (but unfortunately from a security perspective) the typical scenarios are that users grant all the requested permissions during runtime when requested (in order to gain a better user experience with the app). Therefore one can assume optimistically that all permissions in the manifest are finally granted. In the future, we plan to resolve this issue with weaker assumptions. One feasible approach is to model dangerous permissions in a typing environment separately and allow policies to be non-monotonic on non-dangerous permissions only.
 
-Lastly, our eventual goal is to translate source code typing into Dalvik bytecode typing, following a similar approach done by Gilles Barthe et al~\cite{Barthe:2005ju,Barthe:2006jh,Barthe:2007fxa} from Java source to JVM bytecode. The key idea that we describe in the paper, i.e., precise characterizations of security of IPC channels that depends on permission checks, can still be applied to richer type systems such as those used in the Cassandra project~\cite{Lortz:2014ku} or Gunadi's type system~\cite{Gunadi:2015}. We envision our implementation can piggyback on, say, Cassandra system to improve the coverage of typable applications.
+Lastly, our eventual goal is to translate source code typing into Dalvik bytecode typing, following a similar approach done by Gilles Barthe et al~\cite{Barthe:2005ju,Barthe:2006jh,Barthe:2007fxa} from Java source to JVM bytecode. The key idea, i.e., precise characterizations of security of IPC channels that depends on permission checks, can still be applied to richer type systems such as those used in the Cassandra project~\cite{Lortz:2014ku} or Gunadi's type system~\cite{Gunadi:2015}. We envision our implementation can piggyback on, say, Cassandra system to improve the coverage of typable applications.
 
 
