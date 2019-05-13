@@ -36,11 +36,11 @@ Algo.~\ref{algo:gbf} presents the core procedures of a typical grey-box fuzzing 
 Given a PUT, \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual PUT is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
 The instrumentation can be done statically or dynamically. For static source instrumentation, which is usually applied during the source compilation procedure, with the help of compilation infrastructure such as LLVM~\cite{Lattner:2004:LCF:977395.977673}, GCC~\cite{gcc}. For dynamic binary instrumentation (DBI), this is done with the help of DBI frameworks such as Valgrind~\cite{valgrind}, Intel PIN~\cite{pin}. Logically, this does not belong to a fuzzing but only is only used to collect the statistics for fuzzing.
 The fuzzing loop does the actual mutations and testings against the program.
-\begin{enumerate}
+\begin{enumerate}[1.]
 	\item Based on the seed priority, \emph{seed selection} selects next candidate seed $t$ from the queue which is formed by \Seeds.
 	\item \emph{Seed mutation} procedure determines based on previous execution statistics on $t$ to determine how many mutation chances (\mutChance) will be provided for $t$.
 	\item It enters the \emph{monitored execution} against the variants of $t$ with \mutChance iterations. 
-	\begin{enumerate}
+	\begin{enumerate}[a)]
 	\item Firstly, it applies \emph{seed mutation} on $t$ to generate a seed $t'$. 
 	\item Secondly, it goes to the actual \emph{calibration execution} against $t'$; for statistics collection purpose, the fuzzer usually executes \Prog against $t'$ with continuously $\Ncal$ times. This is due to the fact that a single run on a specific seed may not be stable and the fuzzer needs to collect \emph{average statistics} for further scheduling.
 	\item Finally, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
@@ -52,7 +52,7 @@ In the recent years, many approaches have been proposed to increase the fuzzing 
 
 \section{Security Type Checking on Android}\label{sec:intro-sta}
 
-\subsection{Security Type Checking Preliminaries}
+\subsection{Language-based Type Checking on Information Flow}
 
 The starting point of security type checking based verification is the classification of program variables into different security levels. The most basic distinction is to classify some variables as $L$, meaning low security (public information); and other variables as $H$, meaning high security (private information). The goal is to prevent information in $H$ variables from being leaked improperly. Such leaks could take a variety of forms, but at least we need to prevent information in $H$ variables from \emph{flowing} to $L$ variables.
 

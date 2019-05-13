@@ -1177,7 +1177,6 @@ $$
 \eta\vdash\overline{e} \leadsto \overline{v} \quad
 [\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c_1
 \leadsto \eta_1
-%% \quad\eta_1 \vdash {\lpRES} \leadsto v'
 }
 {\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
 \eta [x \mapsto \eta_1(r) ]}
@@ -1301,9 +1300,6 @@ $\eta_1 \vdash e \leadsto v$
 and $\eta_1' \vdash e \leadsto v'$
 we get
 $v = v'$, so it then follows that  $\eta_2 =_{\app{\Gamma}{P}} \eta_2'.$
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% start of hongxu
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-IF] In this case $c \equiv \lcIF{e}{c_1}{c_2}$ and we have
 $$
 \inference
@@ -1336,8 +1332,6 @@ $$
 $$
 The lemma then follows straightforwardly from the induction hypothesis.
 
-%% By induction on the derivation of $e$, it can be concluded that the types of all the involved variables $v_1,\ldots, v_m$ have type $\Gamma(v_i)=t,i=1,\ldots,m$. Otherwise, since $\eta_1=_{\app{\Gamma}{P}}^{l_{O}}\eta_1'$, the execution will follow the same branch, by induction hypothesis, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-WHILE] $c\equiv\lcWHILE{e}{c_b}$ and we have
 $$
 \inference
@@ -1377,24 +1371,15 @@ induction hypothesis to $\eta_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2$
 and $\eta_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'$,
 we obtain $\eta_2 =_{\app{\Gamma} P} \eta_2'.$
 
-%% In one run of $c_b$, suppose that $\eta_1;A;P\vdash c\leadsto \eta_{1b}$ and $\eta_1';A;P\vdash c\leadsto \eta_{1b}'$, it is deducible that $\eta_{1b}=_{\app{\Gamma}{P}}\eta_{1b}'$. Since there are only finite runs of while body; and by induction on the derivation of typing rules on $c_b$, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-SEQ] In this case we have
   $c\equiv\lcSEQ{c_1}{c_2}$ and $\Gamma;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-LETVAR]
   In this case we have $c\equiv\lcLETVAR{x}{e}{c_b}.$
   If $t(P) \nleq l_O$ then the lemma follows from Lemma \ref{lem:comsafe}.
   Otherwise, this case follows from the induction hypothesis and the fact
   that the mapping for the local variable $x$ is removed
   in $\eta_2$ and $\eta_2'.$
-%% only introduces a fresh variable $v$ and its binding is limited to
-%% $c_b$, $\eta_2=_{\app{\Gamma}{P}}\eta_2'$ can be achieved from
-%% induction on $c_b$ according to the type of $e$, respectively.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% end of hongxu
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-CALL]
 In this case, $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$. Suppose the typing
@@ -1503,14 +1488,9 @@ and $\eta_3' \vdash r \leadsto \eta_3'(r).$
 From Claim 2 above, we have $\eta_3 =_{\Gamma'} \eta_3'$.
 Therefore by Lemma~\ref{lem:expsafe}, we have
 $\eta_3(r) = \eta_3'(r).$
-%% Using this and $(\mathbf{T_4})$, $(\mathbf{E_3})$.
-%% $(\mathbf{E_6})$, and Lemma~\ref{lem:expsafe},
-%% we obtain $v' = v''.$
 \end{itemize}
 The statement we are trying to prove, i.e., $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$,
 follows immediately from Claim 3 above.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% start of hongxu
 \item[T-CP] $c\equiv\lcCP{p}{c_1}{c_2}$ and we have
 $$
 \inference
@@ -1545,9 +1525,6 @@ we get $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$.
 
 For the case where $p \not \in P$, we apply a similar reasoning as above,
 but using Lemma~\ref{lem:down} in place of Lemma~\ref{lem:up}.
-%% If $p\in\Theta(A)$, then $t=t_1$, the conclusion holds by induction on $c_1$. Otherwise, the conclusion holds by induction on $c_2$.
-% end of hongxu
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{ProofEnumDesc}
 \end{proof}
 
@@ -1699,7 +1676,6 @@ By induction on $\tlength{\trace}$. The conclusion holds when $\tlength{\trace}=
 \end{equation*}
 \end{proof}
 
-%%%%%%%
 \begin{lemma}\label{lem:tracepsame}
 $\forall t\in\Tcal$, $p\in\PS$,$(t \cdot \tplusminus{ p})\cdot\tplusminuss{ p} =  t \cdot (\tplusminus{ p}) $, where $\tplusminus{}, \tplusminuss{} \in \{\tplus{},\tminus{}\}$.
 \end{lemma}
@@ -1713,7 +1689,6 @@ By case analysis.
 \end{itemize}
 \end{proof}
 
-%%%%%%%
 \begin{lemma}\label{lem:tracesame}
 $\forall t\in\Tcal$, $(t \cdot \trace)\cdot \trace =  t \cdot \trace $.
 \end{lemma}
@@ -1883,7 +1858,6 @@ By Lemma \ref{lem:monotrace} and  $t_i \leq t_1\sqcup t_2$, we have $t_i\cdot \t
 By subsumption, we have $\Gamma\cdot\trace \vdash e_i : ((t_1\sqcup t_2)\cdot\trace) $.
 Finally, by applying Rule {(T-OP)}, we get $\Gamma\cdot\trace \vdash  \leOP{e_1}{e_2} :((t_1\sqcup t_2)\cdot\trace)  $.
 \end{ProofEnumDesc}
-%%%%%%%%%%
 The proof of {\ref{lem:ptrsound-2}}:
 \begin{ProofEnumDesc}
 
@@ -2140,7 +2114,7 @@ Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vd
 Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
 \end{ProofEnumDesc}
-%%%%%%%%%%
+
 The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
 \begin{ProofEnumDesc}
 \item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
@@ -2182,12 +2156,10 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{
 }
 {\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
 \end{equation*}
-%where $t\cdot \trace = (\Gamma\cdot\trace)(x)\sqcap \app{t_b}{\Theta(A)}$.\\
 From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
 Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
 From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
 Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
-%Finally, it is easy to deduce $t \leq_{\trace} \Gamma(x)\sqcap \app{t_b}{\Theta(A)} $.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
@@ -2198,7 +2170,6 @@ Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}
 \end{equation*}
 where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
 
-%By Lemma \ref{lem:traceorder-whole},
 Clearly,
 $(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
 and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
@@ -2218,8 +2189,6 @@ t_1 \leq_{\trace::\tplus p} s_1 \\
 t_2 \leq_{\trace::\tminus p} s_2
 \end{array}
 \end{equation*}
-%Let $s$ be $$.
-%a type such that $s(P) = s_1(P)$ if $p\in P$, otherwise $s(P) =s_2 (P)$.
 Then by Rule {(TT-CP)}, we have
 $$
 \Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
@@ -2255,7 +2224,6 @@ Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s
 From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
 
 \end{ProofEnumDesc}
-%%%%%%%%%%
 The proof of \ref{lem:ptrcomplete-3}: \\
 Clearly, we have
 \begin{equation*}
@@ -2306,7 +2274,6 @@ Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vd
 Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
 \end{ProofEnumDesc}
-%%%%%%%%%%
 The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
 \begin{ProofEnumDesc}
 \item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
@@ -2319,7 +2286,7 @@ By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
 $\Gamma; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Gamma(x)$.
 Then by Rule {(TT-ASS)},  $\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} :\Gamma(x)$.
 
-\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
+\item[T-LETVAR]
 In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
@@ -2348,12 +2315,10 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{
 }
 {\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
 \end{equation*}
-%where $t\cdot \trace = (\Gamma\cdot\trace)(x)\sqcap \app{t_b}{\Theta(A)}$.\\
 From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
 Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
 From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
 Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
-%Finally, it is easy to deduce $t \leq_{\trace} \Gamma(x)\sqcap \app{t_b}{\Theta(A)} $.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
@@ -2364,7 +2329,6 @@ Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}
 \end{equation*}
 where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
 
-%By Lemma \ref{lem:traceorder-whole},
 Clearly,
 $(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
 and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
@@ -2384,8 +2348,6 @@ t_1 \leq_{\trace::\tplus p} s_1 \\
 t_2 \leq_{\trace::\tminus p} s_2
 \end{array}
 \end{equation*}
-%Let $s$ be $$.
-%a type such that $s(P) = s_1(P)$ if $p\in P$, otherwise $s(P) =s_2 (P)$.
 Then by Rule {(TT-CP)}, we have
 $$
 \Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
@@ -2421,7 +2383,6 @@ Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s
 From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
 
 \end{ProofEnumDesc}
-%%%%%%%%%%
 The proof of \ref{lem:ptrcomplete-3}: \\
 Clearly, we have
 \begin{equation*}
@@ -2603,7 +2564,7 @@ Then by induction on $e_i$, $\Gamma\theta;\trace \vdash_{t} e_i: t_i\theta$.
 So by Rule {(TT-OP)}, we have $\Gamma\theta;\trace \vdash_{t} \leOP{e_1}{e_2}: t_1\theta\sqcup t_2\theta $.
 Clearly, $t_1\theta\sqcup t_2\theta = (t_1\sqcup t_2)\theta$.
 \end{ProofEnumDesc}
-%%%%%%%%%%%%%%%%
+
 The proof of \ref{lem:cgrsound-2}:%\\
 \begin{ProofEnumDesc}
 \item[TG-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
@@ -2684,19 +2645,17 @@ Moreover, it is clear that $(\omerge{p}{t_1}{t_2})\theta = \omerge{p}{(t_1\theta
 
 \item[others] By induction.
 \end{ProofEnumDesc}
-%%%%%%%%%%%%%%%%%
 The proof of \ref{lem:cgrsound-3}:\\
 \begin{equation*}
 \inference
 {
 [\overline{x}: \overline{\alpha},\lpRES:\beta]; \epsilon; B \vdash_{g} c : s  \leadsto C \\
-%C = C' \cup \{(\epsilon, \alpha_b \leq s)\}
 }
 {
 \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
 }
 \end{equation*}
-Since $\theta \vDash C$,  %$\theta\vDash C'$ and $\theta(\alpha_b)\leq_{\trace}s\theta$.
+Since $\theta \vDash C$,
 by \ref{lem:cgrsound-2} on $c$, we have
 $$
 [\overline{ x}: \overline{\theta(\alpha)},\lpRES:\theta(\beta)];\epsilon; B \vdash_{t} c : s\theta
@@ -2777,7 +2736,6 @@ In the remaining we prove the following statement:
 \exists C, t',\theta.~\Gamma_{0};\trace; A \vdash_{g} c : t' \leadsto C,~ dom(\theta_{0})~\sharp~ dom(\theta),\\
 \theta_{0}\cup\theta \vDash C,  \textrm{ and } t'(\theta_{0}\cup\theta) = t \tag{2'}
 \end{gather*}
-%\Gamma_{0}(\theta_{0}\cup\theta) =\Gamma
 %%%%%%%
 \begin{ProofEnumDesc}
 \item[TT-ASS] In this case we have $c\cong  \lcASS{x}{e}$ and the following derivation
@@ -3107,8 +3065,7 @@ After saturation, the example set $C_{eg}$ is
 }
 \]
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \begin{lemma}\label{lem:tracesub1}
@@ -3308,6 +3265,71 @@ The type inference system is sound, complete and decidable.
 \end{itemize}
 \end{proof}
 
+
+\section{Related Work}
+
+There is a large body of work on language-based information flow security. We discuss only closely related work.
+
+We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:sta_intro}.
+
+
+Flow-sensitive and value-dependent information flow type systems
+provide a general treatment of security types that may depend on other
+program variables or execution
+contexts~\cite{Toby2016csf,Polikarpova16,Dependent_SIFUM_Type_Systems-AFP,Dependent_SIFUM_Refinement-AFP,Murray:2015jm,Li:2016jb,Zhang:2015bc,Li:2015vw,Lourenco:2015:DIF,Lourenco13,Swamy13,Yang12POPL,MantelSS11,Nanevski11,SwamyCC10,Zheng:2007cd,Tse07,Li:csf17,Hunt:2006:FST:1111037.1111045}.
+Hunt and Sands~\cite{Hunt:2006:FST:1111037.1111045} proposed a
+flow-sensitive type system where order of execution is taken into
+account in the analysis, and demonstrated that the system is precise
+but can be simply described.
+Mantel et. al.~\cite{MantelSS11} introduced a rely-guarantee style
+reasoning for information flow security in which the same variable can
+be assigned different security levels depending on whether some
+assumption is guaranteed, which is similar to our notion of
+permission-dependent security types.
+Li and Zhang~\cite{Li:csf17} proposed 
+both flow-sensitive and path-sensitive information flow analysis with
+program transformation techniques and dependent types.
+Information flow type systems that may depend on execution contexts
+have been considered in work on program synthesis~\cite{Polikarpova16} and
+dynamic information flow control~\cite{Yang12POPL}. Our permission context can be seen as a
+special instance of execution context, however, our intended
+applications and settings are different from \cite{Yang12POPL,Polikarpova16},
+and issues such as parameter laundering does not occur in their
+setting. 
+Louren\c{c}o and Caires~\cite{Lourenco:2015:DIF} provided a precise dependent type
+system where security labels can be indexed by data structures, which
+can be used to encode the dependency of security labels on other
+values in the system.
+It may be possible to encode our notion of security types as a
+dependent type in their setting, by treating permission sets
+explicitly as an additional parameter to a function or a service, and
+to specify security levels of the output of the function as a type
+dependent on that parameter.  Currently it is not yet clear to us how
+one could give a general construction of the index types in their type
+system that would correspond to our security types, and how the merge
+operator would translate to their dependent type constructors, among
+other things.
+We leave the exact correspondence to the future work.
+
+
+Recent research on information flow has also been conducted to deal
+with Android security issues
+(\cite{Ernst:2014,Chin:2011wa,Nadkarni:2016tf,Lortz:2014ku,Gunadi:2015,Chaudhuri:2009ii,Fuchs2010}).
+SCandroid~\cite{Chaudhuri:2009ii,Fuchs2010} is a tool automating
+security certification of Android apps that focuses on typing
+communication between applications. Unlike our work, they do not
+consider implicit flows, and do not take into account access control
+in their type system. Ernst et al~\cite{Ernst:2014} proposed a
+verification model, SPARTA, for use in app stores to guarantee that
+apps are free of malicious information flows. Their approach requires
+the collaboration between software vendor and app store auditor and
+the additional modification of Android permission model to fit for
+their Information Flow Type-checker;
+soundness proof is also absent. Our work is done in the context of
+providing information flow security \emph{certificates} for Android
+applications, following the Proof-Carrying-Code  architecture by
+Necula and Lee~\cite{necula:pcc:1996} and does not require extra
+changes on existing Android application supply chain systems.
 
 
  \section{Conclusion and Future Work}\label{sec:conclusion}

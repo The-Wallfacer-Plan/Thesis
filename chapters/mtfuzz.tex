@@ -189,9 +189,6 @@ This helps the fuzzer to track more thread-interleaving transitions.
 
 
 
-
-
-
  \section{System Overview}
 
 Fig.~\ref{fig:workflow} depicts the overall workflow of \mtfuzz. It contains three major components: (1) static-analysis-guided instrumentation (shown in the \emph{top center} area), (2) dynamic fuzzing (shown in the \emph{bottom center} area), and (3) concurrency bug replay (shown in the \emph{left and right} area). During instrumentation (~\S~\ref{sec:instrument}), we firstly compute the thread-aware ICFG (interprocedural control-flow graph) in \S~\ref{sec:tcg} for a multithreaded program (\ProgO). Based on this ICFG, we perform three categories of instrumentation: the one focusing on exploring more multithreading relevant paths (\S~\ref{sec:instrument_explore}), the one aiming to intervene the thread scheduling (\S~\ref{sec:instrument_schedule}) and the one that provides the threading context (\S~\ref{sec:instrument_thread_ctx}) to eventually produce the instrumented program~\Prog. During dynamic fuzzing~\S~\ref{sec:fuzz}, based on the instrumentation feedback, we apply seed selection (\S~\ref{sec:seed_select}), calibration execution (\S~\ref{sec:calibrate}) and seed triaging (\S~\ref{sec:seed_save}) that are turned for generating multithreading relevant seeds. Since the fuzzing procedure can only detect \emph{vulnerabilities} that are resulted from crashed seeds, we need a concurrency bug detector to replay with the generated seeds to see whether they can trigger certain concurrency violations; this will be covered in the evaluation section (\S~\ref{sec:eval_overall}).
@@ -296,14 +293,6 @@ Finally, since \MTIns only selectively instruments the instructions inside \mtis
 
 
 
-
-
-
-
-
-
-
-
 \subsection{Schedule Intervention Instrumentation}\label{sec:instrument_schedule}
 
 Without specifying any schedule policy or priority, the operation systems usually determine the actual schedule dynamically~\cite{tlpi,posixstd}. As mentioned in \S\ref{sec:afl_issue_mt}, without scheduling intervention the calibration execution during fuzzing may not exhibit diverse interleavings, which is unsatisfactory for covering new transitions. 
@@ -347,14 +336,6 @@ To implement $\func{cov\_new\_mt\_ctx(t)}$, we track the context of calling a mu
 
 
 
-
-
-
-
-
-
-
-
 \begin{algorithm}[t]
 \SetKwInOut{Input}{input}
   \SetKwInOut{Output}{output}
@@ -373,11 +354,6 @@ To implement $\func{cov\_new\_mt\_ctx(t)}$, we track the context of calling a mu
   }
   \caption{Algorithm to Select Next Seed}\label{algo:select_seed}
 \end{algorithm}
-
-
-
-
-
 
 
 \subsection{Calibration Execution}\label{sec:calibrate}
@@ -421,34 +397,6 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
 \textbf{x265} & x265-3.0\_Au+3 & native & \pbin{x265} --input FILE --pools 4 -F 2 -o & 9.7M & 78.3s & 22992 & 412555 & 89408 & 288.9\% \\ \thickhline
 \end{tabular}
 \end{table*}
-
-
-
-%\begin{table*}[ht]
-%\caption{Overall fuzzing and replaying results on \mtfuzz, \mtfuzzc and AFL.}
-%\label{tbl:eval_overall}
-%\centering
-%\tiny
-%\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
-%\hline
-%\multirow{3}{*}{\textbf{ID}} & \multicolumn{7}{c|}{\textbf{\mtfuzz}} & \multicolumn{7}{c|}{\textbf{\mtfuzzc}} & \multicolumn{7}{c|}{\textbf{AFL}} \\ \cline{2-22}
-%& \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}C-\\ Bug\end{tabular}}} & \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}C-\\ Bug\end{tabular}}} & \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}C-\\ Bug\end{tabular}}}  \\ \cline{2-7} \cline{9-14} \cline{16-21}
-%& \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\textbf{\testsRatio}}  & \textbf{\vulsNUM} &  \textbf{\vulsMT} & \textbf{\vulsST} &  & \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\testsRatio} & \textbf{\vulsNUM} & \textbf{\vulsMT}  & \textbf{\vulsST} &  & \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\testsRatio} & \textbf{\vulsNUM} & \textbf{\vulsMT} & \textbf{\vulsST} &  \\ 
-%\hline
-%\textbf{lbzip2-c} & \gres{4503 } & \gres{1637} & \gres{36.4\%} &  0    &   0   &   0 & 1                 &  4155   &  1352  &  32.5\%  & 0   & 0 & 0 & 1                 &  3350   & 753   &  22.5\%  &  0   & 0 & 0 & 1          \\ \hline
-%\textbf{pbzip2-c} & \gres{253  } & \gres{78  } & \gres{30.8\%} &  4    &   \gres{1}   &  0 & 0           &  227    &  59    &  26.0\%  & \gres{6}   & \gres{1} & 0 & 0   &  175    & 50    &  28.6\%  &  0   & 0 & 0 & 0          \\ \hline
-%\textbf{pbzip2-d} & \gres{1231 } & \gres{47  } & \gres{3.8\% } &  \gres{5}    &   \gres{1} & 0  & 0      &  982    &  11    &  1.2\%   & 0   & 0 & 0 & 0                 &  926    & 7     &  0.8\%   &  0   & 0 & 0 & 0          \\ \hline
-%\textbf{pigz-c}   & \gres{921  } & \gres{789 } & \gres{85.7\%} &  0    &   0   &   0 & 1                 &  836    &  673   &  80.5\%  & 0   & 0 & 0 & 1                 &  737    & 592   &  80.3\%  &  0   & 0 & 0 & 1          \\ \hline
-%\textbf{pxz-c}    & \gres{3658 } & \gres{2523} & \gres{69.0\%} &  0    &   0   &   0 & 0                 &  2804   &  1675  &  59.7\%  & 0   & 0 & 0 & 0                 &  2305   & 958   &  41.6\%  &  0   & 0 & 0 & 0          \\ \hline
-%\textbf{xz-c}     & \gres{1598 } & \gres{493 } & \gres{30.9\%} &  0    &   0   &   0 & 0                 &  1359   &  268   &  19.7\%  & 0   & 0 & 0 & 0                 &  1327   & 257   &  19.4\%  &  0   & 0 & 0 & 0          \\ \hline
-%\textbf{gm-cnvt}  & \gres{4677 } & \gres{3265} & \gres{69.8\%} &  0    &   0   &   0 & \gres{5}          &  4036   &  2092  &  51.8\%  & 0   & 0 & 0 & 4                 &  3921   & 1872  &  47.7\%  &  0   & 0 & 0 & 3          \\ \hline
-%\textbf{im-cnvt}  & \gres{4355 } & \gres{3671} & \gres{84.3\%} &  \gres{21} &  \gres{4} &  1 & \gres{3}  &  4028   &  3257  &  80.9\%  & 14  & 2 & 1 & 3                 &  3289   & 2460  &  74.8\%  &  8   & 2 & 1 & 2          \\ \hline
-%\textbf{cwebp}    & \gres{5701 } & \gres{3347} & \gres{58.7\%} &  8    &   0   &   1 & 0                 &  5549   &  3095  &  55.8\%  & \gres{11}  & 0 & 1 & 0          &  4755   & 2234  &  47.0\%  &  9   & 0 & 1 & 0          \\ \hline
-%\textbf{vpxdec}   & \gres{14665} & \gres{3656} & \gres{24.9\%} &  336  &   \gres{2}   &   2 & \gres{3}   &  13927  &  3302  &  23.7\%  & \gres{364} & 1 & 2 & 1          &  13046  & 3117  &  23.9\%  &  345 & 1 & 2 & 1          \\ \hline
-%\textbf{x264}     & \gres{5023 } & \gres{4832} & \gres{96.2\%} &  \gres{7}    &   1   &   0 & \gres{9}   &  4457   &  4197  &  94.2\%  & 6   & 1 & 0 & 6                 &  4465   & 4252  &  95.2\%  &  3   & 1 & 0 & 4          \\ \hline
-%\textbf{x265}     & 6433  & \gres{5012}  & \gres{78.0\%}  &  29   &   0   &   1 & 0                           &  \gres{6743} & {5007}  &  74.3\%  & 43  & 0 & 1 & 0      &  6420   & 4701  &  73.2\%  &  \gres{49}  & 0 & 1 & 0   \\ \hline
-%\end{tabular}
-%\end{table*}
 
 
 
@@ -778,7 +726,34 @@ Indeed fuzzing single-threaded programs can reduce the non-deterministic behavio
 This approach seems straightforward however is not quite practical. The reason is that concurrency bug detection techniques brings considerate overhead: even the most widely used \ts still claims to have $5x\sim 15x$ overhead compared to the regularly compiled programs~\cite{kcc:tsan,lwn_tsan}. On the other hand, GBFs usually generate large numbers of tests that the bottleneck becomes the execution on the \ts instrumented programs. In fact, in our empirical study on lbzip2's~\cite{lbzip2} parallel decompression functionality with AFL, after running 20 hours, a \ts instrumented binary had an average speed of 2.57 executions per second, with only 18 paths explored as decided by AFL; while the binary without \ts could run as fast as 38.9 executions per second, with more than 10000 paths explored. The worst thing is that if \ts does not report any bugs in one execution, it cannot in turn provide any feedback that guide the mutation or seed selection. It is however may be possible to integrate other exhaustive concurrency bug detectors such as UFO~\cite{icse18_ufo} to apply classifications to avoid inefficient mutations on the generated seeds.
 
 
+\section{Related Work}
 
+The work of this Chapter is relevant with the following research aspects.
+
+\subsection{Static Concurrency Bug Prediction}
+Static concurrency bug predictors aim to approximate the runtime behaviours of a concurrent program without actual execution. Several static approaches have been proposed for analyzing pthread and Java  programs~\cite{pratikakis2006locksmith,Vojdani2009,DBLP:conf/cgo/SuiDX16,Liupldi2018,racerdoopsla2018}. LOCKSMITH~\cite{pratikakis2006locksmith} uses existential types to correlate locks and data in dynamic heap structures for race detection. Goblint~\cite{Vojdani2009} relies on a thread-modular constant propagation and points-to analysis for detecting concurrent bugs by considering conditional locking schemes. FSAM~\cite{DBLP:conf/cgo/SuiDX16} proposes a sparse flow-sensitive pointer analysis for pthread C programs  using context-sensitive thread interleaving analysis. 
+D4~\cite{Liupldi2018} presents a real-time concurrency bug detection approach using parallel and incremental pointer analysis. 
+Currently \mtfuzz relies on lightweight static results to guide GBFs to perform three categories of instrumentation for efficient fuzzing. We envision that \mtfuzz can benefit more by integrating insights from these aforementioned static bug prediction techniques.
+
+\subsection{Dynamic Analysis on Concurrency Bugs}
+There also exists a large body of dynamic analyzers.
+Essentially these can be divided into two categories: the concurrency bug detection techniques and the strategies to trigger violation conditions that can be captured by these detection techniques.
+
+
+Dynamic detectors~\cite{pldi09_fasttrack,lockset_SavageABNS97,kcc:tsan,JinTLL10,YuNPP12} typically instrument target programs and monitor the memory and synchronization events~\cite{mtbugs_survey}. The two fundamentals are \emph{happens-before model}~\cite{pldi09_fasttrack} and \emph{lockset models}~\cite{lockset_SavageABNS97}; the former reports a race condition when two threads access a shared memory location and the accesses are
+causally unordered, and the latter considers a potential race if two threads access a shared memory location without locking. Modern detectors such as \ts~\cite{kcc:tsan}, Valgrind~\cite{helgrind} usually apply a hybrid strategy to combine these two models for accuracy and efficiency. Our work does not aim to improve the existing dynamic detection techniques. In fact, we rely on \ts to detect concurrency bugs.
+
+
+The other dynamic analyses focus on how to trigger the concurrency violation conditions. These include the random testings that mimic non-deterministic program executions~\cite{Sen07,Sen08,JoshiPSN09,ParkS08,CaiC12}, the regression testing methods~\cite{TerragniCZ15,YuHW18} that targets interleavings from code changes, the model checking~\cite{FlanaganG05,ZaksJ08,YangCGK07,yang2008inspect} and hybrid constraint solving~\cite{pldi14_maxmodel,Huang15,icse18_ufo} approaches that systematically checks or execute possible thread schedules, or heuristically avoid fruitless executions~\cite{GuoKWYG15,GuoKW16}. Our work differs from all these works in that our goal is to cover more execution paths in the programs by generating more valuable seeds. This has two benefits. On one hand, usually the provided seeds are not able to cover enough paths even when the PUTs are executed with single thread, and \mtfuzz fills the gap. On the other hand, seeds that execute different parts of the code segments tend to require different execution time, memory, and other resources, which influences the actual interleavings intrinsically. Indeed, we also provide the schedule-intervention instrumention. However the main goal is to diversify the schedule introduced interleavings (i.e., transitions).
+
+\subsection{Dynamic Fuzzing Techniques}
+There have been quite a few of fuzzing techniques to improve the effectiveness of exposing vulnerabilities.
+
+For general-purpose fuzzing~\cite{Bohme:2016:CGF,LiCMLLT17,CollAFL,Angora,FairFuzz,redqueen}, the most common strategies are to utilize more feedbacks for execution path explorations. Steelix~\cite{LiCMLLT17} applies a lightweight binary transformation to keep track of program states during magic byte comparisons, which helps guide where and how the mutations will be processed. Angora~\cite{Angora} distinguishes different calling context when calculating deputy instruction transitions and is able to keep more valuable seeds. \mtfuzz inspires from these two techniques in that it aims to provide more valuable feedback for multithreading environment: the stratified coverage-oriented instrumentation on suspicious interleaving scope \mtiscope bookkeeps more transitions for multithreading part, and the thread-context instrumentation additionally differentiates execution context of various threads.
+
+Other fuzzing techniques focus on detecting certain categories of bugs or vulnerabilities~\cite{Bohme:2017:DGF,hawkeye,perffuzz,slowfuzz,junjie:2017sp:skyfire,superion,smart_gbf}.  \mtfuzz focuses on the concurrently executed segments and aims to reveal more vulnerabilities and bugs in a multithreaded environment. Therefore, our strategies for seed selection, power scheduling are all tuned for this purpose.
+
+There are some fuzzing work for multithreading induced vulnerabilities. RAZZER~\cite{razzer} uses the deterministic thread interleaving technique implemented at the hypervisor and generates tests that can trigger data races in Linux kernel. This is a kernel fuzzer whose generated tests correspond to sequences of syscalls; while \mtfuzz mutates the input file content of an application program. Liu et al~\cite{LiuZLZ018} is the most relevant to \mtfuzz in that it is also a file fuzzer that works for multithreaded user-space programs. One major difference is their work only detects concurrency bug induced vulnerabilities. In terms of methodologies, their work relies on heavyweight static analysis from LOCKSMITH~\cite{pratikakis2006locksmith} therefore it faces scalability issues. On the other hand, we propose our novel exploration-oriented instrumentation and the comprehensive strategies to generate more seeds relevant with multithreading. The approach is both scalable and effective.
 
 
 

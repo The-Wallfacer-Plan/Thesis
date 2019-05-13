@@ -8,7 +8,6 @@
    frame=single,
    tabsize=2,
    commentstyle=\it,
- %  basicstyle=\scriptsize,
    basicstyle=\small,
    keywordstyle=\bfseries,
    language=C,
@@ -39,7 +38,6 @@
 
 \makeatletter
 \def\maketag@@@#1{\hbox{\m@th\normalfont\scriptsize#1}}
-%\def\maketag@@@#1{\hbox{\m@th\bfseries\scriptsize#1}}
 \makeatother
 \newcommand*{\ruleTagMath}[1]{\scriptsize\text{(#1)}}
 \newcommand*{\ruleTagText}[1]{{\text{#1}}}
@@ -86,7 +84,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\setlist{nosep}
 \SetLabelAlign{myAlign}{\textup{[}#1\textup{]}:}
 \newlist{ProofEnumDesc}{description}{2}
 \setlist[ProofEnumDesc]{style=sameline,nosep}

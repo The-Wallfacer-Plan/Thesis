@@ -6,16 +6,6 @@
 \section{Introduction and Motivation}
 
 
-
-%Security testing is one of the most effective vulnerability detection techniques for modern software.
-%Among the security testing techniques, fuzzing~\cite{fuzzing1990}, or fuzz testing, is regarded as the most effective and scalable, which~provides various inputs to the PUT and monitors for abnormal behaviors~(e.g., stack or buffer overflow, invalid read/write, assertion failures, or memory leaks)~\cite{fuzzSurvey}. 
-%Since the proposal, fuzzing has gained the popularity in industry and academia, and evolved into different types of fuzzers for different testing scenarios.
-%Fuzzers can be classified as black-box, white-box or grey-box~\cite{chen2018systematic}, according to their awareness of the internal structure of the PUT.
-%Recently, grey-box fuzzers have been widely-used and proven to be effective~\cite{Bohme:2016:CGF}.
-%Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017:DGF,junjie:2017sp:skyfire,FairFuzz,CollAFL,Angora} receive plenty of attentions.
-
-
-
 In general, the existing grey-boxing fuzzers (GBFs) aim to cover as many program states as possible within a limited time budget.
 However, there exist several testing scenarios in which only particular program states are concerned and required to be sufficiently tested. 
 For example, if \emph{MJS}~\cite{mjs} (a JavaScript engine for embedded devices) has a vulnerability discovered on MSP432 ARM platform, similar vulnerabilities may occur in the corresponding code for the other platforms.
@@ -143,22 +133,9 @@ The challenges of the existing DGF roots in the following aspects: 1) the target
 in particular, the indirect calls among functions should not be ignored. If the above two issues are not well handled, the distance-based guiding mechanism for DGF will get hindered and fail in such cases.
 
 
-
-
-
-
-
-
 \subsection{Desired Properties of Directed Fuzzing} \label{subsec:dp}
 
-
-
-
-
 As observed from the above example, an ideal DGF should possess the following desired properties.
-
-
-
 
 \begin{figure}[t]
 	\centering
@@ -180,10 +157,6 @@ However, for DGF, awareness of all possible traces towards the targets is not en
 
 To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a grey-box fuzzing setting.
 
-
-
-
-
 \subsubsection{\textbf{P3}. DGF should select and schedule the seeds to reach target sites \textbf{rapidly}.} \label{subsec:p3}
  AFL determines how many new inputs should be generated (i.e., ``energy'') from a test seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular targets} as fast as possible. Hence, power scheduling in DGF should determine how many new inputs should be generated from a test seed in order to get a new mutated input that leads to the target sites~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of test seeds to reach target sites as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target sites. 
  
@@ -197,12 +170,6 @@ In general, these mutators can be categorized into two levels: fine-grained muta
 For the example in Fig.~\ref{fig:call_chain}, consider the case where the DGF has already reached the target function via trace $\langle a, b, c, d, T, Z\rangle $, but crash is not triggered yet.
 Now, the DGF should allocate less chances for coarse-grained mutations for the input of $\langle a, b, c, d, T, Z\rangle $.
 Meanwhile, if DGF has just started up and $\langle a, b, c, d, T, Z\rangle $ has not been reached yet, then the DGF should give more chances for coarse-grained mutations.
-%
- 
-
-
-
-
 
 
 
@@ -217,7 +184,6 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 
 \begin{figure*}[ht]
 	\includegraphics[width=.99\columnwidth]{res/dfot/overview.pdf}
-%	\vspace{-20pt}
 	\caption{Approach Overview of \dFOT}
 	\label{fig:overview}
 \end{figure*}
@@ -265,14 +231,6 @@ Hence, \aflgo lacks the adaptive mutation strategies, which will mutate arbitrar
 \end{enumerate}
 
 
-
-
-
-
-
-
- 
-
 \section{Approach Overview}
 
 In this section, we briefly introduce the workflow of our proposed approach, named \dFOT. An overview of \dFOT is given in Fig.~\ref{fig:overview}, which~consists of two major components, i.e., \textit{static analysis} and \textit{fuzzing loop}. 
@@ -308,8 +266,7 @@ During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer
 After the energy is determined, the fuzzer adaptively allocates mutation budgets on two different categories of mutations according to mutators' granularities on the seed (\S\ref{subsec:mutationStr}).
 Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those that have more energy or that have reached the target functions (\S\ref{subsec:prioritization}).
 
-%
- 
+
 
 \section{Methodology}
 
@@ -653,12 +610,6 @@ By combining all the static and dynamic techniques mentioned above, for the CVE 
 
 
 
-
-
-
-%
- 
-
 \section{Evaluation}\label{sec:eval}
 
 We implemented our static instrumentation on top of FOT's static instrumentation mode (c.f.~\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
@@ -747,8 +698,6 @@ Furthermore, the number of occurrences of $C_N>1$ and the number of occurrences 
 As to the overhead of the static directedness utility computation, except for \emph{cxxfilt}, which requires approximately 12.5 minutes to generates the call graph, call graphs of most other projects can be generated in seconds. For cxxfilt, the performance degradation lies in the inherent complexity of the project itself. From the program statistics in Table~\ref{tbl:stats}), it is obvious that the code base is bigger and the program structures are more complicated than the others. In fact, the bottleneck of the analysis is inside the pointer analysis implemented in SVF tool. We believe that it is worth the effort due to the fact that this procedure is done purely statically. And as long as the source code does not change, the call graph can be reused.
 
 
-%
- 
 \subsection{Crash Exposure Capability}\label{subsec:evalcrashrepro}
 
 The most common application of directed fuzzing is to try to expose the crash with some given suspicious locations that are supposed to be vulnerable, where the suspicious locations can be detected with the help of other static or dynamic vulnerability detection tools.
@@ -850,12 +799,6 @@ From the results, we can conclude that the dynamic analysis strategies used in \
 
 
 
-
-
-
-
- 
-
 \begin{table}[t]
     \small
     \centering
@@ -940,11 +883,6 @@ With the experiments conducted in Tables~\ref{tbl:cr_aflgo_binutils},  \ref{tbl:
 
 In practice, \dFOT also demonstrates its power in exposing crashes with the help of other vulnerability detection tools. For example, for Oniguruma and MJS projects, with the Clang Static Analyzer~\cite{csa} (the built-in and our customized checkers) reporting suspicious vulnerability locations (i.e., target sites) in the programs, \dFOT successfully detected the crashes by directing the fuzzing to those locations. Interestingly, for MJS, we marked several of the authors' newly patched program locations, and detected a few other crashes even further. As a result, \dFOT has reported more than 28 crashes in projects Oniguruma and MJS. We have also found multiple vulnerabilities in other projects such as Intel XED x86 encoder decoder (4 crashes), Espruino JavaScript interpreter (9 crashes).  All these crashes have been confirmed and fixed, and 15 of them have been assigned with CVE IDs. 
 
-\vspace{-2mm}  
-
-
-
-
 \subsection{Threats to Validity}
 
 The internal threats of validity are twofold:  1).  Several components of \dFOT (e.g., Algo.~\ref{algo:mutateStr} and \ref{algo:coarseMutate}) utilize  the predefined thresholds to make decision. Currently, these thresholds (e.g., $\gamma=0.1$, $\delta=0.4$, $\sigma=0.2$, $\zeta=0.8$) are configured according to our preliminary experiments and  previous experience in fuzzing. Systematic research will be planned to investigate the impact of these thresholds and figure out the best configurations. 
@@ -952,7 +890,49 @@ The internal threats of validity are twofold:  1).  Several components of \dFOT 
 
 The external threats rise from the choice of evaluation dataset and the CVEs for crash reproduction. Despite we adopt the program Binutils that is used in \aflgo~\cite{Bohme:2017:DGF}, the evaluation results still need to be generalized with an empirical study on more projects in future. Besides, the tested CVEs in \emph{MJS} and  \emph{Oniguruma} are \emph{not selectively} chosen for the purpose to show the advance of \dFOT --- we pick them since they are reported within a recent period. 
 
+\section{Related Work}
 
+The work in this chapter is related to the following lines of research:
+
+\subsection{Directed Grey-box Fuzzing}
+Some other DGF techniques have been proposed besides \dFOT.
+\aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed grey-box fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to inputs that hold the trace closer to the target sites.
+In \aflgo, the authors proposed a novel idea of calculating the distance between the input traces and the target sites.
+This is a good starting point by combining such target distance calculation with grey-box fuzzer.
+\dFOT is inspired from \aflgo however provides significant improvements on both the static analysis and dynamic fuzzing.
+As shown in \S\ref{sec:eval}, \dFOT generally outperforms \aflgo in terms of reaching the targets and reproducing crashes, thanks to embedding in-depth consideration about the four desired properties into the design.
+SeededFuzz~\cite{tase16:seededfuzz} uses various program analysis techniques to facilitate the generation and selection of initial seeds which helps to achieve the goal of directed fuzzing.
+Equipped with the improved seed selection and generation techniques, SeededFuzz can reach more critical sites and find more vulnerabilities.
+The core techniques of SeededFuzz are orthogonal to \dFOT because SeededFuzz focuses on the quality of initial seed inputs while \dFOT focuses on the four desirable properties regardless of initial seeds.
+
+Note that our proposed four properties can also be applied for DGF on programs where the source code is unavailable. In fact, we are extending {\dFOT} to be able to work on the binary-only fuzzing scenarios. Technically, the target sites can be determined by binary-code matching techniques on attack surface identification~\cite{bingo,tse18}; the static analysis can be achieved with binary analysis tools such as IDA~\cite{ida}; and the instrumentation can be done by dynamic binary instrumentators such as Intel Pin~\cite{pin}. We envision the extended {\dFOT} can piggyback on these techniques and demonstrate its effectiveness even further.
+
+\subsection{Directed Symbolic Execution}.
+Directed Symbolic Execution (DSE) is one of the most related techniques to DGF as it also aims to execute target sites of the PUT.
+Several works have been proposed for DSE~\cite{Godefroid:2005:DART, Ma:2011:DSE:2041552.2041563, Haller:2013:DOG, Jin:2012, Marinescu:2013:katch}.
+These DSE techniques rely on heavyweight program analysis and  constraint-solving to reach the target sites systematically.
+A typical example of DSE is Katch~\cite{Marinescu:2013:katch}, which relies on symbolic execution, augmented by several synergistic heuristics based on static and dynamic program analysis.
+Katch can effectively find bugs in incomplete patches and increase the patch coverage comparing to manual test suite.
+However, as discussed in ~\cite{Bohme:2017:DGF}, DGF is generally more effective on real-world programs as DSE techniques suffer from the infamous path-explosion problem~\cite{Stephens2016Driller}.
+In contrast to DSE, \dFOT relies on  lightweight program analysis, which ensures its scalability and execution efficiency.
+
+\noindent\textbf{Taint Analysis Aided Fuzzing}.
+Taint analysis is also widely used to facilitate directed white-box testing~\cite{Ganesh:2009:TDW, rawat:2017, wangwgz:2010, Angora,FairFuzz}.
+The key intuition of using taint analysis in fuzzing is to identify \emph{certain parts} of the input which should be mutated with priority.
+In such a way, the fuzzer can drastically reduce the search space for reaching certain desired locations.
+Taint based approaches are more scalable than the DSE techniques and can help the fuzzer to reach certain preferable locations such as rare branches in Fairfuzz~\cite{FairFuzz} or checksum related code in TaintScope~\cite{wangwgz:2010}.
+Different from \dFOT, these techniques are not fed with \emph{given target sites} (e.g., file name and line numbers in our scenario) but based on source-sink pairs.
+Thus, such techniques do not have advantages in scenarios where the targets are clear, such as patch testing and crash reproduction. 
+
+
+\subsection{Coverage-based Grey-box Fuzzing}.
+The purposes of coverage-based grey-box fuzzing (CGBF) and DGF are different. However, some techniques proposed to boost the performance of CGBF could also be adopted by \dFOT.
+For example, CollAFL~\cite{CollAFL} utilizes a novel hash algorithm to solve AFL's instrumentation collision problem.
+Skyfire~\cite{junjie:2017sp:skyfire} learns a probabilistic context sensitive grammar (PGSG) to specify both syntax features and semantic rules, and then the second step leverages the learned PCSG to generate new test seeds.
+Xu \textit{et al.}~\cite{XuKMK:2017} proposed a set of new operating primitives to improve the performance of grey-box fuzzers.
+Another important topic in CGBF is about guiding the fuzzer through path constraints. \cite{Stephens2016Driller, rawat:2017, LiCMLLT17, Angora, tfuzz} aim to help the CGBFs to break through path constraints.
+Moreover, Orthrus~\cite{Shastry:LNCS2017:Orthrus} applies static analysis on AST, CFG, and CG to extract complicated tokens via customizable queries. 
+\dFOT can benefit through combining with the aforementioned techniques.
 
 %
  \section{Conclusion}
