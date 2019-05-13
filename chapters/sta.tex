@@ -7,32 +7,11 @@
 Mobile security has become increasingly important for our daily life due to the pervasive use of mobile applications.
 Among the mobile devices that are currently in the market, Android devices account for the majority of them so analysis of their security
 has been of significant interests. There has been a large number of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) focusing on detecting potential security violations. Here we are interested instead in the problem of constructing secure applications,
-in particular, in providing guarantee of information flow security in the constructed applications. 
- 
-We follow the language-based security approach whereby
-information flow is enforced through type systems~\cite{Denning:1976cl,Denning:1977hwa,Volpano:1996,Sabelfeld:2003}.
-In particular, we propose a design of a type system that
-guarantees non-interference property~\cite{Volpano:1996}, i.e., typable
-programs are non-interferent. As shown in~\cite{Goguen:1982ta}, non-interference provides
-a general and natural way to model information flow security.
-The type-based approach to non-interference requires assigning
-security labels to program variables and security policies to functions or procedures. Such policies
-are typically encoded as types, and typeability of the program implies that the runtime behavior of
-the program complies with the stated policies.
-Security labels form a lattice structure with an underlying partial order $\leq$,
-e.g., a lattice with two elements ``high'' ($H$) and ``low'' ($L$) where $L \leq H$.
-Typing rules can then be designed to prevent both explicit
-and implicit flow (through conditionals, e.g., if-then-else statements) from $H$ to $L$.
-To prevent an \emph{explicit} flow, the typing rule for an assignment statement
-such as \textit{x := e} would require that $l(e) \leq l(x)$ where $l(.)$
-denotes the security level of an expression. To prevent an \emph{implicit} flow, e.g.,
-\textit{if (y = 0) then x:= 0 else x := 1},
-most type systems for non-interference require that
-the assignments in \emph{both} branches are given the same
-security level that is higher or at least equal to the security level of the condition (\emph{y=0}). 
-For example, if $y$ is of type $H$ and $x$ is of type $L$, the statement would not be typable.
+in particular, in providing guarantee of information flow security in the constructed applications. In order to achieve this, we apply a type checking based verification approach.
 
 \subsection{Motivating Examples}
+
+
 In designing an information flow type system for Android, we encounter
 a common pattern of conditionals that would not be typable using conventional type systems.
 Consider the pseudo-code in Listing~\ref{lst:eg_contact}.
@@ -385,7 +364,7 @@ $[ x_1 \mapsto v_1, \cdots,  x_n \mapsto v_n]$
 to denote an evaluation environment mapping variable $x_i$ to value $v_i$; this will sometimes be abbreviated as $[ \overline x \mapsto \overline v ].$
 The domain of $\eta = [ x_1 \mapsto v_1, \cdots, x_n \mapsto v_n]$ (i.e., $\{x_1,\dots,x_n\}$) is denoted by $dom(\eta)$.
 Given two environments $\eta_1$ and $\eta_2$, we define
-$\eta_1\eta_2$ as an environment $\eta$ such that $\eta(x) = \eta_2(x)$ if $x \in dom(\eta_2)$,
+$\eta_1\eta_2$ as the environment $\eta$ such that $\eta(x) = \eta_2(x)$ if $x \in dom(\eta_2)$,
 otherwise $\eta(x) =\eta_1(x)$.
 For example, $\eta[x \mapsto v]$ maps $x$ to $v$, and $y$ to $\eta(y)$
 for any $y \in dom(\eta)$ such that $y \not = x.$
@@ -457,7 +436,7 @@ $s\leq_\Tcal t$ \text{iff} $\forall$ $P\in \PPS$, $s(P) \leq_{\SL} t(P)$.
 \end{proof}
 
 As we shall see, if a variable is typed by a base type, the sensitivity of
-its content may depend on the permissions of the app which writes to the variable.
+its content may depend on the app's permissions which writes to the variable.
 In contrast, in traditional information flow type systems,
 a variable annotated with a security level has a fixed sensitivity level
 regardless of the permissions of the app that writes to the variable.
@@ -500,7 +479,7 @@ From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when 
 
 \begin{definition}
 \label{def:embed}
-Given a security level $l$, we define $\hat{l}$ as follows:
+Given a security level $l$, we define $\hat{l}$ as:
 for all $P \in \PPS$, we have $\hat{l}(P) = l$.
 \end{definition}
 
@@ -763,29 +742,33 @@ the function call are typed according to the projection of $\overline{t}$ and $t
 Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially what is adopted in {\BN} system for method calls~\cite{Banerjee:2005ht}.
 
 Let us consider the example in Listing~\ref{lst:laundery}.
-\begin{figure}[ht]
-\begin{lstlisting}[label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}, basicstyle=\footnotesize]
-A.f(x) {  init r = 0 in { r := call B.g (x); return r }
+\begin{lstlisting}[float=tp, label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
+A.f(x) {  %// $A$ does \emph{not} have permission $p$%
+	init r = 0 in { r := call B.g (x); return r }
 }
 	
-B.g(x) { init r = 0 in {
+B.g(x) { %// $B$ does \emph{not} have permission $p$%
+	init r = 0 in {
 	   test(p) r := 0 else r := x;
 	   return r 
    }
 }
 
-C.getsecret() { init r = 0 in {
+C.getsecret() { %// $C$ \emph{has} permission $p$%
+	init r = 0 in {
 	  test(p) r := P_INFO else r := 0;
 	  return r 
   }
 }
 
-M.main() { init r = 0 in {
-	  letvar {return r
+M.main() { %// $M$ \emph{has} permission $p$%
+    init r = 0 in {
+	  letvar %$x_H$% = 0 in
+	  	{%$x_H$% := C.getsecret(); r := call A.f(%$x_H$%)};
+      return r
   }
 }
 \end{lstlisting}
-\end{figure}
 Let $\PS=\{p\}$ and $t$ be the base type $t =  \{\emptyset \mapsto L, \{p\} \mapsto H\}$,
 where $L$ and $H$ are bottom and top levels respectively. Here we assume \textit{P\_INFO} is a sensitive value
 of security level $H$ that needs to be protected, so function \textit{C.getsecret} is required to have type $() \rightarrow t$. That is, only apps that have the required permission $p$ may obtain
@@ -2970,32 +2953,33 @@ By Lemma \ref{lem:ptrcomplete} and Lemma\ref{lem:cgrcomplete}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
-\begin{figure}
-\begin{lstlisting}[caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}, basicstyle=\footnotesize]
+\begin{lstlisting}[float=tp, caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
 A.getInfo() {
-   init r in { 
-     test(p) {
-       test(q) r = loc;
-       else r = "";
-     } else {
-       test(q) r = id++loc;
-       else r = ""; }
-   return r;   
+   init r in { %// $\Gamma({\lpRES})=\alpha$%
+      test(p) {
+         test(q) r = loc; %// ${(\oplus p\oplus q, l_1 \leq \alpha)}$ %
+         else r = ""; %// ${(\oplus p\ominus q, L \leq \alpha)}$ %
+      }  else  {
+         test(q) r = id++loc; %// ${(\ominus p\oplus q, H \leq \alpha)}$ %
+         else r = ""; %// ${(\ominus p\ominus q, L \leq \alpha)}$ %
+      }
+      return r;   
    }
 }
-B.fun() { 
-  init r in {
-    letvar x = "" in { 
-    test(p) r = 0;  
-    else x = call A.getInfo();
-    if x == "" then r = 0;
-    else r = 1; 
-  }
-  return r;    
-  }
+B.fun() { %// $B$ has permission $q$%
+   init r in { %// $\Gamma({\lpRES})=\beta$%
+      letvar x = "" in { %// $\Gamma({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
+         test(p) r = 0;  %// $(\oplus p, L\leq\beta) $%
+         else x = call A.getInfo();
+         %//$\FT_{C}(A.getInfo) = ()\rightarrow \alpha$,  $(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma) $%
+         if x == "" then r = 0;  %// $(\epsilon, L\leq\beta) $%
+         else r = 1; %// $(\epsilon, L\leq\beta) $,  $(\epsilon, \gamma\leq\beta) $%
+      }
+      return r;    
+   }
 }
 \end{lstlisting}
-\end{figure}
+
 
 Let us apply the constraint generation rules in Fig.~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
 \[

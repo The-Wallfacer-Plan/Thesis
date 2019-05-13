@@ -1,6 +1,5 @@
 \chapter{Preliminaries} \label{ch:preliminaries}
 
-%\setlength{\textfloatsep}{0.1cm} 
 \begin{algorithm}[t]
  \small
 \SetKwInOut{Input}{input}
@@ -61,7 +60,7 @@ As to \emph{confidentiality}, it is widely accepted to treat the set of the secu
 
 Below is an example taken from Denning~\cite{Denning:1976cl}. We assume \textsf{secret}$:H$ and \textsf{leak}$:L$, and the attacker can observe any variable at level $L$ but no variable at $H$.
 From the confidentiality requirement, $\textsf{leak:=secret}$ is illegal while the assignment $\textsf{secret:=leak}$ works fine. This is due to the fact in the former case the secret information may be observed by the attacker when he/she sees the value of \textsf{leak}, which has the same value as \textsf{secret} after the assignment and is accessible by the attacker who has observation level not less than $L$. The leak is caused by an explicit data flow and is so-called \emph{explicit flow}. On the other hand, control flow can also leads to \emph{implicit flow} leaks. For example,
-\begin{lstlisting}[language=c]
+\begin{lstlisting}[language=c,float=h]
 if ((secret mod 2) == 0) {
   leak := 0;
 } else {
@@ -69,11 +68,11 @@ if ((secret mod 2) == 0) {
 }  
 \end{lstlisting}
 
-Despite that the \textsf{if-else} construct is not intended for data transfer, this code is essentially equivalent to $\textsf{leak:=secret}$, which obviously violates the confidentiality. Therefore this is as dangerous as the direct assignment.
+Despite that the \textsf{if-else} construct is not intended for data transfer, this segment is essentially equivalent to $\textsf{leak:=secret}$, which obviously violates the confidentiality. Therefore this is as dangerous as the direct assignment.
 
 Some complex data structures can lead to subtle information leaks. For example, if array \textsf{a} is initially all \textsf{0}s, then the program below is still leaking information due to the fact that after the execution, \textsf{leak} will be assigned to \textsf{i}, which is still the value of \textsf{secret}. There is also a leak from \textsf{secret} to \textsf{leak}.
 
-\begin{lstlisting}[language=c]
+\begin{lstlisting}[language=c,float=h]
 a[secret] := 1;
 for (int i := 0; i < a.length; i++) {  if (a[i] == 1) leak := i;}
 \end{lstlisting}

@@ -1,36 +1,22 @@
 Software security has been growing in importance due to the increasing reliance on computer systems, the Internet, and the popularity of smartphones as well as other devices that constitute the Internet of Things.
-%Due to the complexity, software security is also one of the major challenges of contemporary world. Modern software usually has multiple vulnerabilities that indicate wide ranges of security weakness in design, implementation, operation, or internet control. There are various categories of vulnerabilities, including denial-of-service attacks which result from unexpected software crashes, information leakage caused by memory access violations or design defects, privilege escalation caused by misconfigured access control mechanism.
 In general, there are two categories of approaches to securing a system by reducing its surface of vulnerability, namely \emph{testing} and \emph{verification}. The former
-% is more widely used in software development procedures to reveal multi-level vulnerabilities, which 
  generates test cases to guarantee that the underlying software works properly under certain scenarios.
  The latter models the system in an abstracted description and proves its preservations of certain properties.
-% this is usually applies on the detection of higher level vulnerability detection such as access control.
   In this thesis, we will describe our efforts at \emph{type checking based verification} and \emph{grey-box fuzz testing} in securing various software.
 
-Firstly, we apply \emph{grey-box fuzz testing} (or \emph{fuzzing}) to detect vulnerabilities introduced by erroneous implementation. We aim to improve the effectiveness of dynamic fuzzing with the help of static program analysis. To fulfill our goal, we build our own grey-box fuzzing framework, Fuzzing Orchestration Toolkit (FOT). Compared to other fuzzing tools, FOT is versatile in the functionalities and can be easily configured and extended for different fuzzing purposes. Till now, FOT has integrated multiple state-of-the-art fuzzing techniques and detected 200+ zero-day vulnerabilities in more than 40 world famous projects, from which 52 CVEs have been assigned.
+Firstly, we apply \emph{grey-box fuzz testing} (or \emph{fuzzing}) to detect vulnerabilities introduced by erroneous implementation. We aim to improve the effectiveness of dynamic fuzzing with the help of static program analysis. To fulfill our goal, we build our own grey-box fuzzing framework, Fuzzing Orchestration Toolkit (FOT). Compared to other fuzzing tools, FOT is versatile in the functionalities and can be easily configured and extended for different fuzzing purposes. Till now, FOT has integrated multiple state-of-the-art fuzzing techniques and detected 200+ zero-day vulnerabilities in more than 40 world famous projects, from which 51 CVEs have been assigned.
 On top of \FOT, we have also innovatively proposed techniques for two specific fuzzing scenarios.
 
 One scenario is the directed grey-box fuzzing (DGF) which aims to improve the directedness of executing towards user-specified target sites in the program. To emphasize existing challenges in \mbox{directed} fuzzing, we propose \dFOT to feature four desired properties of directed grey-box fuzzers. With the statically analyzed results on the program under test and the target sites, \dFOT applies multiple dynamic strategies for seed prioritization, power scheduling and \mbox{mutating}.
 The experimental results on various real-world \mbox{programs} showed that \dFOT reaches the target sites and reproduce the crashes much faster than state-of-the-art grey-box fuzzers such as AFL and AFLGo.
 
 The other scenario is enhancing grey-box fuzzing on multithreaded programs. Due to non-deterministic nature of multithreading, grey-box fuzzers usually work poorly because they are inherently incapable of tracking thread-interleavings.
-%We present \mtfuzz, a new grey-box fuzzing technique for multithreaded programs built on top of FOT. 
 We therefore present \mtfuzz, a novel thread-aware technique which effectively generates multithreading-relevant seeds. \mtfuzz relies on a set of thread-aware instrumentation methods consisting of a stratified exploration-oriented instrumentation and two complementary instrumentations. Our experiments on 12 real-world programs showed that \mtfuzz significantly outperforms the state-of-the-art fuzzer AFL in generating multithreading relevant seeds, detecting vulnerabilities, and exposing concurrency bugs.
 
 Secondly, we apply \emph{type checking based verification} to detect those vulnerabilities introduced by logic errors. Particularly, we focus on the information leakage vulnerability caused by inter-app communications between Android apps. 
-%Based on the permission mechanism in Android, we introduce a novel type system for enforcing secure information flow that forbids unauthorized access to sensitive data. 
 We propose a lightweight type system featuring Android permission model, where the permissions are statically assigned and are used to enforce access control in the applications. 
-%A novel feature of our type system is a typing rule for conditional branching induced by permission testing, which introduces a merging operator on security types. Owning to this, we allow more precise security policies to be enforced, which for the first time permits a practical verification on the Android platform. 
 The soundness of our type system is proved with respect to non-interference. With this type system, we are able to soundly prove the absence of potential information leakage among various apps in an Android system.
  Additionally, we also presented a deterministic type inference algorithm for the underlying security type system. 
 
 Finally, based on the attempts that we have made so far, we will discuss the differences of the two applied vulnerability detection approaches in terms of the capability, the practicality, as well as their potential combinations in detecting vulnerabilities for modern software.
-
-
-
-% In particular, \mtfuzz detected 9 multithreading relevant zero-day vulnerabilities, 2 of which have been assigned with CVE IDs; while AFL only detected 4 vulnerabilities. By replaying against the generated seeds with the help of ThreadSanitizer, \mtfuzz detected 19 new concurrency bugs while AFL only reported 9 new concurrency bugs.
-
-%By now, \dFOT has detected more than 41 previously unknown crashes in projects such as Oniguruma, MJS with the target sites provided by \mbox{vulnerability} prediction tools; all these crashes are confirmed and 15 of them have been assigned CVE IDs.
-
-% With {\FOT}~and its extensions, we have found 111 new bugs from 11 projects.~Among these bugs, 18 CVEs have been assigned.
 

@@ -84,7 +84,7 @@ It is \textit{extensible} as the users can implement their own strategies with t
 
 
 \subsubsection{Mutation Manager}
-The mutation manager is in charge of incorporating different mutators.
+The mutation manager is in charge of scheduling different mutators.
 It can mutate the seeds in a pure random manner or according to predefined specifications.
 This part is \textit{configurable} as {\FOT} provides various mutators for the users to choose from.
 It is \textit{extensible} as the developers can implement their own mutators with the provided library.
@@ -124,9 +124,7 @@ One of {\FOT}'s key features is the builtin coordination between different fuzzi
 
 The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing workers; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each test case in the queue, when customizable conditions are triggered (usually the conditions are about the executions and time since last synchronization).
 
-The actual synchronization of the trace information still applies ``bitwise and'' on normal running traces
-%~\footnote{In practice, we also synchronize the timeout traces and crash traces to avoid generating too many redundant ``abnormal'' test cases.}
-from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
+The actual synchronization of the trace information still applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
 
 
   \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
@@ -150,46 +148,9 @@ Due to the existence of the potential lag of the trace synchronization, there st
 Additionally, we provide an external minimizer program to prune the all the serialized test cases (which can be normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting test cases.
  
 
-%\section{Implementation and Extensions}\label{sec:app}
-
-%We have implemented the {\FOT} framework and developed several extensions to {\FOT}.
-
 \subsection{Implementation}\label{sec:fot-impl}
 
-The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4100 lines of C/C++ for the preprocessor, 4800 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain.
-
-
-
-%\subsection{Static Vulnerability Analysis Integration}\label{subsec:sva}
-%
-%
-%
-%Grey-box fuzzers are typically aware of quantitative changes of code coverage and use such feedback for keeping the \textit{interesting} seeds.
-%However, the performance of collecting code coverage feedback quantitatively is often not ideal, and grey-box fuzzers also need to evaluate the code coverage qualitatively~\cite{Bohme:2016:CGF}.
-%One of the approaches to bring qualitative awareness about the covered code is to combine fuzzing with static vulnerability analysis, as mentioned in \S~\ref{sec:static_analysis}.
-%
-%\begin{figure}[t]
-%	\centering
-%	\includegraphics[width=0.75\columnwidth]{res/fot/moo_result.pdf}
-%	\caption{Average Number of Unique Crashes Found in 24 Hours on \textit{mjs} and \textit{intel-xed}.}
-%	\label{fig:moo_result}
-%\end{figure}
-%
-%
-%Existing fuzzing works seldom use static analysis information to facilitate seed prioritization and power scheduling since existing fuzzing frameworks have little support for them.
-%In contrast, integration with vulnerability static analysis is trivial in \FOT: we used \emph{static analyzer} to calculate vulnerability metrics (e.g., calls~to unsafe functions and cyclomatic complexity) and customized \emph{seed scorer} to take them into account during fuzzing. This extension added about 330 lines of C++ and 190 lines of Rust code.
-%
-%The workflow is as follows.
-%First, the static analyzer calculates vulnerability score for each function. Then we instrument the PUT to provide function level coverage information.
-%After detecting a seed that brings new coverage, the feedback collector will collect its function level coverage and map it with the static analysis result to get the function level vulnerability scores.
-%The seed scorer will then accumulate the function-level scores to form the execution trace level vulnerability scores for the exercised seeds.
-%Finally, the power schedule determined by the seed scorer prioritizes and allocates more powers to the seeds with higher vulnerability scores.
-%
-%
-%
-%Figure~\ref{fig:moo_result} shows the average number of unique crashes detected on mjs and intel-xed of different fuzzers over 10 runs.
-%We can see that with the help of static vulnerability analysis, {\FOT} can detect more unique crashes in a limited time budget.
-
+The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4100 lines of C/C++ for the preprocessor, 4800 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain. In Chapter~\ref{ch:dfot} and Chapter~\ref{ch:mtfuzz}, we will introduce two extensions on top of FOT.
   
 
 \section{Comparisons to Other Fuzzing Frameworks and Extensions}
@@ -199,7 +160,7 @@ In this section, we first compare FOT with other fuzzing frameworks, and then di
 
 
 
-Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further more, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory).
+Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory).
 
 Most current fuzzing techniques can be easily integrated into {\FOT} thanks to its highly-modularized design. In fact, these techniques can be applied with some extensions to the different components in Figure~\ref{fig:fot_workflow} and can be used together with the configuration interface. 
 
@@ -236,4 +197,4 @@ Most current fuzzing techniques can be easily integrated into {\FOT} thanks to i
 
 \subsection{New Vulnerabilities}
 
-Till now, {\FOT} has been used to fuzz more than 100 widely used open source projects and it has detected more than 200 vulnerabilities in these projects, among these 51 CVE IDs have been assigned. The detailed information is available at Appendix~\ref{app:bugs}. Notably, \FOT has detected multiple vulnerabilities with \emph{high} or \emph{critical} severity. For example, CVE-2019-9169~\cite{CVE-2019-9169} stresses a vulnerability in the GNU C Library (aka glibc or libc6) through 2.29, where the function \func{proceed\_next\_node} inside POSIX regular expression (regex) component has a heap-based buffer over-read via an attempted case-insensitive regex match. Thanks to the interoperability with the regex generators, FOT is able to generate more meaningful seeds that cover more corner cases of the regex components. According to CVSS v3.0 Severity and Metrics~\cite{cvss3}, it is scored 9.8 out of 10.0 (critical severity); according to CVSS v2.0~\cite{cvss2}, it has a score of 7.5 (high severity)~\footnote{As a comparison, the notorious HeartBleed (CVE-2014-0160) is scored 5.0 medium severity according to CVSS v2.0; there is no CVSS v3.0 for it.}. Many of other vulnerabilities discovered by \FOT also have high severity, e.g, CVE-2018-15822, CVE-2018-14394, CVE-2018-14395 in FFmpeg, CVE-2018-19837, CVE-2018-19838, CVE-2018-19839, CVE-2018-20821, CVE-2018-20822 in libsass, CVE-2018-14560, CVE-2018-14561, CVE-2019-11470, CVE-2019-11472, CVE-2019-11473 in ImageMagick, and CVE-2019-11474 in GraphicsMagick. We envision that with more fuzzing techniques, \FOT will have the capabilities to detect more vulnerabilities that are hard to be discovered by existing fuzzers.
+Till now, {\FOT} has been used to fuzz more than 100 widely used open source projects and it has detected more than 200 vulnerabilities in these projects, among these 51 CVE IDs have been assigned. The detailed information is available at Appendix~\ref{app:bugs}. Notably, \FOT has detected multiple vulnerabilities with \emph{high} or \emph{critical} severity. For example, CVE-2019-9169~\cite{CVE-2019-9169} stresses a vulnerability in the GNU C Library (aka glibc or libc6) through 2.29, where the function \func{proceed\_next\_node} inside POSIX regular expression (regex) component has a heap-based buffer over-read via an attempted case-insensitive regex match. Thanks to the interoperability with the regex generators, FOT is able to generate more meaningful seeds that cover more corner cases of the regex components. According to CVSS v3.0 Severity and Metrics~\cite{cvss3}, it is scored 9.8 out of 10.0 (critical severity); according to CVSS v2.0~\cite{cvss2}, it has a score of 7.5 (high severity). As a comparison, the notorious HeartBleed (CVE-2014-0160) is scored 5.0 medium severity according to CVSS v2.0 (there is no CVSS v3.0 for it). Many of other vulnerabilities discovered by \FOT also have high severity, e.g, CVE-2018-15822, CVE-2018-14394, CVE-2018-14395 in FFmpeg, CVE-2018-19837, CVE-2018-19838, CVE-2018-19839, CVE-2018-20821, CVE-2018-20822 in libsass, CVE-2018-14560, CVE-2018-14561, CVE-2019-11470, CVE-2019-11472, CVE-2019-11473 in ImageMagick, and CVE-2019-11474 in GraphicsMagick. We envision that with more fuzzing techniques, \FOT will have the capabilities to detect more vulnerabilities that are hard to be discovered by existing fuzzers.

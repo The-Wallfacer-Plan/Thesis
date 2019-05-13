@@ -12,7 +12,7 @@
 %Since the proposal, fuzzing has gained the popularity in industry and academia, and evolved into different types of fuzzers for different testing scenarios.
 %Fuzzers can be classified as black-box, white-box or grey-box~\cite{chen2018systematic}, according to their awareness of the internal structure of the PUT.
 %Recently, grey-box fuzzers have been widely-used and proven to be effective~\cite{Bohme:2016:CGF}.
-%Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017:DGF,junjie:2017sp:skyfire,2017arXiv170907101L,CollAFL,Angora} receive plenty of attentions.
+%Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017:DGF,junjie:2017sp:skyfire,FairFuzz,CollAFL,Angora} receive plenty of attentions.
 
 
 
@@ -171,7 +171,7 @@ As observed from the above example, an ideal DGF should possess the following de
 \subsubsection{\textbf{P1}. DGF should define a \textbf{robust} distance-based mechanism that can guide the directed fuzzing by avoiding the bias to some traces and considering all traces to the targets.}  \label{subsec:p1}
 Different from general GBFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing inputs due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
 
-However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$\footnote{If we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target sites.}. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target site, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target site. 
+However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target sites. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target site, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target site. 
 
 
 
@@ -179,17 +179,6 @@ However, for DGF, awareness of all possible traces towards the targets is not en
 
 
 To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a grey-box fuzzing setting.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -329,12 +318,7 @@ In this section, we will elaborate the key components in Fig.~\ref{fig:overview}
 
 \subsection{Graph Construction} \label{subsec:graghCons}
 
-To calculate the accurate distance from a test seed to the oracle seed executing the target sites, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basic block distance in \S\ref{subsec:UtilityComputation}.  	
-
-
-
-
-
+To calculate the accurate distance from a test seed to the oracle seed executing the target sites, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basic block distance in \S\ref{subsec:UtilityComputation}.
 
 
 
@@ -359,7 +343,7 @@ From a probability perspective, we would think that in both cases the distance f
 
 \begin{figure}[t]
     \centering
-\begin{subfigure}[b]{0.4\columnwidth}
+\begin{subfigure}[b]{0.36\columnwidth}
 \begin{lstlisting}[language=c]
 void fa(int i) {
   if (i > 0) {
@@ -375,7 +359,7 @@ void fa(int i) {
 \end{subfigure}
 \hspace{0.1in}
 \centering
-\begin{subfigure}[b]{0.4\columnwidth}
+\begin{subfigure}[b]{0.36\columnwidth}
 \begin{lstlisting}[language=c]        
 void fa(int i) {
   if (i > 0) {
@@ -493,7 +477,7 @@ Compared to AFLGo's approach, which only considers basic block trace distance (\
 \begin{enumerate}[(1)]
     \item \traceDistn~considers both the effects of CG and the CFGs; {\covDistn} considers only the effects of CG. For \traceDistn, the major effect is still CG due to the magnification factor $c$ used in Equation~\ref{eq:aflgo_func_dist}.
     \item \traceDistn~does not penalize traces that do not lead to the targets, while {\covDistn} penalizes them via a union of \fntrace{s} (by tracking function level traces) and \fntrace{\tgtfnset}.
-    \item Given multiple traces that can lead to the targets, {\traceDistn} favors those that have short lengths, but {\covDistn} favors those with longer lengths of common functions in expected trace.
+    \item Given multiple traces that can lead to the targets, {\traceDistn} favors those that have shorter lengths, but {\covDistn} favors those with longer lengths of common functions in expected trace.
 \end{enumerate}
 
 In this sense, $p(s, \tgtbbset)$ strives a balance between shorter traces and longer traces that can reach the target sites with \emph{two heterogeneous metrics}. Admittedly, there may still exist some bias. One of the scenarios is that the power function may assign more energy to a seed that covers many functions in the target function trace closure. For example, assume two traces that can reach the target function $T$: $\langle a,b,c,d,T,Z\rangle$ and $\langle a,e,f,g,T,Z\rangle$; and the target function trace closure is $\langle a, b, c,d,e,f,g,T\rangle$. The power function may assign much energy to a seed with trace $\langle a, b, c, d, e, f, g, Z\rangle$ which does not reach the target function $T$. This is \emph{not} an issue in our opinion: since this seed has covered many ``expected'' functions, it has high chance to be ``close'' to the target; with proper mutations, it is likely to be flipped to mutants that can indeed touch the target.
@@ -661,7 +645,7 @@ Note that all these new generated  seeds in $\mathcal{M}_s $, together with the 
  Not all the seeds have equal or similar priorities, ideally the queue that stores the seeds to be mutated should be a priority queue. However the scoring may be biased (due to the limitations of static analyses, etc.), and the insertion operations on priority queue take a complexity of $\Theta(\log n)$, which is costly since the queue can be quite long and the insertion operation can be frequent. Therefore it is not beneficial \emph{in practice}.\footnote{In fact, the well-known AFL fuzzer only maintains a linked list with some probabilistic to skip seeds that do not cover new edges; the complexity of the  insertion  is $\Theta(1)$.} Instead, we provide a three-tiered queue which appends newly generated seeds into different categories according to their scores. Seeds in the top-tiered queue (tier 1) will be picked firstly, then the second-tiered (tier 2), and finally the lower-tiered (tier 3). This imitates a simplified priority queue with constant time complexity.
  
  
- Algo.~\ref{algo:seedprioritization} shows the seed prioritization strategy for a new seed mutated from the previous step of adaptive mutation. The basic idea is: we should prioritize the \emph{newly generated} seeds that 1) cover new traces 2) have bigger similarity values with the target seeds (i.e., power function values) 3) cover the target functions. We favor the seeds that cover the new traces since we still have to explore \emph{more execution paths} that have the potential to lead to the target sites; this is necessary when the initial seeds are quite far from the targets. The other two prioritization strategies, i.e., comparing similarity values and checking whether the target function have been reached, are specific to directed fuzzing. Note that although these two strategies are relevant, neither of them can be deduced from the other. For the other newly generated seeds, they are put in the second-tiered queue. On the other hand, seeds that have (just) been mutated are assigned with the least priority.
+ Algo.~\ref{algo:seedprioritization} shows the seed prioritization strategy for a new seed mutated from the previous step of adaptive mutation. The basic idea is: we should prioritize the \emph{newly generated} seeds that 1) cover new traces 2) have bigger similarity values with the target seeds (i.e., power function values) 3) cover the target functions. We favor seeds that cover new traces since we still have to explore \emph{more execution paths} that have the potential to lead to the target sites; this is necessary when the initial seeds are quite far from the targets. The other two prioritization strategies, i.e., comparing similarity values and checking whether the target function have been reached, are specific to directed fuzzing. Note that although these two strategies are relevant, neither of them can be deduced from the other. For the other newly generated seeds, they are put in the second-tiered queue. On the other hand, seeds that have (just) been mutated are assigned with the least priority.
 In practice, \dFOT also applies AFL's loop bucket approach (see ~\cite{afl_detail}) to filter out a large number of ``equivalent'' seeds that do not bring new coverage in terms of loop iterations. The prioritization strategies will be applied on the remaining seeds. Therefore, there will not be too many seeds filling up the top-tier queue.
 
 By combining all the static and dynamic techniques mentioned above, for the CVE exampled in \S\ref{subsec:motiv}, \dFOT successfully reproduced the crash with a time budget of 24 hours in 3 out of the 10 runs we conducted when fed with the same initial seeds, which is a significantly improvement on both AFL and AFLGo for this case.
@@ -677,7 +661,7 @@ By combining all the static and dynamic techniques mentioned above, for the CVE 
 
 \section{Evaluation}\label{sec:eval}
 
-We implemented our static instrumentation on top of AFL's LLVM mode and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code. The dynamic fuzzer is implemented based on our Rust implementation of AFL. The fundamental framework, called Fuzzing Orchestration Toolkit\cite{fse18-fot}, is written in about 14000 lines of code. We follow exactly AFL's practice~\cite{afl_detail} by using forkserver, shared memory based basic block transition (edge) tracing, deterministic/non-deterministic mutators, etc., and provide a similar user interface as AFL's. The differences, however, are that we design the fuzzer with considerations of modularization and extensibility without sacrifying performance. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on~\footnote{The semantic mutation part is implemented with Antlr~\cite{antlr} in Java ($\sim$4800 lines of code) that is called from Rust via JNI. We didn't enable this mutation strategy in the experiments since this is not tightly relevant to DGF.}. See our website \url{https://sites.google.com/view/ccs2018-fuzz} for more details.
+We implemented our static instrumentation on top of FOT's static instrumentation mode (c.f.~\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
 
 For each program with the given target sites, the instrumentation of {\dFOT} consists of three parts: 1) basic block IDs that track the execution traces 2) basic block distance information that determines basic block trace distance and 3) function IDs that track functions that have been covered. 
 
@@ -716,7 +700,7 @@ In the experiments, we aim to answer the following questions:
 We evaluated \dFOT with diverse real-world programs:
 \begin{enumerate}[(1)] 
     \item \textbf{GNU Binutils}~\cite{binutils} is a collection of binary analysis tools used in GNU/Linux platform. 
-This benchmark is also used in several other works such as~\cite{Bohme:2016:CGF, Bohme:2017:DGF, 2017arXiv170907101L}.
+This benchmark is also used in several other works such as~\cite{Bohme:2016:CGF, Bohme:2017:DGF, FairFuzz}.
     \item \textbf{MJS}~\cite{mjs} is an embedded JavaScript engine for C/C++ and used in IoT development.
     It is used to compare \dFOT directly with {\aflgo} due to implementation limitations of the latter.
     \item \textbf{Oniguruma}~\cite{oniguruma} is a versatile regular expression library used by multiple world famous projects such as PHP~\cite{php}.

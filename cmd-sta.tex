@@ -1,24 +1,3 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\def\correspondingauthor{\titlenote{Corresponding author.}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- \newtheoremstyle{mystyle}
-   {2pt} % Space above
-   {2pt} % Space below
-   {\itshape} % Body font
-   {} % Indent amount
-   {\bfseries} % Theorem head font
-   {} % Punctuation after theorem head
-   {.5em} % Space after theorem head
-   {} % Theorem head spec (can be left empty, meaning `normal')
- \theoremstyle{mystyle}
- %\theoremstyle{remark}
-% \newtheorem{definition}{Definition}[section]
-% \newtheorem{theorem}{Theorem}[section]
-% \newtheorem{lemma}{Lemma}[section]
- %\newtheorem{example}{Example}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
  \lstset{
    escapechar=\%,
    captionpos=b,
@@ -79,19 +58,6 @@
 \newcommand*{\lcCP}[3]{\ensuremath{{\textbf{test}({#1})~{#2} ~\textbf{else}~ {#3}}}}
 \newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letvar}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
 
-%\newcommand*{\leVAL}[1]{\ensuremath{#1}}
-%\newcommand*{\leVAR}[1]{\ensuremath{#1}}
-%\newcommand*{\leOP}[2]{\ensuremath{{#1}~\text{op}~{#2}}}
-%
-%%---------------------------
-%\newcommand*{\lcASS}[2]{\ensuremath{{#1}:={#2}}}
-%\newcommand*{\lcIF}[3]{\ensuremath{{\text{if}~{#1}~\text{then}~{#2}~\text{else}~{#3}}}}
-%\newcommand*{\lcSEQ}[2]{\ensuremath{{#1};{#2}}}
-%\newcommand*{\lcWHILE}[2]{\ensuremath{\text{while}~{#1}~\text{do}~{#2}}}
-%\newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\text{call}~{#2}({#3})}}
-%\newcommand*{\lcCP}[3]{\ensuremath{{\text{test}({#1})~{#2} ~\text{else}~ {#3}}}}
-%\newcommand*{\lcLETVAR}[3]{\ensuremath{{\text{letvar}~ {#1} = {#2} ~\text{in}~ {#3}}}}
-
 \newcommand*{\com}{\ensuremath{\mathit{com}~}}
 \newcommand*{\FD}{\ensuremath{\mathit{FD}}}
 \newcommand*{\FT}{\ensuremath{\mathit{FT}}}
@@ -104,14 +70,7 @@
 \newcommand*{\lpPROG}[4]{\ensuremath{{#1}(#2)\big\{{\lpINIT{#4}{#3}}\big\}}}
 \newcommand*{\lpFUN}[3]{\ensuremath{\lpPROG{#1}{#2}{#3}{\lpRES}}}
 
-%\newcommand*{\lpRES}{\ensuremath{r}}
-%\newcommand*{\INITVAL}{0}
-%\newcommand*{\lpINIT}[2]{\ensuremath{{\text{init}~ {#1}=\INITVAL ~\text{in}~\{{#2};\text{return}~{#1}\}}}}
-%\newcommand*{\lpPROG}[4]{\ensuremath{{#1}(#2)\big\{{\lpINIT{#4}{#3}}\big\}}}
-%\newcommand*{\lpFUN}[3]{\ensuremath{\lpPROG{#1}{#2}{#3}{\lpRES}}}
-
 \newcommand*{\app}[2]{\ensuremath{\pi_{{#2}}({#1})}}
-%\newcommand*{\omerge}[3]{\ensuremath{{#2} +_{#1} {#3}}}
 \newcommand*{\omerge}[3]{\ensuremath{{#2} \triangleright_{#1} {#3}}}
 
 \newcommand*{\cPair}[2]{\ensuremath{(#1,#2)}}
