@@ -182,7 +182,7 @@ Due to space constraints, most proofs are omitted but they can be found in a tec
 
 \subsection{Contributions}
 The contributions of this chapter are three-fold.
-\begin{enumerate}\item We develop a lightweight type system in which security types are dependent on a permission-based access control mechanism, and prove its soundness with respect to non-interference (Section~\ref{sec:type_system}). A novel feature of the type system is the type merging constructor, used for typing the conditional branch in permission checking, which allows us to model non-monotonic information flow policies.
+\begin{enumerate}\item We develop a lightweight type system in which security types are dependent on a permission-based access control mechanism, and prove its soundness with respect to noninterference (Section~\ref{sec:type_system}). A novel feature of the type system is the type merging constructor, used for typing the conditional branch in permission checking, which allows us to model non-monotonic information flow policies.
 	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during function calls. This problem
 	arises as a byproduct of Android's permission model, which is significantly different from that in JVM, and adopting a standard typing rule for function calls such as the one proposed for Java in~\cite{Banerjee:2005ht} 
 	would lead to unsoundness. We call this problem the parameter laundering problem and we propose a typing rule for function calls that prevents it.
@@ -193,7 +193,7 @@ The contributions of this chapter are three-fold.
 In this section, we present the proposed information flow type system. Section~\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
 Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
 constructs based on the abstract permission model.
-Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness with respect to a notion of non-interference.
+Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness with respect to a notion of noninterference.
 
 \subsection{A Model of Permission-based Access Control}
 \label{sec:permission_model}
@@ -212,7 +212,7 @@ may impose permissions on other apps who want to
 access its services. Communication between apps is implemented
 through Binder IPC (inter-process communications)~\cite{Android-Binder-IPC}.
 
-In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than non-interference certification.}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
+In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than noninterference certification.}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
 
 One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must be careful to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
 
@@ -933,7 +933,7 @@ type $\hat{H}$, and thus cannot be passed to $A.f$ as an argument.
 
 
 
-\subsection{Noninterference and Soundness}\label{sec:non-interference}
+\subsection{Noninterference and Soundness}\label{sec:noninterference}
 
 We first define an \termEmph{indistinguishability} relation between evaluation environments.
 Such a definition typically assumes an observer who may observe values of variables at a certain security level.
@@ -1006,7 +1006,7 @@ $\forall x\in dom(\Gamma)$, we need to prove that when $\app{\Gamma}{P}(x)\leq l
 
 
 We hereby give the definitions for well-typed property
-(Definition~\ref{def:cmd-welltype}) and non-interference for the type
+(Definition~\ref{def:cmd-welltype}) and noninterference for the type
 system (Defintion~\ref{def:ni} and Definition~\ref{def:sys-ni}),
 together with the final soundness conclusion
 (Theorem~\ref{thm:ni}).
@@ -3335,7 +3335,7 @@ changes on existing Android application supply chain systems.
  \section{Conclusion and Future Work}\label{sec:conclusion}
 
 We have provided a lightweight yet precise type system featuring Android permission model for enforcing secure information flow in an
-imperative language and proved its soundness with respect to non-interference.
+imperative language and proved its soundness with respect to noninterference.
 Compared to existing work, our type system can specify a broader range of security policies, including non-monotonic ones.
 We have also proposed a decidable type inference algorithm by reducing it to a constraint solving problem.
 
