@@ -202,7 +202,7 @@ Due to space constraints, most proofs are omitted but they can be found in a tec
 
 
 \subsection{Contributions}
-The contributions of our work are three-fold.
+The contributions of this chapter are three-fold.
 \begin{enumerate}\item We develop a lightweight type system in which security types are dependent on a permission-based access control mechanism, and prove its soundness with respect to non-interference (Section~\ref{sec:type_system}). A novel feature of the type system is the type merging constructor, used for typing the conditional branch in permission checking, which allows us to model non-monotonic information flow policies.
 	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during function calls. This problem
 	arises as a byproduct of Android's permission model, which is significantly different from that in JVM, and adopting a standard typing rule for function calls such as the one proposed for Java in~\cite{Banerjee:2005ht} 
@@ -3239,8 +3239,6 @@ Next, we substitute $t_{\beta}$ for all the occurrences of $\beta$ in the remain
 Finally, the types constructed for $\gamma$ and $\alpha$ are $t_{\gamma} = t_{\beta}$ and $t_{\alpha} = \{\oplus p\oplus q \mapsto l_1, \oplus p\ominus q\mapsto L, \ominus p\oplus q \mapsto H, \ominus p\ominus q \mapsto L\}$, respectively.
 Therefore, the types we infer for \textit{A.getInfo} and \textit{B.fun} are $()\rightarrow t_{\alpha}$ and $()\rightarrow t_{\beta}$, respectively.
 
-\todo{explain lemmas}
-
 
 \begin{lemma}\label{lem:unifysound}
 If $unify(C) = \theta$, then $\theta \vDash C$.
@@ -3294,8 +3292,6 @@ $\beta(\theta'\theta) = \beta((\theta'_0\cup\{\alpha\mapsto t_\alpha\})\theta)
 
 Let $sol$ be the function for the constraint solving algorithm, that is, $sol(C) = unify(sat(dec(C)))$.
 It is provable that the constraint solving algorithm is sound and complete.
-
-\todo{combine lemma and description}
 
 \begin{lemma}\label{lem:solsound}
 If $sol(C) = \theta$, then $\theta \vDash C$.

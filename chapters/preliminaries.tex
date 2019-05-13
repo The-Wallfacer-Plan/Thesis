@@ -1,4 +1,4 @@
-\chapter{Background} \label{ch:background}
+\chapter{Preliminaries} \label{ch:preliminaries}
 
 %\setlength{\textfloatsep}{0.1cm} 
 \begin{algorithm}[t]
@@ -25,16 +25,16 @@
 	\caption{Grey-Box Fuzzing}\label{algo:gbf}
 \end{algorithm}
 
-In this chapter, we briefly describes some preliminaries in this .
+In this chapter, we briefly describes some terminologies and preliminaries used throughout this paper.
 
-\section{Grey-box Fuzz Testing}
+\section{Grey-box Fuzz Testing}\label{sec:intro-gbf}
 Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing}, or \emph{fuzzing}, has remained highly popular due to its conceptual simplicity, its low barrier to deployment, and its vast amount of empirical evidence in discovering real-world software vulnerabilities~\cite{fuzz_survey}.
 
-Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey,afl,libfuzzer,Angora}. Specially, AFL~\cite{afl}, libFuzzer~\cite{libfuzzer} and the fuzzing infrastructure ClusterFuzz~\cite{clusterfuzz} have been able to detect more than 16,000 vulnerabilities or bugs in over 160 open source projects~\cite{afl,clusterfuzz}. Compared to blackbox fuzzing, grey-box fuzzing at some extent knows about the program under test via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution~\cite{dart,klee}, it is extremely lightweight and far more scalable to real-world projects.
+Grey-box fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey}. Specially, AFL~\cite{afl}, libFuzzer~\cite{libfuzzer}, honggfuzz~\cite{honggfuzz} and the fuzzing infrastructure ClusterFuzz~\cite{clusterfuzz} have been able to detect more than 16,000 vulnerabilities or bugs in over 160 open source projects~\cite{afl,clusterfuzz}. Grey-box fuzzing strikes a balance between execution speed and effectiveness. Compared to blackbox fuzzing, grey-box fuzzing at some extent knows about the program under test (PUT) via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution~\cite{dart,klee}, it is extremely lightweight and far more scalable to real-world projects.
 
 
 Algo.~\ref{algo:gbf} presents the core procedures of a typical grey-box fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop.
-Given a program under test (PUT), \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual program under test is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
+Given a PUT, \ProgO, and the input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual PUT is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
 The instrumentation can be done statically or dynamically. For static source instrumentation, which is usually applied during the source compilation procedure, with the help of compilation infrastructure such as LLVM~\cite{Lattner:2004:LCF:977395.977673}, GCC~\cite{gcc}. For dynamic binary instrumentation (DBI), this is done with the help of DBI frameworks such as Valgrind~\cite{valgrind}, Intel PIN~\cite{pin}. Logically, this does not belong to a fuzzing but only is only used to collect the statistics for fuzzing.
 The fuzzing loop does the actual mutations and testings against the program.
 \begin{enumerate}
@@ -47,11 +47,11 @@ The fuzzing loop does the actual mutations and testings against the program.
 	\item Finally, the fuzzer handles the generated seeds based on the execution results: the vulnerable seeds will be reported and those that are considered ``good'' according to the feedback will be appended to the seed queue for future mutations.
 	\end{enumerate}
 \end{enumerate}
-Since the fuzzer's awareness of the program structure is based on the instrumentation feedback rather than the program itself, it still does not \emph{know} the program coverage itself. In practice, the fuzzing procedure is terminated manually.
+Usually the instrumentation does not involve deep static analyses and since the fuzzer's awareness of the program structure is based on the instrumentation feedback, a GBF typically does not \emph{know} the PUT itself. In practice, the fuzzing procedure is terminated manually.
 
-In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{fuzz_survey}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the grey-box fuzzing.
+In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,FairFuzz,CollAFL,Angora,nezha,fuzz_survey}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the grey-box fuzzing.
 
-\section{Security Type Checking on Android}
+\section{Security Type Checking on Android}\label{sec:intro-sta}
 
 \subsection{Security Type Checking Preliminaries}
 

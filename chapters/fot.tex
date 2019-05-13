@@ -5,12 +5,8 @@
 
 \section{Introduction and Motivation}
 
-Grey-box fuzzing has become one of the most effective approaches~to detect vulnerabilities in a program under test (PUT).
-Compared~with whitebox and blackbox fuzzing, grey-box fuzzing strikes a balance~between execution speed and effectiveness.
-The past years have witnessed a number of grey-box fuzzing frameworks, e.g., {\AFL}~\cite{afl}, libFuzzer~\cite{libfuzzer}, and honggfuzz~\cite{honggfuzz}, followed by  various fuzzing extensions \cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,CollAFL,nezha} to enhance their effectiveness and/or efficiency.
 
-
-However, there lacks a fuzzing framework to easily reuse, integrate and compare different fuzzing techniques and~experiment with new ideas.
+In spite of the popularity and effectiveness of applying grey-box fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a fuzzing framework to easily reuse, integrate and compare different fuzzing extensions and~experiment with new ideas.
 Take {\AFL} as an example, it is implemented~all in one file with around 8K LOC, which contains more than 100 global variables.
 Hence, the implementation of a single feature often involves modifications in multiple places.
 In short, {\AFL} is compact but also highly coupled because {\AFL} is designed to \textit{require essentially no configuration}~\cite{afl}.
@@ -45,21 +41,9 @@ More technical details of {\FOT} are available at ~\cite{fot-webpage}.
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=0.6\textwidth]{res/fot/FOT_overview}
-%	\vspace{-5pt}
 	\caption{Overview of the {\FOT} Fuzzing Framework}
 	\label{fig:fot_workflow}
 \end{figure}
-
-\todo{consistent description; consider Yuekang's thesis}
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.6\columnwidth]{res/fot/mt_workflow}
-	\caption{Conductor with Multiple Fuzzing Instances}
-	\label{fig:mt_workflow}
-\end{figure}
-
-\todo{explain multi-worker fuzzing}
 
 Figure~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
 It consists of three parts, namely the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchain}.
@@ -124,15 +108,25 @@ For instance, we implemented a web-based frontend user interface to monitor the 
 It provides fruitful information to make the fuzzing process more transparent.
 We also implemented a crash analyzer to analyze the detected crashes and generate reports automatically.
 This reduces the manual efforts of crash triaging.
-Last but not the least, several other tools have been developed with different purposes to complement the fuzzer.
+In addition, many more extensions are being added to complement the fuzzer.
+
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.6\columnwidth]{res/fot/mt_workflow}
+	\caption{Conductor with Multiple Fuzzing Instances}
+	\label{fig:mt_workflow}
+\end{figure}
 
 
 \subsection{Trace Update and Synchronization}\label{sec:trace_sync}
-One of {\FOT}'s key features is the trace synchronization between fuzzing workers. In general we followed {\AFL}'s practice to instrument the target program; but we made a slight change to the instrumentation runtime to make the target binaries able to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated/specified by different fuzzing workers. Each fuzzing worker allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
+One of {\FOT}'s key features is the builtin coordination between different fuzzing instances (Fig.~\ref{fig:mt_workflow}). One important issue is the trace synchronization between fuzzing instances. For instrumentation, we made a slight change to the conventional instrumentation runtime to make the target binaries able to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated/specified by different fuzzing workers. Each fuzzing worker allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
 
 The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing workers; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each test case in the queue, when customizable conditions are triggered (usually the conditions are about the executions and time since last synchronization).
 
-The actual synchronization of the trace information still applies ``bitwise and'' on normal running traces~\footnote{In practice, we also synchronize the timeout traces and crash traces to avoid generating too many redundant ``abnormal'' test cases.} from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
+The actual synchronization of the trace information still applies ``bitwise and'' on normal running traces
+%~\footnote{In practice, we also synchronize the timeout traces and crash traces to avoid generating too many redundant ``abnormal'' test cases.}
+from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
 
 
   \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
@@ -142,7 +136,7 @@ The actual synchronization of the trace information still applies ``bitwise and'
  	\item The one-time mutation operators for \emph{this fuzz}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the test cases.
  \end{enumerate}
 
-On the other hand, being super general, {\AFL} has limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well.
+On the other hand, being super general, {\AFL} has limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well~\cite{junjie:2017sp:skyfire,mopt-fuzz}.
 
 
 \subsection{Refinement on Variable Behaviors}\label{sec:entry_var_behavior}
@@ -156,45 +150,45 @@ Due to the existence of the potential lag of the trace synchronization, there st
 Additionally, we provide an external minimizer program to prune the all the serialized test cases (which can be normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting test cases.
  
 
-\section{Implementation and Extensions}\label{sec:app}
+%\section{Implementation and Extensions}\label{sec:app}
 
-We have implemented the {\FOT} framework and developed several extensions to {\FOT}.
+%We have implemented the {\FOT} framework and developed several extensions to {\FOT}.
 
-\subsection{Implementation}
+\subsection{Implementation}\label{sec:fot-impl}
 
-The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 15000 lines of Rust for core fuzzing modules, together with 2600 lines of C/C++ for the preprocessor, 4800 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain.
-
-
-
-\subsection{Static Vulnerability Analysis Integration}\label{subsec:sva}
+The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4100 lines of C/C++ for the preprocessor, 4800 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain.
 
 
 
-Grey-box fuzzers are typically aware of quantitative changes of code coverage and use such feedback for keeping the \textit{interesting} seeds.
-However, the performance of collecting code coverage feedback quantitatively is often not ideal, and grey-box fuzzers also need to evaluate the code coverage qualitatively~\cite{Bohme:2016:CGF}.
-One of the approaches to bring qualitative awareness about the covered code is to combine fuzzing with static vulnerability analysis, as mentioned in \S~\ref{sec:static_analysis}.
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.75\columnwidth]{res/fot/moo_result.pdf}
-	\caption{Average Number of Unique Crashes Found in 24 Hours on \textit{mjs} and \textit{intel-xed}.}
-	\label{fig:moo_result}
-\end{figure}
-
-
-Existing fuzzing works seldom use static analysis information to facilitate seed prioritization and power scheduling since existing fuzzing frameworks have little support for them.
-In contrast, integration with vulnerability static analysis is trivial in \FOT: we used \emph{static analyzer} to calculate vulnerability metrics (e.g., calls~to unsafe functions and cyclomatic complexity) and customized \emph{seed scorer} to take them into account during fuzzing. This extension added about 330 lines of C++ and 190 lines of Rust code.
-
-The workflow is as follows.
-First, the static analyzer calculates vulnerability score for each function. Then we instrument the PUT to provide function level coverage information.
-After detecting a seed that brings new coverage, the feedback collector will collect its function level coverage and map it with the static analysis result to get the function level vulnerability scores.
-The seed scorer will then accumulate the function-level scores to form the execution trace level vulnerability scores for the exercised seeds.
-Finally, the power schedule determined by the seed scorer prioritizes and allocates more powers to the seeds with higher vulnerability scores.
-
-
-
-Figure~\ref{fig:moo_result} shows the average number of unique crashes detected on mjs and intel-xed of different fuzzers over 10 runs.
-We can see that with the help of static vulnerability analysis, {\FOT} can detect more unique crashes in a limited time budget.
+%\subsection{Static Vulnerability Analysis Integration}\label{subsec:sva}
+%
+%
+%
+%Grey-box fuzzers are typically aware of quantitative changes of code coverage and use such feedback for keeping the \textit{interesting} seeds.
+%However, the performance of collecting code coverage feedback quantitatively is often not ideal, and grey-box fuzzers also need to evaluate the code coverage qualitatively~\cite{Bohme:2016:CGF}.
+%One of the approaches to bring qualitative awareness about the covered code is to combine fuzzing with static vulnerability analysis, as mentioned in \S~\ref{sec:static_analysis}.
+%
+%\begin{figure}[t]
+%	\centering
+%	\includegraphics[width=0.75\columnwidth]{res/fot/moo_result.pdf}
+%	\caption{Average Number of Unique Crashes Found in 24 Hours on \textit{mjs} and \textit{intel-xed}.}
+%	\label{fig:moo_result}
+%\end{figure}
+%
+%
+%Existing fuzzing works seldom use static analysis information to facilitate seed prioritization and power scheduling since existing fuzzing frameworks have little support for them.
+%In contrast, integration with vulnerability static analysis is trivial in \FOT: we used \emph{static analyzer} to calculate vulnerability metrics (e.g., calls~to unsafe functions and cyclomatic complexity) and customized \emph{seed scorer} to take them into account during fuzzing. This extension added about 330 lines of C++ and 190 lines of Rust code.
+%
+%The workflow is as follows.
+%First, the static analyzer calculates vulnerability score for each function. Then we instrument the PUT to provide function level coverage information.
+%After detecting a seed that brings new coverage, the feedback collector will collect its function level coverage and map it with the static analysis result to get the function level vulnerability scores.
+%The seed scorer will then accumulate the function-level scores to form the execution trace level vulnerability scores for the exercised seeds.
+%Finally, the power schedule determined by the seed scorer prioritizes and allocates more powers to the seeds with higher vulnerability scores.
+%
+%
+%
+%Figure~\ref{fig:moo_result} shows the average number of unique crashes detected on mjs and intel-xed of different fuzzers over 10 runs.
+%We can see that with the help of static vulnerability analysis, {\FOT} can detect more unique crashes in a limited time budget.
 
   
 

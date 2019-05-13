@@ -7,16 +7,16 @@
 
 
 
-Security testing is one of the most effective vulnerability detection techniques for modern software.
-Among the security testing techniques, fuzzing~\cite{fuzzing1990}, or fuzz testing, is regarded as the most effective and scalable, which~provides various inputs to the program under test (PUT) and monitors for abnormal behaviors~(e.g., stack or buffer overflow, invalid read/write, assertion failures, or memory leaks)~\cite{fuzzSurvey}. 
-Since the proposal, fuzzing has gained the popularity in industry and academia, and evolved into different types of fuzzers for different testing scenarios.
-Fuzzers can be classified as black-box, white-box or grey-box~\cite{chen2018systematic}, according to their awareness of the internal structure of the PUT.
-Recently, grey-box fuzzers have been widely-used and proven to be effective~\cite{Bohme:2016:CGF}.
-Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017:DGF,junjie:2017sp:skyfire,2017arXiv170907101L,CollAFL,Angora} receive plenty of attentions.
+%Security testing is one of the most effective vulnerability detection techniques for modern software.
+%Among the security testing techniques, fuzzing~\cite{fuzzing1990}, or fuzz testing, is regarded as the most effective and scalable, which~provides various inputs to the PUT and monitors for abnormal behaviors~(e.g., stack or buffer overflow, invalid read/write, assertion failures, or memory leaks)~\cite{fuzzSurvey}. 
+%Since the proposal, fuzzing has gained the popularity in industry and academia, and evolved into different types of fuzzers for different testing scenarios.
+%Fuzzers can be classified as black-box, white-box or grey-box~\cite{chen2018systematic}, according to their awareness of the internal structure of the PUT.
+%Recently, grey-box fuzzers have been widely-used and proven to be effective~\cite{Bohme:2016:CGF}.
+%Specificaly, AFL~\cite{afl} and its derivations ~\cite{Bohme:2016:CGF,Bohme:2017:DGF,junjie:2017sp:skyfire,2017arXiv170907101L,CollAFL,Angora} receive plenty of attentions.
 
 
 
-In general, the existing grey-boxing fuzzers (GFs) aim to cover as many program states as possible within a limited time budget.
+In general, the existing grey-boxing fuzzers (GBFs) aim to cover as many program states as possible within a limited time budget.
 However, there exist several testing scenarios in which only particular program states are concerned and required to be sufficiently tested. 
 For example, if \emph{MJS}~\cite{mjs} (a JavaScript engine for embedded devices) has a vulnerability discovered on MSP432 ARM platform, similar vulnerabilities may occur in the corresponding code for the other platforms.
 In such a situation, the fuzzer should be \emph{directed} to reproduce the bug at these locations.
@@ -51,7 +51,7 @@ Hence, the first problem is \emph{to have a proper static analysis which can col
 After extracting the information with static analysis, there are several  challenges in \textbf{\emph{dynamic analysis}} --- how to dynamically adjust different strategies for the purpose of reaching the target sites as fast as possible.
 The first challenge is how to properly \emph{allocate} energy to the inputs with different distances and how to \emph{prioritize} the inputs closer to the targets.
 This derives the third desired property \textbf{P3}.
-The second challenge is how to adaptively change the mutation strategies, since GFs may possess various mutation operators at both coarse-grained (e.g., bulk deletion) and fine-grained (e.g., bitwise flip) levels.
+The second challenge is how to adaptively change the mutation strategies, since GBFs may possess various mutation operators at both coarse-grained (e.g., bulk deletion) and fine-grained (e.g., bitwise flip) levels.
  This derives the fourth desired property \textbf{P4}.
 Hence, the second problem is \emph{to make proper adjustments for the dynamic strategies used in DGF}.
 
@@ -77,7 +77,7 @@ Particularly, {\dFOT} can expose certain crashes up to 7 times faster than the s
 
 In practice, \dFOT has been successfully discovering crashes with the suspicious target sites reported by other vulnerability detection tools and successfully found more than 41 previously unknown crashes in projects Oniguruma~\cite{oniguruma}, MJS\cite{mjs}, etc. All these vulnerabilities have been confirmed and fixed; among them, 15 vulnerabilities have been assigned unique CVE IDs.
 
-The main contributions of this work are summarized as follows:
+The main contributions of this chapter are summarized as follows:
 \begin{enumerate}[(1)] 
 \itemsep0em
 \item We analyzed the challenges in directed grey-box fuzzing and summarized the four desired properties for DGFs.
@@ -98,7 +98,7 @@ Finally, we review the state-of-the-art DGF, namely \aflgo~\cite{Bohme:2017:DGF}
 
 
 Fig.~\ref{fig:exam_trace} shows two execution traces related to CVE-2017-15939~\cite{cve-2017-15939}, which is a NULL pointer dereference bug caused by~an incomplete fix in CVE-2017-15023~\cite{cve-2017-15023}.
-This vulnerability is difficult for~the~existing GFs to discover.
+This vulnerability is difficult for~the~existing GBFs to discover.
 For instance, AFL~\cite{afl} fails to detect this vulnerability within 24 hours in all the 10 different runs we conducted.
 This bug is triggered in \texttt{nm} from GNU binutils.
 In function \texttt{concat\_filename}, a NULL pointer is assigned and used without checking, which triggers the segmentation fault.
@@ -135,9 +135,9 @@ From a patch testing perspective, we would like to target \texttt{concat\_filena
 
 
 
-For simplicity, in Fig.~\ref{fig:call_chain}, we illustrate only three representative traces for the CVE-2017-15939 by omitting 1) the overlapping functions before $a$ and 2) the other traces that do not pass the target function $T$. {The difficulty in discovering this CVE for the general GFs (e.g., AFL) arises from the fact that the target function $T$ is deeply hidden in the crashing trace.} As shown in Fig.~\ref{fig:call_chain}, the call chain of $\langle a, e, T, Z\rangle$ is shorter than $\langle a, b, c, d, T, Z\rangle$.
+For simplicity, in Fig.~\ref{fig:call_chain}, we illustrate only three representative traces for the CVE-2017-15939 by omitting 1) the overlapping functions before $a$ and 2) the other traces that do not pass the target function $T$. {The difficulty in discovering this CVE for the general GBFs (e.g., AFL) arises from the fact that the target function $T$ is deeply hidden in the crashing trace.} As shown in Fig.~\ref{fig:call_chain}, the call chain of $\langle a, e, T, Z\rangle$ is shorter than $\langle a, b, c, d, T, Z\rangle$.
 
-Since most of the GFs (such as AFL, LibFuzzer, etc.) are supposed to be \emph{coverage oriented}, and do not care specially about the targets, they may not put most of their efforts in generating test seeds that reach function $T$ and testing the function throughly. For DGFs, although there suppose to be some efforts to guide the fuzzing procedure to favor \emph{some} traces leading to $T$ and focus more on these traces, they may frequently miss \emph{all} the traces. For example, if \aflgo detects that two traces can reach the target sites, it will highly likely favors the trace with shorter path: the distance between the seed to the target is determined by the average distance of the components (basic blocks or functions) in the execution trace to the targets, where the components' distance to the target sites are essentially determined by the number of edges between the components to the targets. This mechanism causes \aflgo to give more energy to the trace $\langle a, e, T, Z\rangle$ since it reaches the target $T$ \emph{and} the induced trace distance is smaller than $\langle a, b, c, d, T, Z\rangle$; on the other hand, less attention is put on $\langle a, b, c, d, T, Z\rangle$, which however causes the crash under some circumstances. Worse still, other traces like $\langle a, e, f, Z\rangle$ may be mistakenly assigned with more energy. As a result, \aflgo was also not able to reproduce the crash within 24 hours in any of the 10 runs we conducted.
+Since most of the GBFs (such as AFL, LibFuzzer, etc.) are supposed to be \emph{coverage oriented}, and do not care specially about the targets, they may not put most of their efforts in generating test seeds that reach function $T$ and testing the function throughly. For DGFs, although there suppose to be some efforts to guide the fuzzing procedure to favor \emph{some} traces leading to $T$ and focus more on these traces, they may frequently miss \emph{all} the traces. For example, if \aflgo detects that two traces can reach the target sites, it will highly likely favors the trace with shorter path: the distance between the seed to the target is determined by the average distance of the components (basic blocks or functions) in the execution trace to the targets, where the components' distance to the target sites are essentially determined by the number of edges between the components to the targets. This mechanism causes \aflgo to give more energy to the trace $\langle a, e, T, Z\rangle$ since it reaches the target $T$ \emph{and} the induced trace distance is smaller than $\langle a, b, c, d, T, Z\rangle$; on the other hand, less attention is put on $\langle a, b, c, d, T, Z\rangle$, which however causes the crash under some circumstances. Worse still, other traces like $\langle a, e, f, Z\rangle$ may be mistakenly assigned with more energy. As a result, \aflgo was also not able to reproduce the crash within 24 hours in any of the 10 runs we conducted.
  
 The challenges of the existing DGF roots in the following aspects: 1) the target functions may appear in several places in PUT, and multiple different traces may lead to the target.  2) since the call graph majorly affects the calculation of the trace distance (the dissimilarity with the target sites), it needs to be accurately built;
 in particular, the indirect calls among functions should not be ignored. If the above two issues are not well handled, the distance-based guiding mechanism for DGF will get hindered and fail in such cases.
@@ -169,7 +169,7 @@ As observed from the above example, an ideal DGF should possess the following de
 \end{figure}
 
 \subsubsection{\textbf{P1}. DGF should define a \textbf{robust} distance-based mechanism that can guide the directed fuzzing by avoiding the bias to some traces and considering all traces to the targets.}  \label{subsec:p1}
-Different from general GFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing inputs due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
+Different from general GBFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing inputs due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
 
 However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$\footnote{If we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target sites.}. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target site, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target site. 
 
@@ -201,7 +201,7 @@ To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired des
  For \emph{power scheduling}, the desired design is that the seed trace with a smaller distance to targets should be assigned more energy for fuzzing, as the trace closer to the target sites gets better chance to reach there. Therefore, $\langle a, e, T, Z\rangle$ should be allocated with similar energy with $\langle a, b, c, d, T, Z\rangle$, and $\langle a, e, f, Z\rangle$ should have less energy than the previous two. For \emph{seed prioritization}, seeds that have smaller distance (``closer'') to the targets should be fuzzed earlier in subsequent mutations. Therefore, $\langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be put ahead of $\langle a, e, f, Z\rangle$.
 
 \subsubsection{\textbf{P4}. DGF should adopt an \textbf{adaptive} mutation strategy when the seeds cover the different program states.}  \label{subsec:p4}
- GFs usually apply different mutations, such as bitwise flip, byte rewrite, chunk replacement, to generate new test seeds from the existing one. 
+ GBFs usually apply different mutations, such as bitwise flip, byte rewrite, chunk replacement, to generate new test seeds from the existing one. 
 In general, these mutators can be categorized into two levels: fine-grained mutations (e.g., bitwise flip) and coarse-grained mutations (e.g., chunk replacement).
  Although there is no direct evidence that fine-grained mutations will likely preserve the execution traces, it is widely accepted that a coarse-grained random mutation has a high chance to change the execution trace greatly. Therefore, the desired design is that when a seed has already reached the target sites (including target lines, basic blocks or functions), it should be given less chances for coarse-grained mutations.
  
@@ -553,7 +553,7 @@ $\mathcal{M}_s\leftarrow \mathcal{M}_s \cup  \{(s^{\prime\prime},s^{\prime\prime
 In \S\ref{subsec:powerSche}, for each seed, the output of power scheduling is the energy (a.k.a. the times of applied mutations), which will be the input of the step of our adaptive mutation. The problem is that, given the total energy available for a seed, we still need to assign the number of mutations for \emph{each type of mutators}. 
 
 
-In general, two categories of mutators are used in GFs. Some are coarse-grained in the sense that they change bulks of bytes during the mutations. Others are fine-grained since they only involve a few byte-level modifications, insertions or deletions. For coarse-grained mutations, we consider them to be:
+In general, two categories of mutators are used in GBFs. Some are coarse-grained in the sense that they change bulks of bytes during the mutations. Others are fine-grained since they only involve a few byte-level modifications, insertions or deletions. For coarse-grained mutations, we consider them to be:
 \begin{enumerate}[(1)] 
 	\item \textbf{Mixed havoc}. This includes several bulk mutations, namely deleting a chunk of bytes, overwriting the given chunk with other bytes in the buffer, deleting a certain lines, duplicating certain lines multiple times, etc. The actual mutation involves their combinations.
 	\item \textbf{Semantic mutation}. This is used when the target program is known to process semantic relevant input files such as javascript, xml, css, etc. In detail, this follows Skyfire~\cite{junjie:2017sp:skyfire}, which includes three meta mutations, inserting another subtree into a random AST position, deleting a given AST, and replacing the given position with another AST.
@@ -726,13 +726,13 @@ This benchmark is also used in several other works such as~\cite{Bohme:2016:CGF,
 
 \textbf{Evalution Tools.} We compare {\dFOT} with the following three fuzzers:
 \begin{enumerate}[(1)] 
-\item \textbf{AFL} is the current state-of-the-art GF. It ignores all the target information for the PUT and only does the ``basic block transition'' instrumentation.
+\item \textbf{AFL} is the current state-of-the-art GBF. It ignores all the target information for the PUT and only does the ``basic block transition'' instrumentation.
 \item \textbf{{\aflgo}} is the state-of-the-art DGF based on AFL.
 Compared to AFL, it also instruments basic block distance information.
 \item \textbf{{\dGO}} is the fuzzer where the basic block level distance is generated with our static analysis procedure (Fig.~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
 \end{enumerate}
 
-Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not publicly available (e.g., Angora~\cite{Angora}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
+Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GBFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not publicly available (e.g., Angora~\cite{Angora}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
 
 In the experiments, all AFL based fuzzers (AFL, {\aflgo} and {\dGO}) are run in their ``fidgety'' mode~\cite{FidgetyAFL}. For both {\aflgo} and {\dGO}, ``time-to-exploitation'' is set to 45 minutes for the fuzzer. Except for the experiments against GNU Binutils (Table~\ref{tbl:cr_aflgo_binutils}) , where we follow exactly the setup in {\aflgo}~\cite{Bohme:2017:DGF} , all the other experiments are repeated 8 times, with a time budget of 4 hours. 
 We use ``time-to-exposure'' (TTE) to measure the length of the
@@ -899,7 +899,7 @@ From the results, we can conclude that the dynamic analysis strategies used in \
 
 \subsection{Target Site Covering}\label{subsec:evalsrcloc}
 Certain locations in the PUTs are hard to reach, though they may not trigger crashes.
-In practice, the generated seeds that can cover the such locations can also be used as initial seeds for CGFs to boost their coverage. 
+In practice, the generated seeds that can cover the such locations can also be used as initial seeds for GBFs to boost their coverage. 
 Therefore, this criterion is an important factor for measuring DGFs' capabilities. 
 
 Google's fuzzing test suite contains three projects that specially focus on testing fuzzers' abilities of discovering hard to reach locations, namely \emph{libjpeg-turbo-07-2017} (\#1), \emph{libpng 1.2.56} (\#2, \#3) and \emph{freetype2-2017} (\#4). 

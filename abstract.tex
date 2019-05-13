@@ -9,16 +9,11 @@ In general, there are two categories of approaches to securing a system by reduc
 
 Firstly, we apply \emph{grey-box fuzz testing} (or \emph{fuzzing}) to detect vulnerabilities introduced by erroneous implementation. We aim to improve the effectiveness of dynamic fuzzing with the help of static program analysis. To fulfill our goal, we build our own grey-box fuzzing framework, Fuzzing Orchestration Toolkit (FOT). Compared to other fuzzing tools, FOT is versatile in the functionalities and can be easily configured and extended for different fuzzing purposes. Till now, FOT has integrated multiple state-of-the-art fuzzing techniques and detected 200+ zero-day vulnerabilities in more than 40 world famous projects, from which 52 CVEs have been assigned.
 On top of \FOT, we have also innovatively proposed techniques for two specific fuzzing scenarios.
-%to significantly improve the effectiveness of fuzzing on particular targets and multithreaded programs.
 
 One scenario is the directed grey-box fuzzing (DGF) which aims to improve the directedness of executing towards user-specified target sites in the program. To emphasize existing challenges in \mbox{directed} fuzzing, we propose \dFOT to feature four desired properties of directed grey-box fuzzers. With the statically analyzed results on the program under test and the target sites, \dFOT applies multiple dynamic strategies for seed prioritization, power scheduling and \mbox{mutating}.
-%Owing to a lightweight yet precise static analysis on the program under test and the target sites, \dFOT precisely collects the static information and .
-%During fuzzing, \dFOT~{evaluates} exercised seeds based on both static information and the \mbox{execution} traces to generate the dynamic metrics, which are then used for seed prioritization, power scheduling and adaptive \mbox{mutating}. These strategies help \dFOT to achieve better directedness and gravitate towards the target sites.
-%We evaluated \dFOT on various real-world \mbox{programs} under different scenarios.
 The experimental results on various real-world \mbox{programs} showed that \dFOT reaches the target sites and reproduce the crashes much faster than state-of-the-art grey-box fuzzers such as AFL and AFLGo.
-%Specially, \dFOT can reduce the time to expose certain vulnerabilities from about 3.5 hours to 0.5 hour. 
 
-The other scenario is to enhance fuzzing on multithreaded programs. Due to non-deterministic nature of multithreading, grey-box fuzzers usually work poorly because they are inherently incapable of tracking thread-interleavings.
+The other scenario is enhancing grey-box fuzzing on multithreaded programs. Due to non-deterministic nature of multithreading, grey-box fuzzers usually work poorly because they are inherently incapable of tracking thread-interleavings.
 %We present \mtfuzz, a new grey-box fuzzing technique for multithreaded programs built on top of FOT. 
 We therefore present \mtfuzz, a novel thread-aware technique which effectively generates multithreading-relevant seeds. \mtfuzz relies on a set of thread-aware instrumentation methods consisting of a stratified exploration-oriented instrumentation and two complementary instrumentations. Our experiments on 12 real-world programs showed that \mtfuzz significantly outperforms the state-of-the-art fuzzer AFL in generating multithreading relevant seeds, detecting vulnerabilities, and exposing concurrency bugs.
 
