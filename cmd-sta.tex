@@ -11,7 +11,7 @@
    basicstyle=\small,
    keywordstyle=\bfseries,
    language=C,
-   morekeywords={info, test, letvar, in, init},
+   morekeywords={info, test, letv, in, init},
    showspaces=false,
    showstringspaces=false
  }
@@ -54,11 +54,11 @@
 \newcommand*{\lcWHILE}[2]{\ensuremath{\textbf{while}~{#1}~\textbf{do}~{#2}}}
 \newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{call}~{#2}({#3})}}
 \newcommand*{\lcCP}[3]{\ensuremath{{\textbf{test}({#1})~{#2} ~\textbf{else}~ {#3}}}}
-\newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letvar}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
+\newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letv}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
 
-\newcommand*{\com}{\ensuremath{\mathit{com}~}}
-\newcommand*{\FD}{\ensuremath{\mathit{FD}}}
-\newcommand*{\FT}{\ensuremath{\mathit{FT}}}
+\newcommand*{\com}{\ensuremath{\mathit{Cmd}~}}
+\newcommand*{\FD}{\ensuremath{\mathit{F_d}}}
+\newcommand*{\FT}{\ensuremath{\mathit{F_t}}}
 
 %---------------------------
 % NOTE: if lpRES is changed, example code should be changed accordingly
@@ -76,7 +76,7 @@
 \newcommand*{\cCond}[4]{\ensuremath{(\cPair{#1}{#2}\leq\cPair{#3}{#4})}}%{\ensuremath{\big(\cPair{#1}{#2}\leq\cPair{#3}{#4}\big)}}
 \newcommand*{\cCondst}[4]{\ensuremath{({#1},{#2},{#3},{#4})}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*{\rank}[1]{{\textbf{r}}(#1)}
+\newcommand*{\rank}[1]{{\textbf{rk}}(#1)}
 \newcommand*{\tlength}[1]{\ensuremath{len(#1)}}
 \newcommand*{\tLEQl}{\ensuremath{\preceq}}
 \newcommand*{\BNTS}{$\mathcal{T}_\mathit{b}$}

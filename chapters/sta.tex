@@ -282,7 +282,7 @@ $c$ is a command and {\lpRES} is a local variable
 that holds the return value of the function.
 The variables $\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{return}~r$'' in their scopes.
 We consider only {\em closed functions}, i.e., the variables occurring in $c$
-are either introduced by \textbf{letvar} or from the set $\{\overline{x}, r\}$.
+are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 
 
 
@@ -762,7 +762,7 @@ C.getsecret() { %// $C$ \emph{has} permission $p$%
 
 M.main() { %// $M$ \emph{has} permission $p$%
     init r = 0 in {
-	  letvar %$x_H$% = 0 in
+	  letv %$x_H$% = 0 in
 	  	{%$x_H$% := C.getsecret(); r := call A.f(%$x_H$%)};
       return r
   }
@@ -1217,7 +1217,7 @@ and transitivity of the indistinguishability relation.
 \item[T-LETVAR] This follows from the induction hypothesis
 and the fact that we can choose fresh variables for local
 variables, and that the local variables are not visible
-outside the scope of letvar.
+outside the scope of letv.
 
 \item[T-CP]
 We have:
@@ -2925,7 +2925,7 @@ A.getInfo() {
 }
 B.fun() { %// $B$ has permission $q$%
    init r in { %// $\Gamma({\lpRES})=\beta$%
-      letvar x = "" in { %// $\Gamma({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
+      letv x = "" in { %// $\Gamma({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
          test(p) r = 0;  %// $(\oplus p, L\leq\beta) $%
          else x = call A.getInfo();
          %//$\FT_{C}(A.getInfo) = ()\rightarrow \alpha$,  $(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma) $%
