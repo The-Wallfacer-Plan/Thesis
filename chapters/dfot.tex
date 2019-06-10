@@ -562,7 +562,7 @@ Note that all these new generated  seeds in $\mathcal{M}_s $, together with the 
 	\Output{$\mathcal{Q}_1$, the tier 1 queue to store the most important seeds}
 	\Output{$\mathcal{Q}_2$, the tier 2 queue to store the important  seeds}
 	\Output{$\mathcal{Q}_3$, the tier 3 queue to store the least important seeds}
-	\Const{$\eta$, the threshold of energy value for accepting important seeds}
+	\Const{$\mu$, the threshold of energy value for accepting important seeds}
 	\BlankLine
 	\SetKw{Continue}{\textbf{continue}}
 	\SetKw{And}{\textbf{and}}
@@ -579,7 +579,7 @@ Note that all these new generated  seeds in $\mathcal{M}_s $, together with the 
   			\If{$seedWithNewEdge(s) == true $}{ \label{algo3:checkNewEdge}
   				$\mathcal{Q}_1 \leftarrow \mathcal{Q}_1 \cup \{s\} $\;	
   			}
-  			\ElseIf{$s.powerEnergy() > \eta $}{ \label{algo3:bigEnergy}
+  			\ElseIf{$s.powerEnergy() > \mu $}{ \label{algo3:bigEnergy}
   			$\mathcal{Q}_1 \leftarrow \mathcal{Q}_1 \cup \{s\} $\;	
   			}
   			\ElseIf{$reachTarget(s) == true $}{ \label{algo3:reachTarget}
@@ -593,7 +593,7 @@ Note that all these new generated  seeds in $\mathcal{M}_s $, together with the 
        	$\mathcal{Q}_3 \leftarrow \mathcal{Q}_3 \cup \{s\} $\;		 
      
     }
-	\caption{$seedPrioritize()$: Seed Prioritization}
+	\caption{Seed Prioritization}
 	\label{algo:seedprioritization}
 \end{algorithm}
  

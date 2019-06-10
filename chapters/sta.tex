@@ -289,61 +289,61 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 \begin{figure*}[ht]
 {\tiny
 \[
-\inference[E-VAL]{}{\eta \vdash \leVAL{v}  \leadsto v}
+\inference[E-VAL]{}{\mu \vdash \leVAL{v}  \leadsto v}
 \qquad
-\inference[E-VAR]{}{\eta \vdash \leVAR{x}  \leadsto \eta(x)}
+\inference[E-VAR]{}{\mu \vdash \leVAR{x}  \leadsto \mu(x)}
 \]
 
 \[
-\inference[E-OP]{\eta \vdash e_1 \leadsto v_1\quad \eta \vdash e_2 \leadsto v_2}
-{\eta \vdash \leOP{e_1}{e_2} \leadsto v_1~op~v_2}
+\inference[E-OP]{\mu \vdash e_1 \leadsto v_1\quad \mu \vdash e_2 \leadsto v_2}
+{\mu \vdash \leOP{e_1}{e_2} \leadsto v_1~op~v_2}
 \qquad
-\inference[E-LETVAR]{\eta \vdash e \leadsto v \quad \eta [ x \mapsto v ]; A ; P \vdash c \leadsto \eta'}
-{\eta; A; P \vdash \lcLETVAR{x}{e}{c} \leadsto \eta' - x}
+\inference[E-LETVAR]{\mu \vdash e \leadsto v \quad \mu [ x \mapsto v ]; A ; P \vdash c \leadsto \mu'}
+{\mu; A; P \vdash \lcLETVAR{x}{e}{c} \leadsto \mu' - x}
 \]
 
 \[
-\inference[E-SEQ]{\eta;A; P \vdash c_1 \leadsto \eta' \quad \eta';A; P \vdash c_2 \leadsto \eta''}
-{\eta;A;P \vdash \lcSEQ{c_1}{c_2} \leadsto \eta''}
+\inference[E-SEQ]{\mu;A; P \vdash c_1 \leadsto \mu' \quad \mu';A; P \vdash c_2 \leadsto \mu''}
+{\mu;A;P \vdash \lcSEQ{c_1}{c_2} \leadsto \mu''}
 \qquad
-\inference[E-ASS]{\eta \vdash e \leadsto v}
-{\eta; A; P \vdash \lcASS{x}{e} \leadsto \eta [ x \mapsto v ]}
+\inference[E-ASS]{\mu \vdash e \leadsto v}
+{\mu; A; P \vdash \lcASS{x}{e} \leadsto \mu [ x \mapsto v ]}
 \]
 
 \[
-\inference[E-IF-T]{\eta \vdash e \leadsto v\quad v\neq 0\quad \eta; A; P \vdash c_1 \leadsto \eta'}
-{\eta; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta'}
+\inference[E-IF-T]{\mu \vdash e \leadsto v\quad v\neq 0\quad \mu; A; P \vdash c_1 \leadsto \mu'}
+{\mu; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu'}
 \qquad
-\inference[E-IF-F]{\eta \vdash e \leadsto v\quad v = 0\quad \eta;A; P \vdash c_2 \leadsto \eta'}
-{\eta;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta'}
+\inference[E-IF-F]{\mu \vdash e \leadsto v\quad v = 0\quad \mu;A; P \vdash c_2 \leadsto \mu'}
+{\mu;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu'}
 \]
 
 \[
 \inference[E-WHILE-T]{
-\eta \vdash e \leadsto v\quad v\neq 0\quad
-\eta;A; P \vdash c \leadsto \eta'\\
-\quad \eta' ; A ; P \vdash \lcWHILE{e}{c} \leadsto \eta''
+\mu \vdash e \leadsto v\quad v\neq 0\quad
+\mu;A; P \vdash c \leadsto \mu'\\
+\quad \mu' ; A ; P \vdash \lcWHILE{e}{c} \leadsto \mu''
 }
-{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta''}
+{\mu;A; P \vdash \lcWHILE{e}{c} \leadsto \mu''}
 \qquad
-\inference[E-WHILE-F]{\eta \vdash e \leadsto v\qquad v = 0}
-{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta}
+\inference[E-WHILE-F]{\mu \vdash e \leadsto v\qquad v = 0}
+{\mu;A; P \vdash \lcWHILE{e}{c} \leadsto \mu}
 \]
 
 \[
-\inference[E-CP-T]{p\in P \quad \eta; A; P \vdash c_1 \leadsto \eta'}
-{\eta; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+\inference[E-CP-T]{p\in P \quad \mu; A; P \vdash c_1 \leadsto \mu'}
+{\mu; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu'}
 \qquad
-\inference[E-CP-F]{p\notin P \quad \eta;A;P \vdash c_2 \leadsto \eta'}
-{\eta;A;P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+\inference[E-CP-F]{p\notin P \quad \mu;A;P \vdash c_2 \leadsto \mu'}
+{\mu;A;P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu'}
 \]
 
 \[
 \inference[E-CALL]{
 \FD(B.f) = \lpPROG{B.f}{\overline{y}}{c}{\lpRES} \qquad
-\eta\vdash\overline{e} \leadsto \overline{v} \quad
-[\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c \leadsto \eta'}
-{\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto \eta[x \mapsto \eta'(r) ]}
+\mu\vdash\overline{e} \leadsto \overline{v} \quad
+[\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c \leadsto \mu'}
+{\mu;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto \mu[x \mapsto \mu'(r) ]}
 \]
 }
 \caption{Evaluation rules for the expressions and commands with function definition table $\FD$ and permission assignment $\Theta.$
@@ -357,34 +357,34 @@ We assume that function definitions are stored in a table $\FD$ indexed by funct
 An {\termEmph{evaluation environment}
 is a finite mapping from variables to values (i.e., integers).
 We denote with $EEnv$ the set of evaluation environments.
-Elements of $EEnv$ are ranged over by $\eta$.
+Elements of $EEnv$ are ranged over by $\mu$.
 We  use the notation
 $[ x_1 \mapsto v_1, \cdots,  x_n \mapsto v_n]$
 to denote an evaluation environment mapping variable $x_i$ to value $v_i$; this will sometimes be abbreviated as $[ \overline x \mapsto \overline v ].$
-The domain of $\eta = [ x_1 \mapsto v_1, \cdots, x_n \mapsto v_n]$ (i.e., $\{x_1,\dots,x_n\}$) is denoted by $dom(\eta)$.
-Given two environments $\eta_1$ and $\eta_2$, we define
-$\eta_1\eta_2$ as the environment $\eta$ such that $\eta(x) = \eta_2(x)$ if $x \in dom(\eta_2)$,
-otherwise $\eta(x) =\eta_1(x)$.
-For example, $\eta[x \mapsto v]$ maps $x$ to $v$, and $y$ to $\eta(y)$
-for any $y \in dom(\eta)$ such that $y \not = x.$
-Given a mapping $\eta$ and a variable $x$, we write $\eta\!-\!x$ to denote the
-mapping resulting from removing $x$ from $dom(\eta)$.
+The domain of $\mu = [ x_1 \mapsto v_1, \cdots, x_n \mapsto v_n]$ (i.e., $\{x_1,\dots,x_n\}$) is denoted by $dom(\mu)$.
+Given two environments $\mu_1$ and $\mu_2$, we define
+$\mu_1\mu_2$ as the environment $\mu$ such that $\mu(x) = \mu_2(x)$ if $x \in dom(\mu_2)$,
+otherwise $\mu(x) =\mu_1(x)$.
+For example, $\mu[x \mapsto v]$ maps $x$ to $v$, and $y$ to $\mu(y)$
+for any $y \in dom(\mu)$ such that $y \not = x.$
+Given a mapping $\mu$ and a variable $x$, we write $\mu\!-\!x$ to denote the
+mapping resulting from removing $x$ from $dom(\mu)$.
 
 The operational semantics for expressions and commands is
 given in Fig.~\ref{fig:semantics}.
 The evaluation judgment
-for expressions has the form $\eta\vdash e\leadsto v$,
+for expressions has the form $\mu\vdash e\leadsto v$,
 which states that expression $e$ evaluates to value $v$ when variables
-in $e$ are interpreted in the evaluation environment $\eta.$
-We write $\eta \vdash \overline{e} \leadsto \overline{v}$,
+in $e$ are interpreted in the evaluation environment $\mu.$
+We write $\mu \vdash \overline{e} \leadsto \overline{v}$,
 where $\overline{e}=e_1,\dots,e_n$ and $\overline{v} = v_1,\dots,v_n$ for some $n$,
 to denote a sequence of judgments
-$\eta \vdash e_1 \leadsto v_1, \ldots, \eta \vdash e_n \leadsto v_n.$
+$\mu \vdash e_1 \leadsto v_1, \ldots, \mu \vdash e_n \leadsto v_n.$
 
 The evaluation judgment for commands takes the form
-$\eta;A;P\vdash c \leadsto \eta'$
-where $\eta$ is an evaluation environment before the execution
-of the command $c$, and $\eta'$ is the evaluation environment
+$\mu;A;P\vdash c \leadsto \mu'$
+where $\mu$ is an evaluation environment before the execution
+of the command $c$, and $\mu'$ is the evaluation environment
 after the execution of $c$. Here $A$ refers to the app to which the command $c$ belongs.
 The permission set $P$ denotes the {\em permission context}, i.e., it is the set of permissions of the app which invokes the function of $A$ in which the command $c$ resides. The caller
 app may be $A$ itself (in which case the permission context will be the same as the permission set of $A$) but more often it is another app in the system.
@@ -954,18 +954,18 @@ which this upper bound is derived.
 
 
 \begin{definition}\label{def:envequ}
-Given two evaluation environments $\eta, \eta'$,
+Given two evaluation environments $\mu, \mu'$,
 a typing environment $\Gamma$, a security level $l_O \in \SL$ of the observer,
 the {\termEmph{indistinguishability relation}}  $=_{\Gamma}^{l_O}$ is defined as: \begin{equation*}
-\eta =_{\Gamma}^{l_{O}} \eta' \text{ iff}
-\forall x\in dom(\Gamma) .\; \big(\Gamma(x) \leq \hat{l_{O}} \Rightarrow \eta(x) = \eta'(x) \big)
+\mu =_{\Gamma}^{l_{O}} \mu' \text{ iff}
+\forall x\in dom(\Gamma) .\; \big(\Gamma(x) \leq \hat{l_{O}} \Rightarrow \mu(x) = \mu'(x) \big)
 \end{equation*}
 where
-$\eta(x) = \eta'(x)$ holds iff both sides of the equation are defined and equal,
+$\mu(x) = \mu'(x)$ holds iff both sides of the equation are defined and equal,
 or both sides are undefined.
 \end{definition}
 
-Note that in Definition~\ref{def:envequ}, $\eta$ and $\eta'$ may not have the same domain, but they must agree on
+Note that in Definition~\ref{def:envequ}, $\mu$ and $\mu'$ may not have the same domain, but they must agree on
 their valuations for the variables in the domain of $\Gamma$. 
 Note also that since base types are functions from permissions to security level, the security
 level $l_O$ needs to be lifted to a base type in the comparison $\Gamma(x) \leq \hat{l_{O}}$.
@@ -982,24 +982,24 @@ $=_{\Gamma}^{l_{O}}$ is an equivalence relation on $EEnv$.
 \end{lemma}
  \begin{proof}
 \begin{ProofEnumDesc}[style=standard]
-	\item [Reflexivity] Obviously $\eta=_{\Gamma}^{l_O}\eta$.
-	\item [Symmetry] Since $\forall x\in dom(\Gamma). (\Gamma(x)\leq\hat{l}_O\Rightarrow\eta'=_{\Gamma}^{l_O}\eta)$.
-	\item [Transitivity] If $\eta_1=_{\Gamma}^{l_O}\eta_2$ and $\eta_2=_{\Gamma}^{l_O}\eta_3$, for a given $x\in dom(\Gamma)$, when $\Gamma(x)\leq\hat{l_O}$, we have $\eta_1(x)=\eta_2(x)$ and $\eta_2(x)=\eta_3(x)$.
+	\item [Reflexivity] Obviously $\mu=_{\Gamma}^{l_O}\mu$.
+	\item [Symmetry] Since $\forall x\in dom(\Gamma). (\Gamma(x)\leq\hat{l}_O\Rightarrow\mu'=_{\Gamma}^{l_O}\mu)$.
+	\item [Transitivity] If $\mu_1=_{\Gamma}^{l_O}\mu_2$ and $\mu_2=_{\Gamma}^{l_O}\mu_3$, for a given $x\in dom(\Gamma)$, when $\Gamma(x)\leq\hat{l_O}$, we have $\mu_1(x)=\mu_2(x)$ and $\mu_2(x)=\mu_3(x)$.
 	\begin{enumerate}[label={(\arabic*)}]
-	\item If $\eta_1(x)\neq\bot$, then $\eta_2(x)\neq\bot$ by the first equation, which in return requires $\eta_3(x)\neq\bot$ by the second equation; by transitivity $\eta_1(x)=\eta_3(x)$($\neq\bot$).
-	\item If $\eta_1(x)=\bot$, the first equation requires that $\eta_2(x)=\bot$, which makes $\eta_3(x)=\bot$, therefore both $\eta_1(x)=\eta_3(x)$($=\bot$).
+	\item If $\mu_1(x)\neq\bot$, then $\mu_2(x)\neq\bot$ by the first equation, which in return requires $\mu_3(x)\neq\bot$ by the second equation; by transitivity $\mu_1(x)=\mu_3(x)$($\neq\bot$).
+	\item If $\mu_1(x)=\bot$, the first equation requires that $\mu_2(x)=\bot$, which makes $\mu_3(x)=\bot$, therefore both $\mu_1(x)=\mu_3(x)$($=\bot$).
 	\end{enumerate}
-	Therefore $\eta_1(x)=\eta_3(x)$.
+	Therefore $\mu_1(x)=\mu_3(x)$.
 \end{ProofEnumDesc}
  \end{proof}
 
  \begin{lemma}\label{lem:proj}
-If $\eta =_{\Gamma}^{l_{O}} \eta'$
+If $\mu =_{\Gamma}^{l_{O}} \mu'$
 then for each $P\in\PPS$,
-$\eta =_{\app{\Gamma}{P}}^{l_O} \eta'.$
+$\mu =_{\app{\Gamma}{P}}^{l_O} \mu'.$
 \end{lemma}
  \begin{proof}
-$\forall x\in dom(\Gamma)$, we need to prove that when $\app{\Gamma}{P}(x)\leq l_O$ then $\eta(x)=\eta'(x)$. But $\app{\Gamma}{P}(x)=\app{\Gamma(x)}{P}=t(P)$, from the definition of $\eta(x)=\eta'(x)$, the conclusion holds.
+$\forall x\in dom(\Gamma)$, we need to prove that when $\app{\Gamma}{P}(x)\leq l_O$ then $\mu(x)=\mu'(x)$. But $\app{\Gamma}{P}(x)=\app{\Gamma(x)}{P}=t(P)$, from the definition of $\mu(x)=\mu'(x)$, the conclusion holds.
  \end{proof}
 
 
@@ -1043,7 +1043,7 @@ The next two lemmas relate projection, promotion/demotion
 and the indistinguishability relation.
 
 \begin{lemma}\label{lem:up}
-If $p \in P$, then $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$ iff $\eta =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \eta'$.
+If $p \in P$, then $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \mu'$.
 \end{lemma}
 \begin{proof}
   We first note that $dom(\app{\Gamma}{P}) = dom(\app{\Gamma\uparrow_{p}}{P})$ since both
@@ -1067,7 +1067,7 @@ If $p \in P$, then $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$ iff $\eta =_{\app{\G
 \end{proof}
 
 \begin{lemma}\label{lem:down}
-If $p \notin P$, then $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta' \Longleftrightarrow \eta =_{\app{\Gamma\downarrow_{p}}{P}}^{l_{O}} \eta'$.
+If $p \notin P$, then $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu' \Longleftrightarrow \mu =_{\app{\Gamma\downarrow_{p}}{P}}^{l_{O}} \mu'$.
 \end{lemma}
 \begin{proof}
 Similar to the proof of Lemma~\ref{lem:up}.
@@ -1078,18 +1078,18 @@ Similar to the proof of Lemma~\ref{lem:up}.
 
 \begin{lemma}\label{lem:expsafe}
 Suppose $\Gamma\vdash e : t$. For $P\in\PPS$, if~$t(P)\leq l_{O}$ and
-$\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$,  $\eta\vdash e\leadsto v$ and $\eta'\vdash e\leadsto v'$, then $v = v'$.
+$\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$,  $\mu\vdash e\leadsto v$ and $\mu'\vdash e\leadsto v'$, then $v = v'$.
 \end{lemma}
 \begin{proof}
-Consider any $P$ which satisfies $t(P)\leq l_{O}$ and $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$.
+Consider any $P$ which satisfies $t(P)\leq l_{O}$ and $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$.
 The proof proceeds by induction on the derivation
 of $\Gamma;A \vdash e : t$.
 \begin{ProofEnumDesc}
 %\item[T-VAL] Trivial.
 %%%%%%%%%%%%%%%%%%
 \item[T-VAR] We have $\Gamma \vdash \leVAR{x} :\Gamma(x) = t$.
-Since $t(P) \leq l_{O}$ and $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$,
-it is deducible that $v = \eta(x) = \eta'(x) = v'$.
+Since $t(P) \leq l_{O}$ and $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$,
+it is deducible that $v = \mu(x) = \mu'(x) = v'$.
 %%%%%%%%%%%%%%%%%%
 \item[T-OP] We have
 \begin{equation*}
@@ -1099,8 +1099,8 @@ it is deducible that $v = \eta(x) = \eta'(x) = v'$.
 \end{equation*}
 and
 \begin{equation*}
-\inference{\eta \vdash e_i \leadsto v_i}{\eta\vdash \leOP{e_1}{e_2}\leadsto v_1~op~v_2} ~
-\inference{\eta' \vdash e_i \leadsto v'_i}{\eta'\vdash \leOP{e_1}{e_2}\leadsto v'_1~op~v'_2}
+\inference{\mu \vdash e_i \leadsto v_i}{\mu\vdash \leOP{e_1}{e_2}\leadsto v_1~op~v_2} ~
+\inference{\mu' \vdash e_i \leadsto v'_i}{\mu'\vdash \leOP{e_1}{e_2}\leadsto v'_1~op~v'_2}
 \end{equation*}
 By induction on $e_i$, we can get $v_i = v'_i$. Therefore $v = v'$.
 %%%%%%%%%%%%%%%%%%
@@ -1120,12 +1120,12 @@ thus the result follows by induction on $\Gamma\vdash e : s$.
 
 \begin{lemma}\label{lem:comsafe}
 Suppose $\Gamma; A \vdash c : t$. Then for any $P\in\PPS$,
-if $t(P)\nleq l_{O}$ and $\eta;A; P \vdash c \leadsto \eta' $, then
-$\eta =_{\app{\Gamma}{P}} \eta'$.
+if $t(P)\nleq l_{O}$ and $\mu;A; P \vdash c \leadsto \mu' $, then
+$\mu =_{\app{\Gamma}{P}} \mu'$.
 \end{lemma}
 \begin{proof}
 By induction on the derivation of $\Gamma; A \vdash c : t$, with subinduction
-on the derivation of $\eta;A; P \vdash c \leadsto \eta'.$
+on the derivation of $\mu;A; P \vdash c \leadsto \mu'.$
 
 \begin{ProofEnumDesc}
 \item[T-ASS]
@@ -1136,21 +1136,21 @@ the typing derivation has the form:
 {\Gamma \vdash e : \Gamma(x)}
 {\Gamma; A  \vdash \lcASS{x}{e} : \Gamma(x)}
 \end{equation*}
-and the evaluation under $\eta$ takes the form:
+and the evaluation under $\mu$ takes the form:
 $$
 \inference
-{\eta \vdash v}
-{\eta; A; P \vdash \lcASS{x}{e} \leadsto \eta[x \mapsto v] }
+{\mu \vdash v}
+{\mu; A; P \vdash \lcASS{x}{e} \leadsto \mu[x \mapsto v] }
 $$
-That is, $\eta' = \eta[x \mapsto v].$
-So $\eta$ and $\eta'$ differ possibly
+That is, $\mu' = \mu[x \mapsto v].$
+So $\mu$ and $\mu'$ differ possibly
 only in the mapping of $x$.
 Since $\Gamma(x)(P) = t(P) \nleq l_{O}$,
 that is $\app{\Gamma}{P}(x) \nleq \hat{l_{O}}$,
 the difference in the valuation of $x$ is not observable
 at level $l_O.$
 It then follows from Definition~\ref{def:envequ}
-that $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta' $.
+that $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu' $.
 
 \item[T-CALL] In this case
 the command $c$ has the form
@@ -1169,22 +1169,22 @@ $$
 $$
 and we have that
 $t = \Gamma(x).$
-The evaluation under $\eta$ is derived as follows:
+The evaluation under $\mu$ is derived as follows:
 $$
 \inference{
 \FD(B.f) = \lpFUN{B.f}{\overline{y}}{c_1} \\
-\eta\vdash\overline{e} \leadsto \overline{v} \quad
+\mu\vdash\overline{e} \leadsto \overline{v} \quad
 [\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c_1
-\leadsto \eta_1
+\leadsto \mu_1
 }
-{\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
-\eta [x \mapsto \eta_1(r) ]}
+{\mu;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+\mu [x \mapsto \mu_1(r) ]}
 $$
 Since $t(P) \not \leq l_O$ and $\Gamma(x) = t$, we have
 $\Gamma(x)(P) \not \leq l_O$
 and therefore $\Gamma(x) \not \leq l_O$
 and
-$$\eta =^{l_O}_{\app{\Gamma}{P}} \eta[x \mapsto v'] = \eta'.$$
+$$\mu =^{l_O}_{\app{\Gamma}{P}} \mu[x \mapsto v'] = \mu'.$$
 
 \item[T-IF]
 This follows straightforwardly from the induction hypothesis.
@@ -1201,15 +1201,15 @@ $$
 and the evaluation derivation is
 $$
 \inference{
-\eta \vdash e \leadsto v\quad v\neq 0\quad
-\eta;A; P \vdash c \leadsto \eta_1\\
-\quad \eta_1 ; A ; P \vdash \lcWHILE{e}{c} \leadsto \eta'
+\mu \vdash e \leadsto v\quad v\neq 0\quad
+\mu;A; P \vdash c \leadsto \mu_1\\
+\quad \mu_1 ; A ; P \vdash \lcWHILE{e}{c} \leadsto \mu'
 }
-{\eta;A; P \vdash \lcWHILE{e}{c} \leadsto \eta'}
+{\mu;A; P \vdash \lcWHILE{e}{c} \leadsto \mu'}
 $$
 Applying the induction hypothesis (on typing derivation)
 and the inner induction hypothesis (on the evaluation derivation)
-we get $\eta =^{l_O}_{\app{\Gamma}{P}} \eta_1$ and $\eta_1 =^{l_O}_{\app{\Gamma}{P}} \eta'$; by transitivity of $=^{l_O}_{\app{\Gamma}{P}}$ we get $\eta =^{l_O}_{\app{\Gamma}{P}} \eta'.$
+we get $\mu =^{l_O}_{\app{\Gamma}{P}} \mu_1$ and $\mu_1 =^{l_O}_{\app{\Gamma}{P}} \mu'$; by transitivity of $=^{l_O}_{\app{\Gamma}{P}}$ we get $\mu =^{l_O}_{\app{\Gamma}{P}} \mu'.$
 
 \item[T-SEQ] This case follows from the induction hypothesis
 and transitivity of the indistinguishability relation.
@@ -1231,13 +1231,13 @@ $$
 There are two possible derivations for the evaluation.
 In one case, we have
 $$
-\inference{p\in P \quad \eta; A; P \vdash c_1 \leadsto \eta'}
-{\eta; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta'}
+\inference{p\in P \quad \mu; A; P \vdash c_1 \leadsto \mu'}
+{\mu; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu'}
 $$
 Since $t(P) \nleq l_{O}$ and $p \in P$, by Definiton~\ref{def:merge},
 we have $t_1(P) \nleq l_{O}$.
-By induction hypothesis, we have $\eta =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \eta'$,
-by Lemma \ref{lem:up}, we have $\eta =_{\app{\Gamma}{P}}^{l_{O}} \eta'$.
+By induction hypothesis, we have $\mu =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \mu'$,
+by Lemma \ref{lem:up}, we have $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$.
 
 The case where $p \notin P$ can be handled similarly,
 making use of Lemma \ref{lem:down}.
@@ -1251,22 +1251,22 @@ making use of Lemma \ref{lem:down}.
 
 \begin{definition}\label{def:ni}
 A command $c$ executed in app $A$ is said to be {\termEmph{non-interferent}} \text{iff}
-for all $\eta_1, \eta'_1,\Gamma, P, l_{O}$,
-if  $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, \; $\eta_1;A ; P\vdash c \leadsto \eta_2 $ and
- $\eta'_1; A; P\vdash c\leadsto \eta'_2  $
-then $\eta_2 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_2$.
+for all $\mu_1, \mu'_1,\Gamma, P, l_{O}$,
+if  $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, \; $\mu_1;A ; P\vdash c \leadsto \mu_2 $ and
+ $\mu'_1; A; P\vdash c\leadsto \mu'_2  $
+then $\mu_2 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_2$.
 \end{definition}
 
 
 %%%%%%%%%
 \begin{lemma}\label{lem:comni}
-Suppose $\Gamma; A\vdash c : t$, for any $P\in\PPS$, if  $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, $\eta_1; A; P \vdash c \leadsto \eta_2$,
-and  $\eta'_1; A; P \vdash c \leadsto \eta'_2$,
-then  $\eta_2 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_2$.
+Suppose $\Gamma; A\vdash c : t$, for any $P\in\PPS$, if  $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, $\mu_1; A; P \vdash c \leadsto \mu_2$,
+and  $\mu'_1; A; P \vdash c \leadsto \mu'_2$,
+then  $\mu_2 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_2$.
 \end{lemma}
 \begin{proof}
 The proof proceeds by induction on \rank{c}, with subinduction
-on the derivations of $\Gamma;\Theta;A \vdash c : t$ and $\eta_1;\Theta;P;A\vdash c \leadsto \eta_2$.
+on the derivations of $\Gamma;\Theta;A \vdash c : t$ and $\mu_1;\Theta;P;A\vdash c \leadsto \mu_2$.
 In the following, we shall omit the superscript $l_O$ from
 $=^{l_O}_{\app{\Gamma}{P}}$ to simplify presentation.
 
@@ -1281,24 +1281,24 @@ $$
 where $t = \Gamma(x)$, and suppose the two executions
 of $c$ are derived as follows:
 $$
-\inference{\eta_1 \vdash e \leadsto v}
-{\eta_1; A; P \vdash \lcASS{x}{e} \leadsto \eta_1 [ x \mapsto v_1 ]}
+\inference{\mu_1 \vdash e \leadsto v}
+{\mu_1; A; P \vdash \lcASS{x}{e} \leadsto \mu_1 [ x \mapsto v_1 ]}
 $$
 $$
-\inference{\eta_2 \vdash e \leadsto v'}
-{\eta_1'; A; P \vdash \lcASS{x}{e} \leadsto \eta_1' [ x \mapsto v_2 ]}
+\inference{\mu_2 \vdash e \leadsto v'}
+{\mu_1'; A; P \vdash \lcASS{x}{e} \leadsto \mu_1' [ x \mapsto v_2 ]}
 $$
-where $\eta_2 = \eta_1[x \mapsto v]$
-and $\eta_2' = \eta_1'[x \mapsto v'].$
+where $\mu_2 = \mu_1[x \mapsto v]$
+and $\mu_2' = \mu_1'[x \mapsto v'].$
 Note that if $\Gamma(x) \not \leq l_O$ then
-$\eta_2 =_{\app{\Gamma}{P}} \eta_2'$ holds trivially
+$\mu_2 =_{\app{\Gamma}{P}} \mu_2'$ holds trivially
 by Definition~\ref{def:ni}.
 So let us assume $\Gamma(x) \leq l_O$. Then applying Lemma~\ref{lem:expsafe}
 to
-$\eta_1 \vdash e \leadsto v$
-and $\eta_1' \vdash e \leadsto v'$
+$\mu_1 \vdash e \leadsto v$
+and $\mu_1' \vdash e \leadsto v'$
 we get
-$v = v'$, so it then follows that  $\eta_2 =_{\app{\Gamma}{P}} \eta_2'.$
+$v = v'$, so it then follows that  $\mu_2 =_{\app{\Gamma}{P}} \mu_2'.$
 \item[T-IF] In this case $c \equiv \lcIF{e}{c_1}{c_2}$ and we have
 $$
 \inference
@@ -1308,26 +1308,26 @@ $$
 If $t(P)\not\leq l_{O}$, then the lemma follows easily from
 Lemma~\ref{lem:comsafe}. So we assume $t(P) \leq l_O.$
 
-The evaluation derivation under $\eta_1$
+The evaluation derivation under $\mu_1$
 takes either one of the following forms:
 $$
-\inference{\eta_1 \vdash e \leadsto v\quad v\neq 0\quad \eta_1; A; P \vdash c_1 \leadsto \eta_2}
-{\eta_1; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2}
+\inference{\mu_1 \vdash e \leadsto v\quad v\neq 0\quad \mu_1; A; P \vdash c_1 \leadsto \mu_2}
+{\mu_1; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2}
 $$
 $$
-\inference{\eta_1 \vdash e \leadsto v\quad v = 0\quad \eta_1;A; P \vdash c_2 \leadsto \eta_2}
-{\eta;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2}
+\inference{\mu_1 \vdash e \leadsto v\quad v = 0\quad \mu_1;A; P \vdash c_2 \leadsto \mu_2}
+{\mu;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2}
 $$
 We consider here only the case where $v\not = 0$; the case with $v=0$
 can be dealt with similarly.
-We first need to show that the evaluation of $c$ under $\eta_1'$
-would take the same if-branch. That is, suppose $\eta_1' \vdash e \leadsto v'$.
+We first need to show that the evaluation of $c$ under $\mu_1'$
+would take the same if-branch. That is, suppose $\mu_1' \vdash e \leadsto v'$.
 Since $t(P) \leq l_O$, we can apply Lemma~\ref{lem:expsafe} to conclude
-that $v=v' \not = 0$, hence the evaluation of $c$ under $\eta_1'$ takes the
+that $v=v' \not = 0$, hence the evaluation of $c$ under $\mu_1'$ takes the
 form:
 $$
-\inference{\eta_1' \vdash e \leadsto v'\quad v'\neq 0\quad \eta_1'; A; P \vdash c_1 \leadsto \eta_2'}
-{\eta_1'; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \eta_2'}
+\inference{\mu_1' \vdash e \leadsto v'\quad v'\neq 0\quad \mu_1'; A; P \vdash c_1 \leadsto \mu_2'}
+{\mu_1'; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2'}
 $$
 The lemma then follows straightforwardly from the induction hypothesis.
 
@@ -1339,36 +1339,36 @@ $$
 $$
 If $t(P) \nleq l_{O}$, the conclusion holds by
 Lemma~\ref{lem:comsafe}. Otherwise, since
-$\eta_1=_{\app{\Gamma}{P}}^{l_{O}}\eta_1'$, by
+$\mu_1=_{\app{\Gamma}{P}}^{l_{O}}\mu_1'$, by
 Lemma~\ref{lem:expsafe}, if
-$\eta_1 \vdash e \leadsto v$ and $\eta_1' \vdash e \leadsto v'$
+$\mu_1 \vdash e \leadsto v$ and $\mu_1' \vdash e \leadsto v'$
 then $v=v'$.
 If both are $0$ then the conclusion holds according to
 (\ruleTagText{E-WHILE-F}). Otherwise, we have
 $$
 \inference{
-\eta_1 \vdash e \leadsto v\quad v\neq 0\quad
-\eta_1;A; P \vdash c_b \leadsto \eta_3\\
-\quad \eta_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2
+\mu_1 \vdash e \leadsto v\quad v\neq 0\quad
+\mu_1;A; P \vdash c_b \leadsto \mu_3\\
+\quad \mu_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2
 }
-{\eta;A; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2}
+{\mu;A; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2}
 $$
 
 $$
 \inference{
-\eta_1' \vdash e \leadsto v\quad v'\neq 0\quad
-\eta_1';A; P \vdash c_b \leadsto \eta_3'\\
-\quad \eta_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'
+\mu_1' \vdash e \leadsto v\quad v'\neq 0\quad
+\mu_1';A; P \vdash c_b \leadsto \mu_3'\\
+\quad \mu_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2'
 }
-{\eta;A; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'}
+{\mu;A; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2'}
 $$
 Applying the induction hypothesis to $\Gamma ; A\vdash c : t$,
-$\eta_1;A; P \vdash c_b \leadsto \eta_3$ and
-$\eta_1';A; P \vdash c_b \leadsto \eta_3'$, we obtain
-$\eta_3 =_{\app{\Gamma}{P}} \eta_3'.$ Then applying the inner
-induction hypothesis to $\eta_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2$
-and $\eta_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \eta_2'$,
-we obtain $\eta_2 =_{\app{\Gamma} P} \eta_2'.$
+$\mu_1;A; P \vdash c_b \leadsto \mu_3$ and
+$\mu_1';A; P \vdash c_b \leadsto \mu_3'$, we obtain
+$\mu_3 =_{\app{\Gamma}{P}} \mu_3'.$ Then applying the inner
+induction hypothesis to $\mu_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2$
+and $\mu_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2'$,
+we obtain $\mu_2 =_{\app{\Gamma} P} \mu_2'.$
 
 \item[T-SEQ] In this case we have
   $c\equiv\lcSEQ{c_1}{c_2}$ and $\Gamma;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
@@ -1378,7 +1378,7 @@ we obtain $\eta_2 =_{\app{\Gamma} P} \eta_2'.$
   If $t(P) \nleq l_O$ then the lemma follows from Lemma \ref{lem:comsafe}.
   Otherwise, this case follows from the induction hypothesis and the fact
   that the mapping for the local variable $x$ is removed
-  in $\eta_2$ and $\eta_2'.$
+  in $\mu_2$ and $\mu_2'.$
 \item[T-CALL]
 In this case, $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$. Suppose the typing
@@ -1394,31 +1394,31 @@ $$
  \Gamma(x)  }
 $$
 where $t = \Gamma(x)$,
-and the executions under $\eta_1$ and $\eta_1'$ are
+and the executions under $\mu_1$ and $\mu_1'$ are
 derived, respectively, as follows:
 $$
 \inference{
-(\mathbf{E_1}) ~ \eta_1\vdash\overline{e} \leadsto \overline{v_1} \\
+(\mathbf{E_1}) ~ \mu_1\vdash\overline{e} \leadsto \overline{v_1} \\
 (\mathbf{E_2}) ~ [\overline{y} \mapsto \overline{v_1}, r \mapsto 0] ; B;
-  \Theta(A) \vdash c_1 \leadsto \eta_3
+  \Theta(A) \vdash c_1 \leadsto \mu_3
 }
-{\eta_1; A; P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
-              \eta_1 [x \mapsto \eta_3(r) ]}
+{\mu_1; A; P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+              \mu_1 [x \mapsto \mu_3(r) ]}
 $$
 and
 $$
 \inference{
-(\mathbf{E_1'}) ~ \eta_1'\vdash\overline{e} \leadsto \overline{v_2}
+(\mathbf{E_1'}) ~ \mu_1'\vdash\overline{e} \leadsto \overline{v_2}
 \\
 (\mathbf{E_2'}) ~ [\overline{y} \mapsto \overline{v_2}, r \mapsto 0] ; B;
-\Theta(A) \vdash c_1 \leadsto \eta_3'}
-{\eta_1';A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
-              \eta_1' [x \mapsto \eta_3'(r) ]}
+\Theta(A) \vdash c_1 \leadsto \mu_3'}
+{\mu_1';A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
+              \mu_1' [x \mapsto \mu_3'(r) ]}
 $$
 where
 $\FD(B.f) = \lpFUN{B.f}{\overline{x}}{c_1}$,
-$\eta_2 = \eta_1[x \mapsto \eta_3(r)]$
-and $\eta_2' = \eta_1'[x \mapsto \eta_3'(r)].$
+$\mu_2 = \mu_1[x \mapsto \mu_3(r)]$
+and $\mu_2' = \mu_1'[x \mapsto \mu_3'(r)].$
 
 Moreover, since we consider only well-typed systems,
 the function $\FD(B.f)$ is also typable:
@@ -1456,15 +1456,15 @@ Suppose $y_u$ is such a variable, i.e., $\Gamma'(y_u) = u \leq \hat{l}_O$,
 and suppose $\rho(y_u) = v_u$ and
 $\rho'(y_u) = v_u'$ for some $y_u \in \overline{y}.$
 From $(\mathbf{E_1})$ we have
-$\eta_1 \vdash e_u \leadsto v_u$
+$\mu_1 \vdash e_u \leadsto v_u$
 and from $(\mathbf{E_2})$
-we have $\eta_1' \vdash e_u \leadsto v_u'$,
+we have $\mu_1' \vdash e_u \leadsto v_u'$,
 and from $(\mathbf{T_1})$ we have $\Gamma \vdash e_u : u.$
 Since $u \leq \hat{l}_O$, applying Lemma~\ref{lem:expsafe},
 we get $v_u = v_u'$.
 
 
-\item Claim 2: $\eta_3 =_{\Gamma'} \eta_3'.$
+\item Claim 2: $\mu_3 =_{\Gamma'} \mu_3'.$
 
 Proof: From Claim 1, we know that
 $$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
@@ -1472,9 +1472,9 @@ $$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
 Since $\rank{c_1}<\rank{c}$, we can apply the outer induction
 hypothesis to $(\mathbf{E_2})$, $(\mathbf{E_2'})$
 and $(\mathbf{T_3})$ to obtain
-$\eta_3 =_{\Gamma'} \eta_3'.$
+$\mu_3 =_{\Gamma'} \mu_3'.$
 
-\item Claim 3: $\eta_3(r) = \eta_3'(r).$
+\item Claim 3: $\mu_3(r) = \mu_3'(r).$
 
 Proof: We first note that from $(\mathbf{T_2})$
 and the assumption that $\Gamma(x)(P) \leq l_O$, we get
@@ -1482,13 +1482,13 @@ $(\app{s'}{\Theta(A)})(P) \leq l_O$.
 The latter, by Definition~\ref{def:projection}, implies  that $s'(\Theta(A)) \leq l_O.$
 Since $r \in dom(\Gamma')$, it is obvious that
 $\Gamma' \vdash r : s'$,
-$\eta_3 \vdash r \leadsto \eta_3(r)$
-and $\eta_3' \vdash r \leadsto \eta_3'(r).$
-From Claim 2 above, we have $\eta_3 =_{\Gamma'} \eta_3'$.
+$\mu_3 \vdash r \leadsto \mu_3(r)$
+and $\mu_3' \vdash r \leadsto \mu_3'(r).$
+From Claim 2 above, we have $\mu_3 =_{\Gamma'} \mu_3'$.
 Therefore by Lemma~\ref{lem:expsafe}, we have
-$\eta_3(r) = \eta_3'(r).$
+$\mu_3(r) = \mu_3'(r).$
 \end{itemize}
-The statement we are trying to prove, i.e., $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$,
+The statement we are trying to prove, i.e., $\mu_2 =_{\app{\Gamma}{P}} \mu_2'$,
 follows immediately from Claim 3 above.
 \item[T-CP] $c\equiv\lcCP{p}{c_1}{c_2}$ and we have
 $$
@@ -1502,25 +1502,25 @@ We need to consider two cases, one where $p \in P$
 and the other where $p \not \in P$.
 
 Assume that $p \in P.$
-Then the evaluation of $c$ under $\eta_1$ and $\eta_1'$
+Then the evaluation of $c$ under $\mu_1$ and $\mu_1'$
 are respectively:
 $$
-\inference{p\in P \quad \eta_1; A; P \vdash c_1 \leadsto \eta_2}
-{\eta_1; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta_2}
+\inference{p\in P \quad \mu_1; A; P \vdash c_1 \leadsto \mu_2}
+{\mu_1; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu_2}
 $$
 and
 $$
 \inference
-    {p\in P \quad \eta_1'; A; P \vdash c_1 \leadsto \eta_2'}
-    {\eta_1'; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \eta_2'}
+    {p\in P \quad \mu_1'; A; P \vdash c_1 \leadsto \mu_2'}
+    {\mu_1'; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu_2'}
 $$
-Since $\eta_1 =_{\app{\Gamma}{P}} \eta_1'$ and since $p \in P$,
-by Lemma~\ref{lem:up}, we have $\eta_1 =_{\app{\Gamma\uparrow_p}{P}} \eta_1'$.
+Since $\mu_1 =_{\app{\Gamma}{P}} \mu_1'$ and since $p \in P$,
+by Lemma~\ref{lem:up}, we have $\mu_1 =_{\app{\Gamma\uparrow_p}{P}} \mu_1'$.
 Therefore by the induction hypothesis applied to $\Gamma\uparrow_p ; A \vdash c_1 : t_1$,
-$\eta_1; A; P \vdash c_1 \leadsto \eta_2$ and
-$\eta_1'; A; P \vdash c_1 \leadsto \eta_2'$, we obtain
-$\eta_2 =_{\app{\Gamma\uparrow_p}{P}} \eta_2'$, and by Lemma~\ref{lem:up},
-we get $\eta_2 =_{\app{\Gamma}{P}} \eta_2'$.
+$\mu_1; A; P \vdash c_1 \leadsto \mu_2$ and
+$\mu_1'; A; P \vdash c_1 \leadsto \mu_2'$, we obtain
+$\mu_2 =_{\app{\Gamma\uparrow_p}{P}} \mu_2'$, and by Lemma~\ref{lem:up},
+we get $\mu_2 =_{\app{\Gamma}{P}} \mu_2'$.
 
 For the case where $p \not \in P$, we apply a similar reasoning as above,
 but using Lemma~\ref{lem:down} in place of Lemma~\ref{lem:up}.
@@ -1536,15 +1536,15 @@ $$\lpFUN{A.f}{\overline{x}}{c}$$
 in $\mathcal{S}$
 with $FT(A.f) = \overline{t} \rightarrow t'$
 is {\termEmph{non-interferent}}
-if for all $\eta_1, \eta'_1, P, v, l_{O}$,
+if for all $\mu_1, \mu'_1, P, v, l_{O}$,
 if the following hold:
 \begin{itemize}
 \item $t'(P) \leq l_{O}$,
-\item $\eta_1 =_{\app{\Gamma}{P}}^{l_{O}} \eta'_1$, where
+\item $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, where
 $\Gamma = [\overline{x} : \overline{t}, r : t']$,
-\item $\eta_1;A ; P\vdash c \leadsto \eta_2 $, and $\eta'_1; A; P\vdash c\leadsto \eta'_2 $,
+\item $\mu_1;A ; P\vdash c \leadsto \mu_2 $, and $\mu'_1; A; P\vdash c\leadsto \mu'_2 $,
 \end{itemize}
-then $\eta_2(r) = \eta_2'(r).$
+then $\mu_2(r) = \mu_2'(r).$
 The system $\mathcal{S}$ is \termEmph{non-interferent} iff all functions
 in $\mathcal{S}$ are non-interferent.
 \end{definition}
