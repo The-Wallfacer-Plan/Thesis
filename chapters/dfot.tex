@@ -1,12 +1,12 @@
 % !TeX root =../../main.tex
 
-\chapter{\dFOT: Directed Grey-box Fuzzing} \label{ch:dfot}
+\chapter{\dFOT: Directed Greybox Fuzzing} \label{ch:dfot}
 
 
 \section{Introduction and Motivation}
 
 
-In general, the existing grey-boxing fuzzers (GBFs) aim to cover as many program states as possible within a limited time budget.
+In general, the existing greyboxing fuzzers (GBFs) aim to cover as many program states as possible within a limited time budget.
 However, there exist several testing scenarios in which only particular program states are concerned and required to be sufficiently tested. 
 For example, if \emph{MJS}~\cite{mjs} (a JavaScript engine for embedded devices) has a vulnerability discovered on MSP432 ARM platform, similar vulnerabilities may occur in the corresponding code for the other platforms.
 In such a situation, the fuzzer should be \emph{directed} to reproduce the bug at these locations.
@@ -19,7 +19,7 @@ Following the definition in~\cite{Bohme:2017:DGF}, we name the fuzzers that can 
 
 
 
-As the state-of-the-art directed grey-box fuzzer (DGF for short), {\aflgo}~\cite{Bohme:2017:DGF}~casts the reachability of target sites as an \emph{optimization problem} and adopts a meta-heuristic to promote the test seeds with shorter distances.
+As the state-of-the-art directed greybox fuzzer (DGF for short), {\aflgo}~\cite{Bohme:2017:DGF}~casts the reachability of target sites as an \emph{optimization problem} and adopts a meta-heuristic to promote the test seeds with shorter distances.
 Here, the distance is calculated according to the average \emph{weight} of basic blocks on the input seed's execution trace to the target basic block(s), where the weight
  is determined by the edges in the call graph and control flow graphs of the program, and the meta-heuristic is simulated annealing~\cite{kirkpatrick1983optimization}.
 Based on these, \aflgo solves the \emph{power scheduling problem} for directed fuzzing --- how many new inputs (termed ``energy'' in \aflgo) should be generated from the current test seed.
@@ -64,7 +64,7 @@ For \textbf{P3}, we propose to combine the basic block trace distance and covere
 For \textbf{P4}, we propose to apply an adaptive mutation strategy according to the reachability analysis and covered function similarity~(\S\ref{subsec:mutationStr}).
 
 By taking these properties into account, we implemented our DGF, {\dFOT}, and conducted a thorough evaluation with various real-world programs. 
-The experimental results show that in most cases, {\dFOT} outperforms the state-of-the-art grey-box fuzzers in terms of the time to reach the target sites and the time to expose the crashes.
+The experimental results show that in most cases, {\dFOT} outperforms the state-of-the-art greybox fuzzers in terms of the time to reach the target sites and the time to expose the crashes.
 Particularly, {\dFOT} can expose certain crashes up to 7 times faster than the state-of-the-art \aflgo, reducing the time to exposure from 3.5 hours to 0.5 hours.
 
 In practice, \dFOT has been successfully discovering crashes with the suspicious target sites reported by other vulnerability detection tools and successfully found more than 41 previously unknown crashes in projects Oniguruma~\cite{oniguruma}, MJS\cite{mjs}, etc. All these vulnerabilities have been confirmed and fixed; among them, 15 vulnerabilities have been assigned unique CVE IDs.
@@ -72,7 +72,7 @@ In practice, \dFOT has been successfully discovering crashes with the suspicious
 The main contributions of this chapter are summarized as follows:
 \begin{enumerate}[(1)] 
 \itemsep0em
-\item We analyzed the challenges in directed grey-box fuzzing and summarized the four desired properties for DGFs.
+\item We analyzed the challenges in directed greybox fuzzing and summarized the four desired properties for DGFs.
 \item We provided a measure of power function that can guide the fuzzer towards the target sites effectively.
 \item We proposed a novel approach to boost the convergence speed to the target sites by utilizing power scheduling, adaptive mutation and seed prioritization.
 \item We implemented a novel fuzzing framework that organically combines these ideas and thoroughly evaluated our results in both crash reproduction and target site covering.
@@ -157,7 +157,7 @@ However, for DGF, awareness of all possible traces towards the targets is not en
 \subsubsection{\textbf{P2}. DGF should strike a \textbf{balance} between overheads and utilities in static analysis.}\label{subsec:p2}  Effective static analysis can benefit the dynamic fuzzing procedure in two aspects: 1) In real-world C/C++ programs, there are indirect function calls (e.g., passing a function pointer as a parameter in C, or using function objects and pointers to member functions in C++). In the presence of indirect calls, call sites cannot be observed directly from the source code or binary instructions. So the trade-offs between overheads and utilities need to be made for analyzing them. 2) Not all call relations should be treated equally. For example, some functions occur multiple times in its calling functions, implying  that they have higher chance to be called at runtime. From the static analysis perspective, we need to provide a way to distinguish these scenarios. As to function level distances between functions that have \emph{immediate} calling relations, it is intuitive that callees called in multiple times in different branches should be ``closer'' to the caller.
 
 
-To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a grey-box fuzzing setting.
+To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a greybox fuzzing setting.
 
 \subsubsection{\textbf{P3}. DGF should select and schedule the seeds to reach target sites \textbf{rapidly}.} \label{subsec:p3}
  AFL determines how many new inputs should be generated (i.e., ``energy'') from a test seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular targets} as fast as possible. Hence, power scheduling in DGF should determine how many new inputs should be generated from a test seed in order to get a new mutated input that leads to the target sites~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of test seeds to reach target sites as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target sites. 
@@ -896,11 +896,11 @@ The external threats rise from the choice of evaluation dataset and the CVEs for
 
 The work in this chapter is related to the following lines of research:
 
-\subsection{Directed Grey-box Fuzzing}
+\subsection{Directed Greybox Fuzzing}
 Some other DGF techniques have been proposed besides \dFOT.
-\aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed grey-box fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to inputs that hold the trace closer to the target sites.
+\aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed greybox fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to inputs that hold the trace closer to the target sites.
 In \aflgo, the authors proposed a novel idea of calculating the distance between the input traces and the target sites.
-This is a good starting point by combining such target distance calculation with grey-box fuzzer.
+This is a good starting point by combining such target distance calculation with greybox fuzzer.
 \dFOT is inspired from \aflgo however provides significant improvements on both the static analysis and dynamic fuzzing.
 As shown in \S\ref{sec:eval}, \dFOT generally outperforms \aflgo in terms of reaching the targets and reproducing crashes, thanks to embedding in-depth consideration about the four desired properties into the design.
 SeededFuzz~\cite{tase16:seededfuzz} uses various program analysis techniques to facilitate the generation and selection of initial seeds which helps to achieve the goal of directed fuzzing.
@@ -927,19 +927,19 @@ Different from \dFOT, these techniques are not fed with \emph{given target sites
 Thus, such techniques do not have advantages in scenarios where the targets are clear, such as patch testing and crash reproduction. 
 
 
-\subsection{Coverage-based Grey-box Fuzzing}.
-The purposes of coverage-based grey-box fuzzing (CGBF) and DGF are different. However, some techniques proposed to boost the performance of CGBF could also be adopted by \dFOT.
+\subsection{Coverage-based Greybox Fuzzing}.
+The purposes of coverage-based greybox fuzzing (CGBF) and DGF are different. However, some techniques proposed to boost the performance of CGBF could also be adopted by \dFOT.
 For example, CollAFL~\cite{CollAFL} utilizes a novel hash algorithm to solve AFL's instrumentation collision problem.
 Skyfire~\cite{junjie:2017sp:skyfire} learns a probabilistic context sensitive grammar (PGSG) to specify both syntax features and semantic rules, and then the second step leverages the learned PCSG to generate new test seeds.
-Xu \textit{et al.}~\cite{XuKMK:2017} proposed a set of new operating primitives to improve the performance of grey-box fuzzers.
+Xu \textit{et al.}~\cite{XuKMK:2017} proposed a set of new operating primitives to improve the performance of greybox fuzzers.
 Another important topic in CGBF is about guiding the fuzzer through path constraints. \cite{Stephens2016Driller, rawat:2017, LiCMLLT17, Angora, tfuzz} aim to help the CGBFs to break through path constraints.
 Moreover, Orthrus~\cite{Shastry:LNCS2017:Orthrus} applies static analysis on AST, CFG, and CG to extract complicated tokens via customizable queries. 
 \dFOT can benefit through combining with the aforementioned techniques.
 
 %
  \section{Conclusion}
-We propose a novel directed grey-box fuzzer, \dFOT.
+We propose a novel directed greybox fuzzer, \dFOT.
 The design of \dFOT embeds four desired properties for directed fuzzing by combining static analysis and dynamic fuzzing in an effective way.
 Equipped with a better evaluation of the distance between input execution traces and the user specified target sites, \dFOT can precisely and adaptively adjust its seed prioritization, power scheduling as well as mutation strategies to reach the target sites rapidly.
-A thorough evaluation showed that \dFOT can reach the target sites and reproduce the crashes much faster than existing state-of-the-art grey-box fuzzers.
+A thorough evaluation showed that \dFOT can reach the target sites and reproduce the crashes much faster than existing state-of-the-art greybox fuzzers.
 The promising results indicate that \dFOT can be effective in patch testing, crash exposure and other scenarios. 

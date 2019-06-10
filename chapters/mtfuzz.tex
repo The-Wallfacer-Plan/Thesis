@@ -44,22 +44,22 @@ As mentioned in Section~\ref{sec:intro-gbf}, a conventional GBF usually has no a
 In fact, the only symptom it observes is that a seed has non-deterministic behaviors in that the same seed exercises different traces during calibration execution.
 However, since there are \emph{multiple reasons} that can cause non-deterministic behaviors, a GBF typically does not have any countermeasures: all it can do is to increase \Ncal to execute the seeds more times to get more stable running statistics.
 
-When fuzzing a multithreaded program, as long as the seeds can execute the multithreading segments, it always exhibits certain non-deterministic behaviors due to the interleavings across different threads. Compared with the seeds that cannot even entering the multithreading segments, we would \emph{prioritize} these seeds that have thread-interleavings since it is these seeds that 1) may themselves introduce vulnerabilities with different interleavings 2) are more likely to be mutated to seeds that can exercise similar paths~\cite{fuzz_survey}. On the other hand, preserving more multithreading relevant seeds will be more helpful for concurrency bug detectors to detect concurrency violations. Therefore, to enhance the effectiveness of grey-box fuzzing on multi-threading programs, we should provide \emph{thread-aware} analyses to help exercise more thread-interleaving paths and generating more multithreading relevant seeds.
+When fuzzing a multithreaded program, as long as the seeds can execute the multithreading segments, it always exhibits certain non-deterministic behaviors due to the interleavings across different threads. Compared with the seeds that cannot even entering the multithreading segments, we would \emph{prioritize} these seeds that have thread-interleavings since it is these seeds that 1) may themselves introduce vulnerabilities with different interleavings 2) are more likely to be mutated to seeds that can exercise similar paths~\cite{fuzz_survey}. On the other hand, preserving more multithreading relevant seeds will be more helpful for concurrency bug detectors to detect concurrency violations. Therefore, to enhance the effectiveness of greybox fuzzing on multi-threading programs, we should provide \emph{thread-aware} analyses to help exercise more thread-interleaving paths and generating more multithreading relevant seeds.
 
 
-We hereby present \mtfuzz, a new grey-box fuzzing technique for multithreaded programs.
+We hereby present \mtfuzz, a new greybox fuzzing technique for multithreaded programs.
 The core of \mtfuzz is a novel thread-aware seed generation technique which
 effectively produces valuable seeds to test the multithreading context. 
 \mtfuzz relies on a set of thread-aware instrumentation methods consisting of a
 stratified exploration-oriented instrumentation and two complementary instrumentation. The dynamic strategies are hereby optimized for the feedback provided by these instrumentation to improve the effectiveness of fuzzing.
 
-The experimental results demonstrate \mtfuzz significantly outperforms the state-of-the-art grey-box fuzzer AFL~\cite{afl} in generating multithreading relevant seeds, detecting multithreading relevant vulnerabilities, and exposing concurrency bugs via generated seeds. In particular, \mtfuzz detected 9 multithreading relevant vulnerabilities and 2 of them have been assigned CVE IDs. Additionally, \mtfuzz helped to expose 19 new concurrency previously bugs with the generated seeds. 
+The experimental results demonstrate \mtfuzz significantly outperforms the state-of-the-art greybox fuzzer AFL~\cite{afl} in generating multithreading relevant seeds, detecting multithreading relevant vulnerabilities, and exposing concurrency bugs via generated seeds. In particular, \mtfuzz detected 9 multithreading relevant vulnerabilities and 2 of them have been assigned CVE IDs. Additionally, \mtfuzz helped to expose 19 new concurrency previously bugs with the generated seeds. 
 
 The contributions of this chapter are as follows:
 \begin{enumerate}[1)]
 \item We designed a novel stratified selective instrumentation strategy specifically designed for exploring thread-interleaving induced paths. This instrumentation significantly increases both the total number of multithreading relevant seeds and its percentage among all generated seeds.
 \item We introduced two other thread-aware instrumentations to exhibit more thread-interleavings as well as distinguish overall threading context. This helps increase the thread-interleaving induced coverage during calibration execution, as well as diversify the generated seeds.
-\item We integrated the dynamic fuzzing strategies with these thread-aware instrumentations and implemented our enhanced GBF, \mtfuzz, for fuzzing multithreaded programs. To the best of our knowledge, this is the first grey-box fuzzer that is optimized for detecting vulnerabilities and concurrency bugs in  multithreaded programs.
+\item We integrated the dynamic fuzzing strategies with these thread-aware instrumentations and implemented our enhanced GBF, \mtfuzz, for fuzzing multithreaded programs. To the best of our knowledge, this is the first greybox fuzzer that is optimized for detecting vulnerabilities and concurrency bugs in  multithreaded programs.
 \end{enumerate}
 
 

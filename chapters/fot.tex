@@ -6,7 +6,7 @@
 \section{Introduction and Motivation}
 
 
-In spite of the popularity and effectiveness of applying grey-box fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a general fuzzing framework to reuse, integrate and evaluate various fuzzing extensions and~try new ideas.
+In spite of the popularity and effectiveness of applying greybox fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a general fuzzing framework to reuse, integrate and evaluate various fuzzing extensions and~try new ideas.
 For example, {\AFL}'s core fuzzing logic is implemented in one file with around 8K LOC, with more than 100 global variables. Therefore, the integration of a single new feature often involves modifications in multiple places.
 In short, {\AFL} is highly coupled as it is designed to \textit{essentially require no configuration}~\cite{afl}.
 In fact, most of the existing fuzzers are designed for easy deployment and use, without considering easy extension.
