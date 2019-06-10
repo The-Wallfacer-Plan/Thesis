@@ -22,7 +22,7 @@ String getContactNo(String name) {
     if(checkPermission(READ_CONTACT))
        number = ... ;
     else number = "";
-    return number;
+    ret number;
 }
 \end{lstlisting}
 \end{figure}
@@ -76,18 +76,18 @@ The typing rules for the \textit{test} command (in a much
 simplified form) are:
 \[
 \inference[(R1)~]{
-Q \cap P = \emptyset & Q |- c_1 : \tau & Q \vdash {c_2} : \tau
+Q \cap P = \emptyset & Q |- c_1 : t & Q \vdash {c_2} : t
 }
 {
-Q \vdash \lcCP{P}{c_1}{c_2} : \tau
+Q \vdash \lcCP{P}{c_1}{c_2} : t
 }
 \]
 \[
 \inference[(R2)~]{
-Q \cap P \not = \emptyset & Q \vdash c_2 : \tau
+Q \cap P \not = \emptyset & Q \vdash c_2 : t
 }
 {
-Q \vdash \lcCP{P}{c_1}{c_2} : \tau
+Q \vdash \lcCP{P}{c_1}{c_2} : t
 }
 \]
 where $Q$ is a set of permissions that are disabled.
@@ -123,7 +123,7 @@ String getInfo() {
    } else  {
      test(q) r = id++loc; else r = "";
    }
-   return r;
+   ret r;
 }
 \end{lstlisting}
 \end{figure}
@@ -280,7 +280,7 @@ F ::= \lpPROG{A.f}{\overline{x}}{c}{{\lpRES}}
 where $A.f$ is the name of the function, $\bar x$ are function parameters,
 $c$ is a command and {\lpRES} is a local variable
 that holds the return value of the function.
-The variables $\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{return}~r$'' in their scopes.
+The variables $\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{ret}~r$'' in their scopes.
 We consider only {\em closed functions}, i.e., the variables occurring in $c$
 are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 
@@ -743,20 +743,20 @@ Notice that the type of the argument $\overline{e}$ must match the type of the f
 Let us consider the example in Listing~\ref{lst:laundery}.
 \begin{lstlisting}[float=tp, label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
 A.f(x) {  %// $A$ does \emph{not} have permission $p$%
-	init r = 0 in { r := call B.g (x); return r }
+	init r = 0 in { r := call B.g (x); ret r }
 }
 	
 B.g(x) { %// $B$ does \emph{not} have permission $p$%
 	init r = 0 in {
 	   test(p) r := 0 else r := x;
-	   return r 
+	   ret r 
    }
 }
 
 C.getsecret() { %// $C$ \emph{has} permission $p$%
 	init r = 0 in {
 	  test(p) r := P_INFO else r := 0;
-	  return r 
+	  ret r 
   }
 }
 
@@ -764,7 +764,7 @@ M.main() { %// $M$ \emph{has} permission $p$%
     init r = 0 in {
 	  letv %$x_H$% = 0 in
 	  	{%$x_H$% := C.getsecret(); r := call A.f(%$x_H$%)};
-      return r
+      ret r
   }
 }
 \end{lstlisting}
@@ -876,7 +876,7 @@ Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
 \qquad \lcCALL{x_H}{C.getsecret}{~}; \\
 \qquad \lcCALL{r}{A.f}{x_H} \\
 \quad \} \\
-\quad \textbf{return}~r
+\quad \textbf{ret}~r
 \quad \}
 \end{array}
 : () \rightarrow \hat{L}
@@ -1032,7 +1032,7 @@ as a measure in our soundness proof (Lemma~\ref{lem:comni}).
 \rank{\lcWHILE{e}{c}} & = &\rank{c} \\
 \rank{\lcLETVAR{x}{e}{c}} & = &\rank{c} \\
 \rank{\lcCALL{x}{A.f}{\overline{e}}} & = &
-   \rank{FD(A.f)} + 1\\
+   \rank{\FD(A.f)} + 1\\
 \rank{\lcCP{p}{c_1}{c_2}} & = & max(\rank{c_1}, \rank{c_2})\\
 \rank{\lpFUN{A.f}{\overline x}{c}} &=& \rank{c}
 \end{array}
@@ -2920,7 +2920,7 @@ A.getInfo() {
          test(q) r = id++loc; %// ${(\ominus p\oplus q, H \leq \alpha)}$ %
          else r = ""; %// ${(\ominus p\ominus q, L \leq \alpha)}$ %
       }
-      return r;   
+      ret r;   
    }
 }
 B.fun() { %// $B$ has permission $q$%
@@ -2932,7 +2932,7 @@ B.fun() { %// $B$ has permission $q$%
          if x == "" then r = 0;  %// $(\epsilon, L\leq\beta) $%
          else r = 1; %// $(\epsilon, L\leq\beta) $,  $(\epsilon, \gamma\leq\beta) $%
       }
-      return r;    
+      ret r;    
    }
 }
 \end{lstlisting}

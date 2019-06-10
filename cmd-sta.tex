@@ -11,7 +11,7 @@
    basicstyle=\small,
    keywordstyle=\bfseries,
    language=C,
-   morekeywords={info, test, letv, in, init},
+   morekeywords={info, test, letv, in, init, ret},
    showspaces=false,
    showstringspaces=false
  }
@@ -52,7 +52,7 @@
 \newcommand*{\lcIF}[3]{\ensuremath{{\textbf{if}~{#1}~\textbf{then}~{#2}~\textbf{else}~{#3}}}}
 \newcommand*{\lcSEQ}[2]{\ensuremath{{#1};{#2}}}
 \newcommand*{\lcWHILE}[2]{\ensuremath{\textbf{while}~{#1}~\textbf{do}~{#2}}}
-\newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{call}~{#2}({#3})}}
+\newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{fcall}~{#2}({#3})}}
 \newcommand*{\lcCP}[3]{\ensuremath{{\textbf{test}({#1})~{#2} ~\textbf{else}~ {#3}}}}
 \newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letv}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
 
@@ -64,7 +64,7 @@
 % NOTE: if lpRES is changed, example code should be changed accordingly
 \newcommand*{\lpRES}{\ensuremath{r}}
 \newcommand*{\INITVAL}{0}
-\newcommand*{\lpINIT}[2]{\ensuremath{{\textbf{init}~ {#1}=\INITVAL ~\textbf{in}~\{{#2};\textbf{return}~{#1}\}}}}
+\newcommand*{\lpINIT}[2]{\ensuremath{{\textbf{init}~ {#1}=\INITVAL ~\textbf{in}~\{{#2};\textbf{ret}~{#1}\}}}}
 \newcommand*{\lpPROG}[4]{\ensuremath{{#1}(#2)\big\{{\lpINIT{#4}{#3}}\big\}}}
 \newcommand*{\lpFUN}[3]{\ensuremath{\lpPROG{#1}{#2}{#3}{\lpRES}}}
 
@@ -76,7 +76,7 @@
 \newcommand*{\cCond}[4]{\ensuremath{(\cPair{#1}{#2}\leq\cPair{#3}{#4})}}%{\ensuremath{\big(\cPair{#1}{#2}\leq\cPair{#3}{#4}\big)}}
 \newcommand*{\cCondst}[4]{\ensuremath{({#1},{#2},{#3},{#4})}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand*{\rank}[1]{{\textbf{rk}}(#1)}
+\newcommand*{\rank}[1]{{\textbf{rank}}(#1)}
 \newcommand*{\tlength}[1]{\ensuremath{len(#1)}}
 \newcommand*{\tLEQl}{\ensuremath{\preceq}}
 \newcommand*{\BNTS}{$\mathcal{T}_\mathit{b}$}
@@ -90,7 +90,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %marco for tyinfer
-\newcommand*{\trace}{\ensuremath{\Lambda}}
+\newcommand*{\trace}{\ensuremath{\Upsilon}}
 \newcommand*{\tplus}[1]{\ensuremath{\oplus #1}}
 \newcommand*{\tminus}[1]{\ensuremath{\ominus #1}}
 \newcommand*{\tplusminus}[1]{\ensuremath{\circledcirc #1}}

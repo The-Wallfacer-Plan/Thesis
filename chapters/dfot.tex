@@ -20,14 +20,14 @@ Following the definition in~\cite{Bohme:2017:DGF}, we name the fuzzers that can 
 
 
 As the state-of-the-art directed greybox fuzzer (DGF for short), {\aflgo}~\cite{Bohme:2017:DGF}~casts the reachability of target sites as an \emph{optimization problem} and adopts a meta-heuristic to promote the test seeds with shorter distances.
-Here, the distance is calculated according to the average \emph{weight} of basic blocks on the input seed's execution trace to the target basic block(s), where the weight
+Here, the distance is calculated according to the average \emph{weight} of basicblocks on the input seed's execution trace to the target basicblock(s), where the weight
  is determined by the edges in the call graph and control flow graphs of the program, and the meta-heuristic is simulated annealing~\cite{kirkpatrick1983optimization}.
 Based on these, \aflgo solves the \emph{power scheduling problem} for directed fuzzing --- how many new inputs (termed ``energy'' in \aflgo) should be generated from the current test seed.
 To summarize, represented by \aflgo, DGF achieves the goal of reaching the target sites by \emph{combing both static analysis and dynamic analysis}.
 
 
 A pure dynamic execution can only get the feedback based on the traces it has \emph{already} covered without any awareness about the predefined target sites.
-Thus, \textbf{\emph{static analysis}} is required to extract the necessary information for guiding the execution towards the target sites for DGFs. The most widely used approach is to calculate the \emph{distance} (or weight) to the target sites for the components (e.g., basic blocks, functions) of the PUT, so that when executed, DGFs can judge the \emph{affinity} between current seed and the target sites from the components in the execution traces. 
+Thus, \textbf{\emph{static analysis}} is required to extract the necessary information for guiding the execution towards the target sites for DGFs. The most widely used approach is to calculate the \emph{distance} (or weight) to the target sites for the components (e.g., basicblocks, functions) of the PUT, so that when executed, DGFs can judge the \emph{affinity} between current seed and the target sites from the components in the execution traces. 
 The major challenge is that the distance needs to be effectively calculated without compromising certain desired features.
 Particularly, it should help to retain the seed diversity~\cite{Audibert09}.
 For example, the existing seed distance calculation algorithm used in \aflgo always favors shortest path that leads to the targets (see \S~\ref{subsec:motiv}), which may starve inputs that could be more easily mutated to reach the target site and further trigger crashes.
@@ -57,10 +57,10 @@ To emphasize the two aforementioned problems, an ideal DGF is expected to hold t
 
 
 We propose our solutions to achieve the 4 properties for DGF. 
-For \textbf{P1}, we propose to apply the static analysis results to augment the adjacent-function distance (\S\ref{subsec:functionDist}); and the function level distance and basic block level distance should be calculated based on the augmented adjacent-function distance to simulate the affinities between functions (\S\ref{subsec:UtilityComputation}).
-Meanwhile, during fuzzing, we calculate \emph{basic block trace distance} and \emph{covered function similarity} of the execution trace to that of the target functions (\S\ref{subsec:powerSche}) by integrating the static analysis results with the runtime execution information.
-For \textbf{P2}, we propose to apply the analysis based on call graph (CG) and control flow graph (CFG), i.e., the function level reachability analysis, the points-to analysis for function pointers (indirect calls), and the basic block metrics (\S\ref{subsec:graghCons}). 
-For \textbf{P3}, we propose to combine the basic block trace distance and covered function similarity for solving the power scheduling problem (\S\ref{subsec:powerSche}) and the seed priorization problem (\S\ref{subsec:prioritization}). 
+For \textbf{P1}, we propose to apply the static analysis results to augment the adjacent-function distance (\S\ref{subsec:functionDist}); and the function level distance and basicblock level distance should be calculated based on the augmented adjacent-function distance to simulate the affinities between functions (\S\ref{subsec:UtilityComputation}).
+Meanwhile, during fuzzing, we calculate \emph{basicblock trace distance} and \emph{covered function similarity} of the execution trace to that of the target functions (\S\ref{subsec:powerSche}) by integrating the static analysis results with the runtime execution information.
+For \textbf{P2}, we propose to apply the analysis based on call graph (CG) and control flow graph (CFG), i.e., the function level reachability analysis, the points-to analysis for function pointers (indirect calls), and the basicblock metrics (\S\ref{subsec:graghCons}). 
+For \textbf{P3}, we propose to combine the basicblock trace distance and covered function similarity for solving the power scheduling problem (\S\ref{subsec:powerSche}) and the seed priorization problem (\S\ref{subsec:prioritization}). 
 For \textbf{P4}, we propose to apply an adaptive mutation strategy according to the reachability analysis and covered function similarity~(\S\ref{subsec:mutationStr}).
 
 By taking these properties into account, we implemented our DGF, {\dFOT}, and conducted a thorough evaluation with various real-world programs. 
@@ -129,7 +129,7 @@ From a patch testing perspective, we would like to target \texttt{concat\_filena
 
 For simplicity, in Fig.~\ref{fig:call_chain}, we illustrate only three representative traces for the CVE-2017-15939 by omitting 1) the overlapping functions before $a$ and 2) the other traces that do not pass the target function $T$. {The difficulty in discovering this CVE for the general GBFs (e.g., AFL) arises from the fact that the target function $T$ is deeply hidden in the crashing trace.} As shown in Fig.~\ref{fig:call_chain}, the call chain of $\langle a, e, T, Z\rangle$ is shorter than $\langle a, b, c, d, T, Z\rangle$.
 
-Since most of the GBFs (such as AFL, LibFuzzer, etc.) are supposed to be \emph{coverage oriented}, and do not care specially about the targets, they may not put most of their efforts in generating test seeds that reach function $T$ and testing the function throughly. For DGFs, although there suppose to be some efforts to guide the fuzzing procedure to favor \emph{some} traces leading to $T$ and focus more on these traces, they may frequently miss \emph{all} the traces. For example, if \aflgo detects that two traces can reach the target sites, it will highly likely favors the trace with shorter path: the distance between the seed to the target is determined by the average distance of the components (basic blocks or functions) in the execution trace to the targets, where the components' distance to the target sites are essentially determined by the number of edges between the components to the targets. This mechanism causes \aflgo to give more energy to the trace $\langle a, e, T, Z\rangle$ since it reaches the target $T$ \emph{and} the induced trace distance is smaller than $\langle a, b, c, d, T, Z\rangle$; on the other hand, less attention is put on $\langle a, b, c, d, T, Z\rangle$, which however causes the crash under some circumstances. Worse still, other traces like $\langle a, e, f, Z\rangle$ may be mistakenly assigned with more energy. As a result, \aflgo was also not able to reproduce the crash within 24 hours in any of the 10 runs we conducted.
+Since most of the GBFs (such as AFL, LibFuzzer, etc.) are supposed to be \emph{coverage oriented}, and do not care specially about the targets, they may not put most of their efforts in generating test seeds that reach function $T$ and testing the function throughly. For DGFs, although there suppose to be some efforts to guide the fuzzing procedure to favor \emph{some} traces leading to $T$ and focus more on these traces, they may frequently miss \emph{all} the traces. For example, if \aflgo detects that two traces can reach the target sites, it will highly likely favors the trace with shorter path: the distance between the seed to the target is determined by the average distance of the components (basicblocks or functions) in the execution trace to the targets, where the components' distance to the target sites are essentially determined by the number of edges between the components to the targets. This mechanism causes \aflgo to give more energy to the trace $\langle a, e, T, Z\rangle$ since it reaches the target $T$ \emph{and} the induced trace distance is smaller than $\langle a, b, c, d, T, Z\rangle$; on the other hand, less attention is put on $\langle a, b, c, d, T, Z\rangle$, which however causes the crash under some circumstances. Worse still, other traces like $\langle a, e, f, Z\rangle$ may be mistakenly assigned with more energy. As a result, \aflgo was also not able to reproduce the crash within 24 hours in any of the 10 runs we conducted.
  
 The challenges of the existing DGF roots in the following aspects: 1) the target functions may appear in several places in PUT, and multiple different traces may lead to the target.  2) since the call graph majorly affects the calculation of the trace distance (the dissimilarity with the target sites), it needs to be accurately built;
 in particular, the indirect calls among functions should not be ignored. If the above two issues are not well handled, the distance-based guiding mechanism for DGF will get hindered and fail in such cases.
@@ -167,7 +167,7 @@ To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired des
 \subsubsection{\textbf{P4}. DGF should adopt an \textbf{adaptive} mutation strategy when the seeds cover the different program states.}  \label{subsec:p4}
  GBFs usually apply different mutations, such as bitwise flip, byte rewrite, chunk replacement, to generate new test seeds from the existing one. 
 In general, these mutators can be categorized into two levels: fine-grained mutations (e.g., bitwise flip) and coarse-grained mutations (e.g., chunk replacement).
- Although there is no direct evidence that fine-grained mutations will likely preserve the execution traces, it is widely accepted that a coarse-grained random mutation has a high chance to change the execution trace greatly. Therefore, the desired design is that when a seed has already reached the target sites (including target lines, basic blocks or functions), it should be given less chances for coarse-grained mutations.
+ Although there is no direct evidence that fine-grained mutations will likely preserve the execution traces, it is widely accepted that a coarse-grained random mutation has a high chance to change the execution trace greatly. Therefore, the desired design is that when a seed has already reached the target sites (including target lines, basicblocks or functions), it should be given less chances for coarse-grained mutations.
  
 For the example in Fig.~\ref{fig:call_chain}, consider the case where the DGF has already reached the target function via trace $\langle a, b, c, d, T, Z\rangle $, but crash is not triggered yet.
 Now, the DGF should allocate less chances for coarse-grained mutations for the input of $\langle a, b, c, d, T, Z\rangle $.
@@ -192,7 +192,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 
 \textbf{For P1.} 
 For Fig.~\ref{fig:call_chain}, based on the distance formula defined in \aflgo
-the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In fact, \aflgo calculates the trace distance at the \emph{basic block} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
+the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In fact, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
 Given these three execution traces, the energy assigned to them will be $ \langle a, e, T, Z\rangle$ $>$ $\langle a, e, f , Z\rangle$ $>$ $\langle a, b, c, d, T, Z\rangle$.
 This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphasized; the crashing trace $\langle a, b, c, d, T, Z\rangle$ is however considered the least important, even less important than the trace $\langle a, e, f , Z\rangle$ that fails to reach the target $T$.
 
@@ -210,7 +210,7 @@ The function level distance is calculated on the call graph with the Dijkstra sh
 
 
 \textbf{For P3. } 
-\aflgo applies a simulated annealing based power scheduler: it favors those seeds that are closer~to~the targets by assigning more energy to them for mutation; the applied cooling schedule initially assigns smaller weight on the effect of ``distance guidance'', until it reaches the ``exploitation'' phrase. It solves the ``exploration vs exploitation'' problem~\cite{eve} and mitigates the imprecision issue brought by the statically calculated basic block level distance. In our opinion, this is an effective strategy. The problem is that there is no prioritization procedure so the newly generated seeds with smaller distance may wait for a long to be mutated.
+\aflgo applies a simulated annealing based power scheduler: it favors those seeds that are closer~to~the targets by assigning more energy to them for mutation; the applied cooling schedule initially assigns smaller weight on the effect of ``distance guidance'', until it reaches the ``exploitation'' phrase. It solves the ``exploration vs exploitation'' problem~\cite{eve} and mitigates the imprecision issue brought by the statically calculated basicblock level distance. In our opinion, this is an effective strategy. The problem is that there is no prioritization procedure so the newly generated seeds with smaller distance may wait for a long to be mutated.
 
 
  
@@ -241,21 +241,21 @@ In this section, we briefly introduce the workflow of our proposed approach, nam
 
 \subsection{Static Analysis}\label{subsec:static_flow}
 
-The inputs of static analysis are the \textit{program source code} and the~\textit{target sites} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basic blocks and functions where the ~target~sites~reside in, and call them \textit{target basic blocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basic block level distance}.
+The inputs of static analysis are the \textit{program source code} and the~\textit{target sites} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basicblocks and functions where the ~target~sites~reside in, and call them \textit{target basicblocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basicblock level distance}.
 
 First, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all possible  calls. Besides, for each function, we construct the  control flow graph (CFG) (\S\ref{subsec:graghCons}).
 
 
 Second, we compute several~utilities that are used to facilitate the directedness in \dFOT based on CG and CFG (\S\ref{subsec:UtilityComputation}).
 \begin{enumerate}[(1)]
-\item \textbf{Function level distance} is computed based on CG by augmenting adjacent-function distance (\S\ref{subsec:functionDist}).~This distance is utilized~to calculate the \textit{basic block level distance}. It is also~used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
+\item \textbf{Function level distance} is computed based on CG by augmenting adjacent-function distance (\S\ref{subsec:functionDist}).~This distance is utilized~to calculate the \textit{basicblock level distance}. It is also~used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
     
-\item \textbf{Basic block level distance} is computed based on the function level distance, together with the CG and the functions' CFGs. This distance is statically instrumented for each basic block that is considered to be able to reach one of the target sites. During the fuzzing loop, it is also used to calculate the \emph{basic block trace distance} (\S\ref{subsec:powerSche}).
+\item \textbf{Basic block level distance} is computed based on the function level distance, together with the CG and the functions' CFGs. This distance is statically instrumented for each basicblock that is considered to be able to reach one of the target sites. During the fuzzing loop, it is also used to calculate the \emph{basicblock trace distance} (\S\ref{subsec:powerSche}).
 
 \item \textbf{Target function trace closure} is computed for each target site~according to the CG to obtain the functions that can reach the target sites. It is used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
 \end{enumerate}
 
-Finally, the target program is instrumented to keep track of the edge transitions (similar to AFL), the accumulated basic block trace distance (similar to AFLGo), and the covered functions.
+Finally, the target program is instrumented to keep track of the edge transitions (similar to AFL), the accumulated basicblock trace distance (similar to AFLGo), and the covered functions.
 
 
 \subsection{Fuzzing Loop}\label{sec:fuzz_flow}
@@ -263,7 +263,7 @@ Finally, the target program is instrumented to keep track of the edge transition
 The inputs of fuzzing loop are the \textit{instrumented program binary},~the \textit{initial test seeds}, the \textit{target sites} as well as the information of \textit{function level distance} and \textit{target function trace closure}.
 The outputs~of~fuzzing loop are the test seeds that cause abnormal program behaviors such as crashes or timeouts.
 
-During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target sites more mutation chances, i.e., energy (\S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basic block trace distance}. For each newly generated test seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basic block trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basic block trace distance is calculated as the accumulated basic block level distances divided by the total number of executed basic blocks; and its covered function similarity is calculated based on the overlapping of current executed functions and the target function trace closure, as well as the function level distance.
+During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target sites more mutation chances, i.e., energy (\S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basicblock trace distance}. For each newly generated test seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basicblock trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basicblock trace distance is calculated as the accumulated basicblock level distances divided by the total number of executed basicblocks; and its covered function similarity is calculated based on the overlapping of current executed functions and the target function trace closure, as well as the function level distance.
 
 After the energy is determined, the fuzzer adaptively allocates mutation budgets on two different categories of mutations according to mutators' granularities on the seed (\S\ref{subsec:mutationStr}).
 Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those that have more energy or that have reached the target functions (\S\ref{subsec:prioritization}).
@@ -277,7 +277,7 @@ In this section, we will elaborate the key components in Fig.~\ref{fig:overview}
 
 \subsection{Graph Construction} \label{subsec:graghCons}
 
-To calculate the accurate distance from a test seed to the oracle seed executing the target sites, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basic block distance in \S\ref{subsec:UtilityComputation}.
+To calculate the accurate distance from a test seed to the oracle seed executing the target sites, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basicblock distance in \S\ref{subsec:UtilityComputation}.
 
 
 
@@ -339,7 +339,7 @@ void fa(int i) {
 Therefore, we propose two metrics to augment the distance that is defined by immediate calling relation between caller and callee.
 \begin{enumerate}[(1)] 
 \item Call site occurrences \csnum~of a certain callee for a given caller. More occurrences of callee could incur more chance that callee will be dynamically executed with more different (actual) parameters, and in return the distance between the caller to the callee will be smaller. We apply a factor $\Phi(\csnum)=\frac{\phi\cdot \csnum+1}{\phi\cdot \csnum}$ to denote this effect, where $\phi$ is a constant value (usually, $\phi=2$).
-\item The number of basic blocks \csbb~in the caller that contains at least one call site of the callee. The rationale is that, with more branches that have a call site, more different execution traces will include the callee. The factor function $\Psi(\csbb)=\frac{\psi\cdot \csbb+1}{\psi\cdot \csbb}$ denotes this effect, and $\psi$ is a constant value (usually, $\psi=2$).
+\item The number of basicblocks \csbb~in the caller that contains at least one call site of the callee. The rationale is that, with more branches that have a call site, more different execution traces will include the callee. The factor function $\Psi(\csbb)=\frac{\psi\cdot \csbb+1}{\psi\cdot \csbb}$ denotes this effect, and $\psi$ is a constant value (usually, $\psi=2$).
 \end{enumerate}
 
 Note that both factor functions are monotone decreasing functions; also, $\Phi$ converges to 1 when $C_N\rightarrow\infty$ and $\Psi$ converges to 1 when $C_B\rightarrow 1$.
@@ -362,7 +362,7 @@ The applied approach aims to make a trade-off between the efficiency and the uti
 \subsection{Directedness Utility Computation} \label{subsec:UtilityComputation}
 
 In \S\ref{subsec:functionDist}, the augmented function distance is calculated on two adjacent functions according to their call patterns. By assigning  the adjacent-function distance as the weight of the edges in the call graph, we can calculate the function level distance for any two functions with the Dijkstra shortest path algorithm, beyond which we can further derive the 
-basic block level distance. 
+basicblock level distance. 
 Besides, we also compute the target function trace closure which will be used to calculate the covered function similarity in \S\ref{subsec:powerSche}.
 
 \textbf{Function Level Distance.} This distance is calculated according to CG. It tells the (average) distance from the current function to target functions. Given a function $n$, its distance to the target function set \tgtfnset~is defined as:
@@ -378,11 +378,11 @@ d_f(n, \tgtfnset) =
 where $R(n, \tgtfnset) = \left\{\tgtfn | \textbf{reachable}(n, \tgtfn)\right\}$,
 which is the set of target functions that can be statically reached from $n$ in CG, and \traceFnDist{n}{\tgtfn} is the \emph{dijkstra shortest path based on augmented function distance} from $n$ to a given target function {\tgtfn} in CG.
 
-\textbf{Basic Block Level Distance.} Given a function $n$ and two basic blocks $m_1$ and $m_2$ inside, the basic block level distance \simpleBBDist{m_1}{m_2} is defined as the minimal number of edges from $m_1$ to $m_2$ in the CFG \cfg{n}.
-The set of functions called inside basic block $m$ is denoted as \BBCallees{m},
+\textbf{Basic Block Level Distance.} Given a function $n$ and two basicblocks $m_1$ and $m_2$ inside, the basicblock level distance \simpleBBDist{m_1}{m_2} is defined as the minimal number of edges from $m_1$ to $m_2$ in the CFG \cfg{n}.
+The set of functions called inside basicblock $m$ is denoted as \BBCallees{m},
 then $\BBCalleesT{m}=\left\{n | R(n, \tgtfnset)\neq\emptyset, n\in\BBCallees{m} \right\}$, 
 and $\transitiveBB=\left\{m| \exists \cfg{n}, m\in \cfg{n}, n\in\fnset, \BBCalleesT{m}\neq\emptyset \right\}$, where $\fnset$ is the set of all functions.
-Given a basic block $m$, its distance to the target basic blocks \tgtbbset~are defined as:
+Given a basicblock $m$, its distance to the target basicblocks \tgtbbset~are defined as:
 \begin{equation}
 \traceBBDist{m}{\tgtbbset} = 
 \begin{cases}
@@ -403,19 +403,19 @@ Note that Equation \ref{eq:aflgo_func_dist} and \ref{eq:aflgo_bb_dist}, on their
 
 \subsection{Power Scheduling}  \label{subsec:powerSche}
 
-During dynamic fuzzing, we apply power scheduling on a selected seed based on two dynamically-computed metrics: basic block trace distance and target function trace similarity.
+During dynamic fuzzing, we apply power scheduling on a selected seed based on two dynamically-computed metrics: basicblock trace distance and target function trace similarity.
 
-\textbf{Basic Block Trace Distance.} The distance between the seed $s$ to the target basic blocks $\tgtbbset$ is defined as:
+\textbf{Basic Block Trace Distance.} The distance between the seed $s$ to the target basicblocks $\tgtbbset$ is defined as:
 \begin{equation}
 \traceDist{s}{\tgtbbset} = \frac{\Sigma_{m\in\xi_b(s)}\traceBBDist{m}{\tgtbbset}}{|\bbtrace{s}|}
 \label{eq:aflgo_seed_dist}
 \end{equation}
-where \bbtrace{s} is the execution trace of a seed $s$ and contains all the basic blocks that are executed. Hence, the basic idea of Equation  \ref{eq:aflgo_seed_dist} is that: for all the basic blocks in the  execution trace of $s$, we calculate the average basic block level distance to the target basic blocks  $\tgtbbset$.  Note that Equation \ref{eq:aflgo_seed_dist} is also the same as the one in \aflgo \cite{Bohme:2017:DGF}.
+where \bbtrace{s} is the execution trace of a seed $s$ and contains all the basicblocks that are executed. Hence, the basic idea of Equation  \ref{eq:aflgo_seed_dist} is that: for all the basicblocks in the  execution trace of $s$, we calculate the average basicblock level distance to the target basicblocks  $\tgtbbset$.  Note that Equation \ref{eq:aflgo_seed_dist} is also the same as the one in \aflgo \cite{Bohme:2017:DGF}.
 
 It then applies a feature scaling normalization to get the final distance $\traceDistFinal{s}{\tgtbbset}=\frac{\traceDist{s}{\tgtbbset}-minD}{maxD-minD}$ where $minD$ (or $maxD$) is the smallest (or largest) distances ever met.
 
 
-\textbf{Covered Function Similarity.} This metric measures the similarity between the execution trace of the seed and the target execution trace \emph{on the function level}. We do not track the basic block level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the ``expected traces'' will have more chances to be mutated to reach the targets. This similarity is calculated by tracking the function \emph{sets} the current seed covered (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Fig.~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
+\textbf{Covered Function Similarity.} This metric measures the similarity between the execution trace of the seed and the target execution trace \emph{on the function level}. We do not track the basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the ``expected traces'' will have more chances to be mutated to reach the targets. This similarity is calculated by tracking the function \emph{sets} the current seed covered (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Fig.~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
 
 The covered function similarity is then determined by the following formula:
 \begin{equation}
@@ -425,14 +425,14 @@ The covered function similarity is then determined by the following formula:
 $\traceFnDist{f}{\tgtfnset}$ is the function level distance calculated with Equation~\ref{eq:aflgo_func_dist}. Similar to \traceDistn, a feature scaling normalization is also applied and the final similarity is denoted as \covDistnN. Note that this similarity metric is uniquely proposed in our approach.
 
 \textbf{Scheduling.}
-Scheduling deals with the problem how many mutation chances will be assigned to the given seed. The intuition is that if the trace that the current seed executes is ``closer'' to any of the expected traces that can reach the target site in the program, more mutations on that seed should be more beneficial for generating expected seeds. A scheduling purely based on \emph{trace distance} may favor certain patterns of traces. For \aflgo, as mentioned in \S\ref{subsec:p2}, the shorter paths will be assigned more energy, which may starve longer paths that are still reachable to the target sites. To \emph{mitigate} this, we propose the \emph{power function} that considers both \emph{trace distance} (based on basic block level distance) and \emph{trace similarities} (based on covered function similarity): 
+Scheduling deals with the problem how many mutation chances will be assigned to the given seed. The intuition is that if the trace that the current seed executes is ``closer'' to any of the expected traces that can reach the target site in the program, more mutations on that seed should be more beneficial for generating expected seeds. A scheduling purely based on \emph{trace distance} may favor certain patterns of traces. For \aflgo, as mentioned in \S\ref{subsec:p2}, the shorter paths will be assigned more energy, which may starve longer paths that are still reachable to the target sites. To \emph{mitigate} this, we propose the \emph{power function} that considers both \emph{trace distance} (based on basicblock level distance) and \emph{trace similarities} (based on covered function similarity): 
 \begin{equation}\label{eq:aflgo_power}
 p(s, \tgtbbset) = \covDistN{s}{\tgtfnset}\cdot(1 - \traceDistFinal{s}{\tgtbbset})
 \end{equation}
 
 Obviously, the value of $p(s, \tgtbbset)$ fits into $[0,1]$ since both the multipliers are in $[0,1]$.
 
-Compared to AFLGo's approach, which only considers basic block trace distance (\traceDistn, or \traceDistnFinal), our power function balances the effect of shorter paths and the longer paths that can reach the target. Logically, there are some differences between {\covDistn} and {\traceDistn}:
+Compared to AFLGo's approach, which only considers basicblock trace distance (\traceDistn, or \traceDistnFinal), our power function balances the effect of shorter paths and the longer paths that can reach the target. Logically, there are some differences between {\covDistn} and {\traceDistn}:
 \begin{enumerate}[(1)]
     \item \traceDistn~considers both the effects of CG and the CFGs; {\covDistn} considers only the effects of CG. For \traceDistn, the major effect is still CG due to the magnification factor $c$ used in Equation~\ref{eq:aflgo_func_dist}.
     \item \traceDistn~does not penalize traces that do not lead to the targets, while {\covDistn} penalizes them via a union of \fntrace{s} (by tracking function level traces) and \fntrace{\tgtfnset}.
@@ -616,7 +616,7 @@ By combining all the static and dynamic techniques mentioned above, for the CVE 
 
 We implemented our static instrumentation on top of FOT's static instrumentation mode (c.f.~\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
 
-For each program with the given target sites, the instrumentation of {\dFOT} consists of three parts: 1) basic block IDs that track the execution traces 2) basic block distance information that determines basic block trace distance and 3) function IDs that track functions that have been covered. 
+For each program with the given target sites, the instrumentation of {\dFOT} consists of three parts: 1) basicblock IDs that track the execution traces 2) basicblock distance information that determines basicblock trace distance and 3) function IDs that track functions that have been covered. 
 
 
 
@@ -652,21 +652,21 @@ In the experiments, we aim to answer the following questions:
 \textbf{Evaluation Dataset.}
 We evaluated \dFOT with diverse real-world programs:
 \begin{enumerate}[(1)] 
-    \item \textbf{GNU Binutils}~\cite{binutils} is a collection of binary analysis tools used in GNU/Linux platform. 
-This benchmark is also used in several other works such as~\cite{Bohme:2016:CGF, Bohme:2017:DGF, FairFuzz}.
-    \item \textbf{MJS}~\cite{mjs} is an embedded JavaScript engine for C/C++ and used in IoT development.
+    \item \textbf{GNU Binutils}~\cite{binutils} is a set of binary analysis tools on Linux. 
+This also serves a benchmark in other works such as~\cite{Bohme:2016:CGF, Bohme:2017:DGF, FairFuzz}.
+    \item \textbf{MJS}~\cite{mjs} is an embedded JavaScript interpreter for IoT development.
     It is used to compare \dFOT directly with {\aflgo} due to implementation limitations of the latter.
     \item \textbf{Oniguruma}~\cite{oniguruma} is a versatile regular expression library used by multiple world famous projects such as PHP~\cite{php}.
     \item \textbf{Fuzzer Test Suite}~\cite{fuzzer-test-suite} is a set of benchmarks for fuzzing engines.
     It contains several representative real-world projects.
 \end{enumerate}
 
-\textbf{Evalution Tools.} We compare {\dFOT} with the following three fuzzers:
+\textbf{Evaluation Tools.} We compare the following three fuzzers:
 \begin{enumerate}[(1)] 
-\item \textbf{AFL} is the current state-of-the-art GBF. It ignores all the target information for the PUT and only does the ``basic block transition'' instrumentation.
+\item \textbf{AFL} is the current state-of-the-art GBF. It discards all the target information for the PUT and only utilizes the ``basicblock transition'' instrumentation.
 \item \textbf{{\aflgo}} is the state-of-the-art DGF based on AFL.
-Compared to AFL, it also instruments basic block distance information.
-\item \textbf{{\dGO}} is the fuzzer where the basic block level distance is generated with our static analysis procedure (Fig.~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
+Compared to AFL, it also instruments basicblock distance information.
+\item \textbf{{\dGO}} is the fuzzer whose basicblock level distance is generated with our static analysis procedure (Fig.~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
 \end{enumerate}
 
 Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GBFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not publicly available (e.g., Angora~\cite{Angora}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
@@ -752,8 +752,8 @@ To summarize, {\dFOT} has the real potential to fulfill directed fuzzing tasks w
 
 In order to \emph{directly} compare the performance between {\dFOT} and {\aflgo}, we chose a project called \emph{MJS}, which contains a single source file and the results are in Table~\ref{tbl:cr_aflgo_mjs}.
 We used this project for direct comparison with \aflgo since \aflgo took too much time or failed to generate the distance information for other projects such as Oniguruma, libpng, etc. 
-On \emph{MJS}, \aflgo took an average of 13 minutes to generate the basic block distance for different targets.
-During experiments, the initial input seed files are all from the project's \emph{tests} directory. The targets are selected from the crashes reported in the project's GitHub pages, which correspond to four categories of vulnerabilities, namely \emph{integer overflow} (\#1), \emph{invalid read} (\#2), \emph{heap buffer overflow} (\#3), and \emph{use after free} (\#4). We can observe the following facts : 
+On \emph{MJS}, \aflgo took an average of 13 minutes to generate the basicblock distance for different targets.
+During experiments, the initial input seed files are all from the project's \emph{tests} directory. The targets are selected from the crashes reported in the project's GitHub pages, which correspond to four categories of vulnerabilities, namely \emph{integer overflow} (\#1, \url{https://github.com/cesanta/mjs/issues/57}), \emph{invalid write} (\#2, \url{https://github.com/cesanta/mjs/issues/69}), \emph{heap buffer overflow} (\#3, \url{https://github.com/cesanta/mjs/issues/77}), and \emph{use after free} (\#4, \url{https://github.com/cesanta/mjs/issues/78}). We can observe the following facts : 
 1) On \#1 and \#2,  \dFOT achieves the best results, with the most hitting rounds and the shortest {\utte} for both cases.  In terms of hitting rounds, {\dFOT} found \#1's bug in 5 runs and \#2's bug in 7 runs, while for the other two tools they only detected both crashes in 2 runs. Notably, this case is nontrivial and {\dFOT} reduces the {\utte} from about 3.5 hours to 0.5 hours.
 2) On \#3, for which all the tools reproduce the crash in 8 rounds. Still, \dFOT has the highly significant improvement on {\utte}, using less than one fourth {\utte} of other tools.
 3) On \#4, all the tools reproduce the crash in all rounds, and the {\utte} differences among them are not significant.

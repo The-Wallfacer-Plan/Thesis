@@ -237,14 +237,14 @@ We first calculate a \emph{base instrumentation probability} according to cyclom
 \end{equation}
 We use $\stpn$ as the probability to \emph{selectively} instrument on the first instruction of a basicblock that is \emph{totally} outside the scope of multithreading environment, i.e., \emph{none of} the instructions inside this basicblock belongs to \mtiscope.
 \begin{equation}
-    \stp{\aFUNC} = \max\big\{\ccr{\aFUNC}, ~\stpnO\big\}
+    \stp{\aFUNC} = \min\big\{\ccr{\aFUNC}, ~\stpnO\big\}
 \end{equation}
 where $0<\stpnO<1$. Empirically, we set $\stpnO=0.5$.
 
 On the other hand, for each basicblock \aBB inside the given function~\aFUNC, we calculate the total number of instructions $N(\aBB)$, and the total number of memory operation instructions  $N_m(\aBB)$, e.g., load/store operations, or built-in memory function calls such as \func{memcpy}, \func{strncat}, \func{malloc}, \func{free}, etc. 
 Then for each of the instructions, we instrument based on the probability as:
 \begin{equation}
-    \mtp{\aFUNC}{\aBB} = \max\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}
+    \mtp{\aFUNC}{\aBB} = \min\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}
 where $\mtpnO$ is a factor satisfying $0<\mtpnO<1$ and defaults to $0.33$.
 
 \subsubsection{Instrumentation Algorithm}
@@ -379,7 +379,10 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
 \begin{table*}[ht]
 \caption{Static information of the 12 evaluated programs.}
 \label{tbl:bm_stats}
-\tiny
+\begingroup
+\setlength{\tabcolsep}{0pt} % Default value: 6pt
+\renewcommand{\arraystretch}{0.9} % Default value: 1
+\scriptsize
 \begin{tabular}{c"c|c|c|c"c|c|c|c|r}
 \thickhline
 \textbf{ID} &\textbf{Project} & \textbf{MT Type} & \textbf{Command Line Options}  & \textbf{\begin{tabular}[c]{@{}c@{}}Binary\\ Size\end{tabular}} &  \textbf{$T_{pp}$} & \textbf{$N_{B}$} & \textbf{$N_{I}$} & \textbf{$N_{ii}$} & \textsf{$\frac{N_{ii}-N_{B}}{N_{B}}$} \\ \thickhline
@@ -396,6 +399,7 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
     \textbf{x264} & x264-0.157.2966 & native & \pbin{x264} --threads=4 -o out.264 FILE & 6.4M & 1701.0s & 38912 & 410453 & 103926 & 167.1\% \\ \hline
 \textbf{x265} & x265-3.0\_Au+3 & native & \pbin{x265} --input FILE --pools 4 -F 2 -o & 9.7M & 78.3s & 22992 & 412555 & 89408 & 288.9\% \\ \thickhline
 \end{tabular}
+\endgroup
 \end{table*}
 
 
@@ -533,10 +537,10 @@ The rest columns state the static instrumentation data. The ``Binary Size'' colu
 calculates the sizes of the instrumented binaries. Column $T_{pp}$ records the 
 preprocessing time (c.f.~\S\ref{sec:preprocess}). The program \emph{vpxdec} cost the 
 most time --- about 30 minutes. The last three columns $N_B$, $N_I$, and $N_{ii}$ 
-depict the number of basic blocks, the number of total instructions, and the number 
+depict the number of basicblocks, the number of total instructions, and the number 
 of included instructions for \mtfuzz instrumentation (c.f.~\S\ref{sec:instrument_explore}), 
 respectively. Recall that \AFLIns does the instrumentation over the \emph{deputy} instruction 
-of each basic block, so $N_B$ also implicates the number of instrumented instructions by AFL. 
+of each basicblock, so $N_B$ also implicates the number of instrumented instructions by AFL. 
 The last column is the ratio of more instructions \mtfuzz instrumented compared to AFL. 
 
 
