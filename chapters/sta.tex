@@ -553,58 +553,58 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 \tiny
 \[
 \inference[T-VAR]{}
-{\Gamma \vdash \leVAR{x} : \Gamma(x)}
+{\Psi \vdash \leVAR{x} : \Psi(x)}
 \qquad
 \inference[T-OP]
-{\Gamma\vdash e_1: t & \Gamma ; A\vdash e_2: t}
-{\Gamma\vdash \leOP{e_1}{e_2} : t}
+{\Psi\vdash e_1: t & \Psi ; A\vdash e_2: t}
+{\Psi\vdash \leOP{e_1}{e_2} : t}
 \qquad
 \inference[T-SUB$_{e}$]
-{\Gamma\vdash e : s & s \leq t}
-{\Gamma\vdash e : t}
+{\Psi\vdash e : s & s \leq t}
+{\Psi\vdash e : t}
 \qquad
 \inference[T-SUB$_{c}$]
-{\Gamma; A \vdash c : s & t \leq s}
-{\Gamma; A\vdash c : t}
+{\Psi; A \vdash c : s & t \leq s}
+{\Psi; A\vdash c : t}
 \]
 
 \[
 \inference[T-ASS]
-{\Gamma \vdash e : \Gamma(x)}
-{\Gamma ;A \vdash \lcASS{x}{e} : \Gamma(x)}
+{\Psi \vdash e : \Psi(x)}
+{\Psi ;A \vdash \lcASS{x}{e} : \Psi(x)}
 \qquad
 \inference[T-LETVAR]
-{\Gamma \vdash e : s &
-\Gamma[x:s]; A \vdash c : t }
-{\Gamma; A\vdash \lcLETVAR{x}{e}{c} :  t}
+{\Psi \vdash e : s &
+\Psi[x:s]; A \vdash c : t }
+{\Psi; A\vdash \lcLETVAR{x}{e}{c} :  t}
 \qquad
 \inference[T-IF]
-{\Gamma \vdash e : t & \Gamma ; A\vdash c_1 : t & \Gamma; A \vdash c_2 : t }
-{\Gamma; A \vdash \lcIF{e}{c_1}{c_2} : t}
+{\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
+{\Psi; A \vdash \lcIF{e}{c_1}{c_2} : t}
 \]
 
 \[
 \inference[T-CP]
-{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
-\Gamma\downarrow_{p} ; A\vdash c_2 : t_2}
-{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : \omerge p {t_1} {t_2}}
+{\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Psi\downarrow_{p} ; A\vdash c_2 : t_2}
+{\Psi; A\vdash \lcCP{p}{c_1}{c_2} : \omerge p {t_1} {t_2}}
 \qquad
 \inference[T-WHILE]
-{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
-{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+{\Psi \vdash e : t & \Psi ; A\vdash c : t  }
+{\Psi; A \vdash \lcWHILE{e}{c} : t }
 \quad
 \inference[T-SEQ]
-{\Gamma; A\vdash c_1 : t & \Gamma ; A\vdash c_2 : t }
-{\Gamma ; A\vdash \lcSEQ{c_1}{c_2} : t}
+{\Psi; A\vdash c_1 : t & \Psi ; A\vdash c_2 : t }
+{\Psi ; A\vdash \lcSEQ{c_1}{c_2} : t}
 \]
 
 \[
 \inference[T-CALL]
 {\FT(B.f) = \overline{t} \rightarrow t' &
-\Gamma \vdash \overline{e} : \app{\overline{t}}{\Theta(A)} &
-\app{t'}{\Theta(A)} \leq \Gamma(x)}
-{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
- \Gamma(x)  }
+\Psi \vdash \overline{e} : \app{\overline{t}}{\Theta(A)} &
+\app{t'}{\Theta(A)} \leq \Psi(x)}
+{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+ \Psi(x)  }
 \qquad
 \inference[T-FUN]
 {[\overline{x}:\overline{t}, r : t'] ; B\vdash c : s}
@@ -647,31 +647,31 @@ t_2(P) & p\not\in P\\
 A {\em typing environment} is a finite mapping from variables to base types.
 We use the notation  $[x_1 : t_1, \dots, x_n : t_n]$
 to enumerate a typing environment with domain $\{x_1,\dots,x_n\}.$
-Typing environments are ranged over by $\Gamma.$
-Given $\Gamma_1$ and $\Gamma_2$ such that $dom(\Gamma_1) \cap dom(\Gamma_2) = \emptyset$,
-we write $\Gamma_1\Gamma_2$ to denote a typing environment that is the (disjoint) union of the mappings
-in $\Gamma_1$ and $\Gamma_2$.
+Typing environments are ranged over by $\Psi.$
+Given $\Psi_1$ and $\Psi_2$ such that $dom(\Psi_1) \cap dom(\Psi_2) = \emptyset$,
+we write $\Psi_1\Psi_2$ to denote a typing environment that is the (disjoint) union of the mappings
+in $\Psi_1$ and $\Psi_2$.
 
 \begin{definition}\label{def:tenv-pd}
-  Given a typing environment $\Gamma$, its {\em promotion} and {\em demotion} along $p$
-  are typing environments $\Gamma\!\uparrow_p$ and $\Gamma\!\downarrow_p$, such that
-$(\Gamma\!\uparrow_{p})(x) = \Gamma(x)\!\uparrow_{p}$ and
-$(\Gamma\!\downarrow_{p})(x) = \Gamma(x)\!\downarrow_{p}$ for every $x \in dom(\Gamma).$
-  The projection of $\Gamma$ on $P \in \PPS$ is a typing environment $\app{\Gamma}{P}$ such that
-$(\app{\Gamma}{P})(x) = \app{\Gamma(x)}{P}$ for each $x \in dom(\Gamma).$
+  Given a typing environment $\Psi$, its {\em promotion} and {\em demotion} along $p$
+  are typing environments $\Psi\!\uparrow_p$ and $\Psi\!\downarrow_p$, such that
+$(\Psi\!\uparrow_{p})(x) = \Psi(x)\!\uparrow_{p}$ and
+$(\Psi\!\downarrow_{p})(x) = \Psi(x)\!\downarrow_{p}$ for every $x \in dom(\Psi).$
+  The projection of $\Psi$ on $P \in \PPS$ is a typing environment $\app{\Psi}{P}$ such that
+$(\app{\Psi}{P})(x) = \app{\Psi(x)}{P}$ for each $x \in dom(\Psi).$
 \end{definition}
 
 There are three typing judgments in our type system as explained below. All these judgments are implicitly parameterized by
 a function type table, $\FT$, which maps all function names to function types, and a mapping $\Theta$ assigning permission sets to apps.
 
 \begin{itemize}
-\item Expression typing: $\Gamma \vdash e : t.$
-This says that under $\Gamma$,
+\item Expression typing: $\Psi \vdash e : t.$
+This says that under $\Psi$,
 the expression $e$ has a base type at most $t$.
 
-\item Command typing: $\Gamma; A \vdash c : t$.
+\item Command typing: $\Psi; A \vdash c : t$.
 This means that the command $c$ writes to variables with type at least $t$, when
-executed by app $A$, under the typing environment $\Gamma.$
+executed by app $A$, under the typing environment $\Psi.$
 
 \item Function typing:
 The typing judgment takes the form: $$\vdash \lpFUN{B.f}{\overline{x}}{c} :  \overline{t} \xrightarrow{} t'$$
@@ -722,9 +722,9 @@ a projection of the type given in $FT(B.f)$ on the permissions of $A$ (given by 
 $\app{\overline{t}}{\Theta(A)} \rightarrow \app{t'}{\Theta(A)}.$
 Therefore the arguments for the function call should be typed
 as
-$\Gamma \vdash \overline{e} : \app{\overline{t}}{\Theta(A)}$
+$\Psi \vdash \overline{e} : \app{\overline{t}}{\Theta(A)}$
 and the return type (as viewed by $A$) should be dominated
-by the type of $x$, i.e., $\app{t'}{\Theta(A)} \leq \Gamma(x)$.
+by the type of $x$, i.e., $\app{t'}{\Theta(A)} \leq \Psi(x)$.
 
 
 \textbf{Parameter laundering}~It is essential that in Rule \ruleTagText{T-CALL}, the arguments $\overline{e}$ and the return value of
@@ -733,10 +733,10 @@ the function call are typed according to the projection of $\overline{t}$ and $t
 \inference[T-CALL']
 {
  \FT(B.f) = \overline{t} \rightarrow t' &
- \Gamma \vdash \overline{e} :\overline{t} &
- t'  \leq \Gamma(x)}
-{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
-  \Gamma(x)}
+ \Psi \vdash \overline{e} :\overline{t} &
+ t'  \leq \Psi(x)}
+{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+  \Psi(x)}
 \end{equation*}
 Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially what is adopted in {\BN} system for method calls~\cite{Banerjee:2005ht}.
 
@@ -861,8 +861,8 @@ Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
 \begin{scriptsize}
 \begin{prooftree}
 \AxiomC{$r : \hat{L} \vdash 0 : t$}
-	\AxiomC{$\Gamma ; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
-	\AxiomC{$\Gamma ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
+	\AxiomC{$\Psi ; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
+	\AxiomC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \LeftLabel{T-SEQ}
 \BinaryInfC{$r : \hat{L}, x_H : t ; M \vdash \lcSEQ {\lcCALL{x_H}{C.getsecret}{~} } {\lcCALL{r}{A.f}{x_H} }  :  \hat{L}$}
 \LeftLabel{T-LETVAR}
@@ -882,29 +882,29 @@ Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
 : () \rightarrow \hat{L}
 $}
 \end{prooftree}
-where $\Gamma = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are derived, respectively, as follows:
+where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are derived, respectively, as follows:
 
 
 \vskip1ex
 
 \begin{prooftree}
 \AxiomC{$FT(C.getsecret) = () \rightarrow t$}
-\AxiomC{$\Gamma \vdash () : () $}
-\AxiomC{$t \leq \Gamma(x_H) = t $}
+\AxiomC{$\Psi \vdash () : () $}
+\AxiomC{$t \leq \Psi(x_H) = t $}
 \LeftLabel{T-CALL'}
-\TrinaryInfC{$\Gamma; M \vdash \lcCALL{x_H}{C.getsecret}{~} : t$}
+\TrinaryInfC{$\Psi; M \vdash \lcCALL{x_H}{C.getsecret}{~} : t$}
 \LeftLabel{T-SUB${}_c$}
-\UnaryInfC{$\Gamma; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
+\UnaryInfC{$\Psi; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
 \end{prooftree}
 
 \vskip1ex
 
 \begin{prooftree}
 \AxiomC{$FT(A.f) = t \rightarrow \hat{L}$}
-\AxiomC{$\Gamma \vdash x_H : t$}
-\AxiomC{$\hat{L} \leq \Gamma(x_H) = t$}
+\AxiomC{$\Psi \vdash x_H : t$}
+\AxiomC{$\hat{L} \leq \Psi(x_H) = t$}
 \LeftLabel{T-CALL'}
-\TrinaryInfC{$\Gamma ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
+\TrinaryInfC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \end{prooftree}
 \end{scriptsize}
 \caption{A typing derivation for function M.main}
@@ -955,10 +955,10 @@ which this upper bound is derived.
 
 \begin{definition}\label{def:envequ}
 Given two evaluation environments $\mu, \mu'$,
-a typing environment $\Gamma$, a security level $l_O \in \SL$ of the observer,
-the {\termEmph{indistinguishability relation}}  $=_{\Gamma}^{l_O}$ is defined as: \begin{equation*}
-\mu =_{\Gamma}^{l_{O}} \mu' \text{ iff}
-\forall x\in dom(\Gamma) .\; \big(\Gamma(x) \leq \hat{l_{O}} \Rightarrow \mu(x) = \mu'(x) \big)
+a typing environment $\Psi$, a security level $l_O \in \SL$ of the observer,
+the {\termEmph{indistinguishability relation}}  $=_{\Psi}^{l_O}$ is defined as: \begin{equation*}
+\mu =_{\Psi}^{l_{O}} \mu' \text{ iff}
+\forall x\in dom(\Psi) .\; \big(\Psi(x) \leq \hat{l_{O}} \Rightarrow \mu(x) = \mu'(x) \big)
 \end{equation*}
 where
 $\mu(x) = \mu'(x)$ holds iff both sides of the equation are defined and equal,
@@ -966,11 +966,11 @@ or both sides are undefined.
 \end{definition}
 
 Note that in Definition~\ref{def:envequ}, $\mu$ and $\mu'$ may not have the same domain, but they must agree on
-their valuations for the variables in the domain of $\Gamma$. 
+their valuations for the variables in the domain of $\Psi$. 
 Note also that since base types are functions from permissions to security level, the security
-level $l_O$ needs to be lifted to a base type in the comparison $\Gamma(x) \leq \hat{l_{O}}$.
+level $l_O$ needs to be lifted to a base type in the comparison $\Psi(x) \leq \hat{l_{O}}$.
 The latter implies that
-$\Gamma(x)(P) \leq l_O$ (in the latice $\SL$) for every permission set $P.$
+$\Psi(x)(P) \leq l_O$ (in the latice $\SL$) for every permission set $P.$
 If the base type of each variable assigns the same security level to every permission set (i.e., the security level
 is independent of the permissions), then our notion of indistinguishability coincides with the standard definition
 for the non-dependent setting.
@@ -978,13 +978,13 @@ for the non-dependent setting.
 
 
 \begin{lemma}\label{lem:ni-eq}
-$=_{\Gamma}^{l_{O}}$ is an equivalence relation on $EEnv$.
+$=_{\Psi}^{l_{O}}$ is an equivalence relation on $EEnv$.
 \end{lemma}
  \begin{proof}
 \begin{ProofEnumDesc}[style=standard]
-	\item [Reflexivity] Obviously $\mu=_{\Gamma}^{l_O}\mu$.
-	\item [Symmetry] Since $\forall x\in dom(\Gamma). (\Gamma(x)\leq\hat{l}_O\Rightarrow\mu'=_{\Gamma}^{l_O}\mu)$.
-	\item [Transitivity] If $\mu_1=_{\Gamma}^{l_O}\mu_2$ and $\mu_2=_{\Gamma}^{l_O}\mu_3$, for a given $x\in dom(\Gamma)$, when $\Gamma(x)\leq\hat{l_O}$, we have $\mu_1(x)=\mu_2(x)$ and $\mu_2(x)=\mu_3(x)$.
+	\item [Reflexivity] Obviously $\mu=_{\Psi}^{l_O}\mu$.
+	\item [Symmetry] Since $\forall x\in dom(\Psi). (\Psi(x)\leq\hat{l}_O\Rightarrow\mu'=_{\Psi}^{l_O}\mu)$.
+	\item [Transitivity] If $\mu_1=_{\Psi}^{l_O}\mu_2$ and $\mu_2=_{\Psi}^{l_O}\mu_3$, for a given $x\in dom(\Psi)$, when $\Psi(x)\leq\hat{l_O}$, we have $\mu_1(x)=\mu_2(x)$ and $\mu_2(x)=\mu_3(x)$.
 	\begin{enumerate}[label={(\arabic*)}]
 	\item If $\mu_1(x)\neq\bot$, then $\mu_2(x)\neq\bot$ by the first equation, which in return requires $\mu_3(x)\neq\bot$ by the second equation; by transitivity $\mu_1(x)=\mu_3(x)$($\neq\bot$).
 	\item If $\mu_1(x)=\bot$, the first equation requires that $\mu_2(x)=\bot$, which makes $\mu_3(x)=\bot$, therefore both $\mu_1(x)=\mu_3(x)$($=\bot$).
@@ -994,12 +994,12 @@ $=_{\Gamma}^{l_{O}}$ is an equivalence relation on $EEnv$.
  \end{proof}
 
  \begin{lemma}\label{lem:proj}
-If $\mu =_{\Gamma}^{l_{O}} \mu'$
+If $\mu =_{\Psi}^{l_{O}} \mu'$
 then for each $P\in\PPS$,
-$\mu =_{\app{\Gamma}{P}}^{l_O} \mu'.$
+$\mu =_{\app{\Psi}{P}}^{l_O} \mu'.$
 \end{lemma}
  \begin{proof}
-$\forall x\in dom(\Gamma)$, we need to prove that when $\app{\Gamma}{P}(x)\leq l_O$ then $\mu(x)=\mu'(x)$. But $\app{\Gamma}{P}(x)=\app{\Gamma(x)}{P}=t(P)$, from the definition of $\mu(x)=\mu'(x)$, the conclusion holds.
+$\forall x\in dom(\Psi)$, we need to prove that when $\app{\Psi}{P}(x)\leq l_O$ then $\mu(x)=\mu'(x)$. But $\app{\Psi}{P}(x)=\app{\Psi(x)}{P}=t(P)$, from the definition of $\mu(x)=\mu'(x)$, the conclusion holds.
  \end{proof}
 
 
@@ -1043,31 +1043,31 @@ The next two lemmas relate projection, promotion/demotion
 and the indistinguishability relation.
 
 \begin{lemma}\label{lem:up}
-If $p \in P$, then $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \mu'$.
+If $p \in P$, then $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Psi\uparrow_{p}}{P}}^{l_{O}} \mu'$.
 \end{lemma}
 \begin{proof}
-  We first note that $dom(\app{\Gamma}{P}) = dom(\app{\Gamma\uparrow_{p}}{P})$ since both
+  We first note that $dom(\app{\Psi}{P}) = dom(\app{\Psi\uparrow_{p}}{P})$ since both
   promotion and projection do not change the domain of a typing environment.
-  We then show below that $\app{\Gamma}{P} = \app{\Gamma\uparrow_p}{P}$, from which the
+  We then show below that $\app{\Psi}{P} = \app{\Psi\uparrow_p}{P}$, from which the
   lemma follows immediately.
-  Given any $x \in dom(\app{\Gamma\uparrow_{p}}{P})$,
+  Given any $x \in dom(\app{\Psi\uparrow_{p}}{P})$,
   for any $Q \in \PPS$, we have
   $$
   \begin{array}{ll}
-    \app{\Gamma\uparrow_p}{P}(x)(Q) & \\
-    = (\app{\Gamma\uparrow_p(x)}{P})(Q) & \mbox{ by Def.\ref{def:tenv-pd} }\\
-    = (\Gamma\uparrow_p(x))(P) & \mbox{ by Def. \ref{def:projection} }\\
-    = \Gamma(x)(P \cup \{p\}) & \mbox { by Def. \ref{def:updown} } \\
-    = \Gamma(x)(P) & \mbox{ by assumption $p \in P$ }\\
-    = (\app{\Gamma(x)}{P})(Q) & \mbox{ by Def. \ref{def:projection} }\\
-    = \app{\Gamma}{P}(x)(Q) & \mbox{ by Def. \ref{def:tenv-pd} }
+    \app{\Psi\uparrow_p}{P}(x)(Q) & \\
+    = (\app{\Psi\uparrow_p(x)}{P})(Q) & \mbox{ by Def.\ref{def:tenv-pd} }\\
+    = (\Psi\uparrow_p(x))(P) & \mbox{ by Def. \ref{def:projection} }\\
+    = \Psi(x)(P \cup \{p\}) & \mbox { by Def. \ref{def:updown} } \\
+    = \Psi(x)(P) & \mbox{ by assumption $p \in P$ }\\
+    = (\app{\Psi(x)}{P})(Q) & \mbox{ by Def. \ref{def:projection} }\\
+    = \app{\Psi}{P}(x)(Q) & \mbox{ by Def. \ref{def:tenv-pd} }
   \end{array}
   $$
-  Since this holds for arbitrary $Q$,it follows that $\app{\Gamma\uparrow_p}{P} = \app{\Gamma}{P}.$
+  Since this holds for arbitrary $Q$,it follows that $\app{\Psi\uparrow_p}{P} = \app{\Psi}{P}.$
 \end{proof}
 
 \begin{lemma}\label{lem:down}
-If $p \notin P$, then $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu' \Longleftrightarrow \mu =_{\app{\Gamma\downarrow_{p}}{P}}^{l_{O}} \mu'$.
+If $p \notin P$, then $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu' \Longleftrightarrow \mu =_{\app{\Psi\downarrow_{p}}{P}}^{l_{O}} \mu'$.
 \end{lemma}
 \begin{proof}
 Similar to the proof of Lemma~\ref{lem:up}.
@@ -1077,25 +1077,25 @@ Similar to the proof of Lemma~\ref{lem:up}.
 %%%%%%%%%
 
 \begin{lemma}\label{lem:expsafe}
-Suppose $\Gamma\vdash e : t$. For $P\in\PPS$, if~$t(P)\leq l_{O}$ and
-$\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$,  $\mu\vdash e\leadsto v$ and $\mu'\vdash e\leadsto v'$, then $v = v'$.
+Suppose $\Psi\vdash e : t$. For $P\in\PPS$, if~$t(P)\leq l_{O}$ and
+$\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$,  $\mu\vdash e\leadsto v$ and $\mu'\vdash e\leadsto v'$, then $v = v'$.
 \end{lemma}
 \begin{proof}
-Consider any $P$ which satisfies $t(P)\leq l_{O}$ and $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$.
+Consider any $P$ which satisfies $t(P)\leq l_{O}$ and $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$.
 The proof proceeds by induction on the derivation
-of $\Gamma;A \vdash e : t$.
+of $\Psi;A \vdash e : t$.
 \begin{ProofEnumDesc}
 %\item[T-VAL] Trivial.
 %%%%%%%%%%%%%%%%%%
-\item[T-VAR] We have $\Gamma \vdash \leVAR{x} :\Gamma(x) = t$.
-Since $t(P) \leq l_{O}$ and $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$,
+\item[T-VAR] We have $\Psi \vdash \leVAR{x} :\Psi(x) = t$.
+Since $t(P) \leq l_{O}$ and $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$,
 it is deducible that $v = \mu(x) = \mu'(x) = v'$.
 %%%%%%%%%%%%%%%%%%
 \item[T-OP] We have
 \begin{equation*}
 \inference
-{\Gamma \vdash e_1 : t & \Gamma \vdash e_2 : t}
-{\Gamma \vdash \leOP{e_1}{e_2} : t}
+{\Psi \vdash e_1 : t & \Psi \vdash e_2 : t}
+{\Psi \vdash \leOP{e_1}{e_2} : t}
 \end{equation*}
 and
 \begin{equation*}
@@ -1107,11 +1107,11 @@ By induction on $e_i$, we can get $v_i = v'_i$. Therefore $v = v'$.
 \item[T-SUB$_e$] we have
 \begin{equation*}
 \inference
-{\Gamma\vdash e : s & s \leq t}
-{\Gamma\vdash e : t}
+{\Psi\vdash e : s & s \leq t}
+{\Psi\vdash e : t}
 \end{equation*}
 since $s(P)\leq t(P)$ and $t(P)\leq l_{O} $, then $s(P)\leq l_{O}$ as well,
-thus the result follows by induction on $\Gamma\vdash e : s$.
+thus the result follows by induction on $\Psi\vdash e : s$.
 \end{ProofEnumDesc}
 \end{proof}
 
@@ -1119,22 +1119,22 @@ thus the result follows by induction on $\Gamma\vdash e : s$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{lemma}\label{lem:comsafe}
-Suppose $\Gamma; A \vdash c : t$. Then for any $P\in\PPS$,
+Suppose $\Psi; A \vdash c : t$. Then for any $P\in\PPS$,
 if $t(P)\nleq l_{O}$ and $\mu;A; P \vdash c \leadsto \mu' $, then
-$\mu =_{\app{\Gamma}{P}} \mu'$.
+$\mu =_{\app{\Psi}{P}} \mu'$.
 \end{lemma}
 \begin{proof}
-By induction on the derivation of $\Gamma; A \vdash c : t$, with subinduction
+By induction on the derivation of $\Psi; A \vdash c : t$, with subinduction
 on the derivation of $\mu;A; P \vdash c \leadsto \mu'.$
 
 \begin{ProofEnumDesc}
 \item[T-ASS]
-In this case $t = \Gamma(x)$ and
+In this case $t = \Psi(x)$ and
 the typing derivation has the form:
 \begin{equation*}
 \inference
-{\Gamma \vdash e : \Gamma(x)}
-{\Gamma; A  \vdash \lcASS{x}{e} : \Gamma(x)}
+{\Psi \vdash e : \Psi(x)}
+{\Psi; A  \vdash \lcASS{x}{e} : \Psi(x)}
 \end{equation*}
 and the evaluation under $\mu$ takes the form:
 $$
@@ -1145,12 +1145,12 @@ $$
 That is, $\mu' = \mu[x \mapsto v].$
 So $\mu$ and $\mu'$ differ possibly
 only in the mapping of $x$.
-Since $\Gamma(x)(P) = t(P) \nleq l_{O}$,
-that is $\app{\Gamma}{P}(x) \nleq \hat{l_{O}}$,
+Since $\Psi(x)(P) = t(P) \nleq l_{O}$,
+that is $\app{\Psi}{P}(x) \nleq \hat{l_{O}}$,
 the difference in the valuation of $x$ is not observable
 at level $l_O.$
 It then follows from Definition~\ref{def:envequ}
-that $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu' $.
+that $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu' $.
 
 \item[T-CALL] In this case
 the command $c$ has the form
@@ -1163,12 +1163,12 @@ $$
 \inference
 {
 \FT(B.f) = \overline{s} \rightarrow {s'} &
-\Gamma \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
-\app{s'}{\Theta(A)} \leq \Gamma(x)}
-{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x) }
+\Psi \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
+\app{s'}{\Theta(A)} \leq \Psi(x)}
+{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x) }
 $$
 and we have that
-$t = \Gamma(x).$
+$t = \Psi(x).$
 The evaluation under $\mu$ is derived as follows:
 $$
 \inference{
@@ -1180,11 +1180,11 @@ $$
 {\mu;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto
 \mu [x \mapsto \mu_1(r) ]}
 $$
-Since $t(P) \not \leq l_O$ and $\Gamma(x) = t$, we have
-$\Gamma(x)(P) \not \leq l_O$
-and therefore $\Gamma(x) \not \leq l_O$
+Since $t(P) \not \leq l_O$ and $\Psi(x) = t$, we have
+$\Psi(x)(P) \not \leq l_O$
+and therefore $\Psi(x) \not \leq l_O$
 and
-$$\mu =^{l_O}_{\app{\Gamma}{P}} \mu[x \mapsto v'] = \mu'.$$
+$$\mu =^{l_O}_{\app{\Psi}{P}} \mu[x \mapsto v'] = \mu'.$$
 
 \item[T-IF]
 This follows straightforwardly from the induction hypothesis.
@@ -1195,8 +1195,8 @@ evaluates to true, otherwise it is trivial.
 In this case the typing derivation is
 $$
 \inference
-{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
-{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+{\Psi \vdash e : t & \Psi ; A\vdash c : t  }
+{\Psi; A \vdash \lcWHILE{e}{c} : t }
 $$
 and the evaluation derivation is
 $$
@@ -1209,7 +1209,7 @@ $$
 $$
 Applying the induction hypothesis (on typing derivation)
 and the inner induction hypothesis (on the evaluation derivation)
-we get $\mu =^{l_O}_{\app{\Gamma}{P}} \mu_1$ and $\mu_1 =^{l_O}_{\app{\Gamma}{P}} \mu'$; by transitivity of $=^{l_O}_{\app{\Gamma}{P}}$ we get $\mu =^{l_O}_{\app{\Gamma}{P}} \mu'.$
+we get $\mu =^{l_O}_{\app{\Psi}{P}} \mu_1$ and $\mu_1 =^{l_O}_{\app{\Psi}{P}} \mu'$; by transitivity of $=^{l_O}_{\app{\Psi}{P}}$ we get $\mu =^{l_O}_{\app{\Psi}{P}} \mu'.$
 
 \item[T-SEQ] This case follows from the induction hypothesis
 and transitivity of the indistinguishability relation.
@@ -1223,10 +1223,10 @@ outside the scope of letv.
 We have:
 $$
 \inference
-{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
-\Gamma\downarrow_{p} ; A\vdash c_2 : t_2 &
+{\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Psi\downarrow_{p} ; A\vdash c_2 : t_2 &
 t = \omerge{p}{t_1}{t_2}}
-{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : t}
+{\Psi; A\vdash \lcCP{p}{c_1}{c_2} : t}
 $$
 There are two possible derivations for the evaluation.
 In one case, we have
@@ -1236,8 +1236,8 @@ $$
 $$
 Since $t(P) \nleq l_{O}$ and $p \in P$, by Definiton~\ref{def:merge},
 we have $t_1(P) \nleq l_{O}$.
-By induction hypothesis, we have $\mu =_{\app{\Gamma\uparrow_{p}}{P}}^{l_{O}} \mu'$,
-by Lemma \ref{lem:up}, we have $\mu =_{\app{\Gamma}{P}}^{l_{O}} \mu'$.
+By induction hypothesis, we have $\mu =_{\app{\Psi\uparrow_{p}}{P}}^{l_{O}} \mu'$,
+by Lemma \ref{lem:up}, we have $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$.
 
 The case where $p \notin P$ can be handled similarly,
 making use of Lemma \ref{lem:down}.
@@ -1251,34 +1251,34 @@ making use of Lemma \ref{lem:down}.
 
 \begin{definition}\label{def:ni}
 A command $c$ executed in app $A$ is said to be {\termEmph{non-interferent}} \text{iff}
-for all $\mu_1, \mu'_1,\Gamma, P, l_{O}$,
-if  $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, \; $\mu_1;A ; P\vdash c \leadsto \mu_2 $ and
+for all $\mu_1, \mu'_1,\Psi, P, l_{O}$,
+if  $\mu_1 =_{\app{\Psi}{P}}^{l_{O}} \mu'_1$, \; $\mu_1;A ; P\vdash c \leadsto \mu_2 $ and
  $\mu'_1; A; P\vdash c\leadsto \mu'_2  $
-then $\mu_2 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_2$.
+then $\mu_2 =_{\app{\Psi}{P}}^{l_{O}} \mu'_2$.
 \end{definition}
 
 
 %%%%%%%%%
 \begin{lemma}\label{lem:comni}
-Suppose $\Gamma; A\vdash c : t$, for any $P\in\PPS$, if  $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, $\mu_1; A; P \vdash c \leadsto \mu_2$,
+Suppose $\Psi; A\vdash c : t$, for any $P\in\PPS$, if  $\mu_1 =_{\app{\Psi}{P}}^{l_{O}} \mu'_1$, $\mu_1; A; P \vdash c \leadsto \mu_2$,
 and  $\mu'_1; A; P \vdash c \leadsto \mu'_2$,
-then  $\mu_2 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_2$.
+then  $\mu_2 =_{\app{\Psi}{P}}^{l_{O}} \mu'_2$.
 \end{lemma}
 \begin{proof}
 The proof proceeds by induction on \rank{c}, with subinduction
-on the derivations of $\Gamma;\Theta;A \vdash c : t$ and $\mu_1;\Theta;P;A\vdash c \leadsto \mu_2$.
+on the derivations of $\Psi;\Theta;A \vdash c : t$ and $\mu_1;\Theta;P;A\vdash c \leadsto \mu_2$.
 In the following, we shall omit the superscript $l_O$ from
-$=^{l_O}_{\app{\Gamma}{P}}$ to simplify presentation.
+$=^{l_O}_{\app{\Psi}{P}}$ to simplify presentation.
 
 \begin{ProofEnumDesc}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-ASS] In this case, $c \equiv x := e$ and the typing derivation takes the form:
 $$
 \inference
-{\Gamma \vdash e : \Gamma(x)}
-{\Gamma ; A \vdash \lcASS{x}{e} : \Gamma(x)}
+{\Psi \vdash e : \Psi(x)}
+{\Psi ; A \vdash \lcASS{x}{e} : \Psi(x)}
 $$
-where $t = \Gamma(x)$, and suppose the two executions
+where $t = \Psi(x)$, and suppose the two executions
 of $c$ are derived as follows:
 $$
 \inference{\mu_1 \vdash e \leadsto v}
@@ -1290,20 +1290,20 @@ $$
 $$
 where $\mu_2 = \mu_1[x \mapsto v]$
 and $\mu_2' = \mu_1'[x \mapsto v'].$
-Note that if $\Gamma(x) \not \leq l_O$ then
-$\mu_2 =_{\app{\Gamma}{P}} \mu_2'$ holds trivially
+Note that if $\Psi(x) \not \leq l_O$ then
+$\mu_2 =_{\app{\Psi}{P}} \mu_2'$ holds trivially
 by Definition~\ref{def:ni}.
-So let us assume $\Gamma(x) \leq l_O$. Then applying Lemma~\ref{lem:expsafe}
+So let us assume $\Psi(x) \leq l_O$. Then applying Lemma~\ref{lem:expsafe}
 to
 $\mu_1 \vdash e \leadsto v$
 and $\mu_1' \vdash e \leadsto v'$
 we get
-$v = v'$, so it then follows that  $\mu_2 =_{\app{\Gamma}{P}} \mu_2'.$
+$v = v'$, so it then follows that  $\mu_2 =_{\app{\Psi}{P}} \mu_2'.$
 \item[T-IF] In this case $c \equiv \lcIF{e}{c_1}{c_2}$ and we have
 $$
 \inference
-{\Gamma \vdash e : t & \Gamma ; A\vdash c_1 : t & \Gamma; A \vdash c_2 : t }
-{\Gamma; A \vdash \lcIF{e}{c_1}{c_2} : t}
+{\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
+{\Psi; A \vdash \lcIF{e}{c_1}{c_2} : t}
 $$
 If $t(P)\not\leq l_{O}$, then the lemma follows easily from
 Lemma~\ref{lem:comsafe}. So we assume $t(P) \leq l_O.$
@@ -1334,12 +1334,12 @@ The lemma then follows straightforwardly from the induction hypothesis.
 \item[T-WHILE] $c\equiv\lcWHILE{e}{c_b}$ and we have
 $$
 \inference
-{\Gamma \vdash e : t & \Gamma ; A\vdash c : t  }
-{\Gamma; A \vdash \lcWHILE{e}{c} : t }
+{\Psi \vdash e : t & \Psi ; A\vdash c : t  }
+{\Psi; A \vdash \lcWHILE{e}{c} : t }
 $$
 If $t(P) \nleq l_{O}$, the conclusion holds by
 Lemma~\ref{lem:comsafe}. Otherwise, since
-$\mu_1=_{\app{\Gamma}{P}}^{l_{O}}\mu_1'$, by
+$\mu_1=_{\app{\Psi}{P}}^{l_{O}}\mu_1'$, by
 Lemma~\ref{lem:expsafe}, if
 $\mu_1 \vdash e \leadsto v$ and $\mu_1' \vdash e \leadsto v'$
 then $v=v'$.
@@ -1362,16 +1362,16 @@ $$
 }
 {\mu;A; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2'}
 $$
-Applying the induction hypothesis to $\Gamma ; A\vdash c : t$,
+Applying the induction hypothesis to $\Psi ; A\vdash c : t$,
 $\mu_1;A; P \vdash c_b \leadsto \mu_3$ and
 $\mu_1';A; P \vdash c_b \leadsto \mu_3'$, we obtain
-$\mu_3 =_{\app{\Gamma}{P}} \mu_3'.$ Then applying the inner
+$\mu_3 =_{\app{\Psi}{P}} \mu_3'.$ Then applying the inner
 induction hypothesis to $\mu_3 ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2$
 and $\mu_3' ; A ; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2'$,
-we obtain $\mu_2 =_{\app{\Gamma} P} \mu_2'.$
+we obtain $\mu_2 =_{\app{\Psi} P} \mu_2'.$
 
 \item[T-SEQ] In this case we have
-  $c\equiv\lcSEQ{c_1}{c_2}$ and $\Gamma;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
+  $c\equiv\lcSEQ{c_1}{c_2}$ and $\Psi;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
 
 \item[T-LETVAR]
   In this case we have $c\equiv\lcLETVAR{x}{e}{c_b}.$
@@ -1388,12 +1388,12 @@ $$
 \inference
 {
 \FT(B.f) = \overline{s} \rightarrow s' \\
-(\mathbf{T_1}) ~ \Gamma \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
-(\mathbf{T_2}) ~ \app{s'}{\Theta(A)} \leq \Gamma(x)}
-{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
- \Gamma(x)  }
+(\mathbf{T_1}) ~ \Psi \vdash \overline{e} : \app{\overline{s}}{\Theta(A)} &
+(\mathbf{T_2}) ~ \app{s'}{\Theta(A)} \leq \Psi(x)}
+{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
+ \Psi(x)  }
 $$
-where $t = \Gamma(x)$,
+where $t = \Psi(x)$,
 and the executions under $\mu_1$ and $\mu_1'$ are
 derived, respectively, as follows:
 $$
@@ -1437,66 +1437,66 @@ $$
 First we note that if $t(P) \nleq l_O$ then the result
 follows from Lemma~\ref{lem:comsafe}.
 So in the following, we assume $t(P) \leq l_O$.
-Since $t = \Gamma(x)$, it follows that
-$\Gamma(x)(P) \leq l_O.$
+Since $t = \Psi(x)$, it follows that
+$\Psi(x)(P) \leq l_O.$
 
-Let $\Gamma' = \app{[\overline{y} : \overline{t}, r : s]}{\Theta(A)}.$
+Let $\Psi' = \app{[\overline{y} : \overline{t}, r : s]}{\Theta(A)}.$
 We first prove several claims:
 \begin{itemize}
 \item Claim 1:
 $[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
-=_{\Gamma'} [\overline{y} \mapsto \overline{v_2}, r\mapsto 0].$
+=_{\Psi'} [\overline{y} \mapsto \overline{v_2}, r\mapsto 0].$
 
 Proof:
 Let $\rho = [\overline{y} \mapsto \overline{v_1}, r \mapsto 0]$
 and $\rho' = [\overline{y} \mapsto \overline{v_2}, r \mapsto 0]$.
 We only need to check that the two mappings
 agree on mappings of $\overline{y}$ that are of type $\leq \hat{l}_O.$
-Suppose $y_u$ is such a variable, i.e., $\Gamma'(y_u) = u \leq \hat{l}_O$,
+Suppose $y_u$ is such a variable, i.e., $\Psi'(y_u) = u \leq \hat{l}_O$,
 and suppose $\rho(y_u) = v_u$ and
 $\rho'(y_u) = v_u'$ for some $y_u \in \overline{y}.$
 From $(\mathbf{E_1})$ we have
 $\mu_1 \vdash e_u \leadsto v_u$
 and from $(\mathbf{E_2})$
 we have $\mu_1' \vdash e_u \leadsto v_u'$,
-and from $(\mathbf{T_1})$ we have $\Gamma \vdash e_u : u.$
+and from $(\mathbf{T_1})$ we have $\Psi \vdash e_u : u.$
 Since $u \leq \hat{l}_O$, applying Lemma~\ref{lem:expsafe},
 we get $v_u = v_u'$.
 
 
-\item Claim 2: $\mu_3 =_{\Gamma'} \mu_3'.$
+\item Claim 2: $\mu_3 =_{\Psi'} \mu_3'.$
 
 Proof: From Claim 1, we know that
 $$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
-=_{\Gamma'} [\overline{y} \mapsto \overline{v_2}, r \mapsto 0].$$
+=_{\Psi'} [\overline{y} \mapsto \overline{v_2}, r \mapsto 0].$$
 Since $\rank{c_1}<\rank{c}$, we can apply the outer induction
 hypothesis to $(\mathbf{E_2})$, $(\mathbf{E_2'})$
 and $(\mathbf{T_3})$ to obtain
-$\mu_3 =_{\Gamma'} \mu_3'.$
+$\mu_3 =_{\Psi'} \mu_3'.$
 
 \item Claim 3: $\mu_3(r) = \mu_3'(r).$
 
 Proof: We first note that from $(\mathbf{T_2})$
-and the assumption that $\Gamma(x)(P) \leq l_O$, we get
+and the assumption that $\Psi(x)(P) \leq l_O$, we get
 $(\app{s'}{\Theta(A)})(P) \leq l_O$.
 The latter, by Definition~\ref{def:projection}, implies  that $s'(\Theta(A)) \leq l_O.$
-Since $r \in dom(\Gamma')$, it is obvious that
-$\Gamma' \vdash r : s'$,
+Since $r \in dom(\Psi')$, it is obvious that
+$\Psi' \vdash r : s'$,
 $\mu_3 \vdash r \leadsto \mu_3(r)$
 and $\mu_3' \vdash r \leadsto \mu_3'(r).$
-From Claim 2 above, we have $\mu_3 =_{\Gamma'} \mu_3'$.
+From Claim 2 above, we have $\mu_3 =_{\Psi'} \mu_3'$.
 Therefore by Lemma~\ref{lem:expsafe}, we have
 $\mu_3(r) = \mu_3'(r).$
 \end{itemize}
-The statement we are trying to prove, i.e., $\mu_2 =_{\app{\Gamma}{P}} \mu_2'$,
+The statement we are trying to prove, i.e., $\mu_2 =_{\app{\Psi}{P}} \mu_2'$,
 follows immediately from Claim 3 above.
 \item[T-CP] $c\equiv\lcCP{p}{c_1}{c_2}$ and we have
 $$
 \inference
-{\Gamma\uparrow_{p} ; A \vdash c_1 : t_1 &
-\Gamma\downarrow_{p} ; A\vdash c_2 : t_2 &
+{\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
+\Psi\downarrow_{p} ; A\vdash c_2 : t_2 &
 t=\omerge {p} {t_1} {t_2}}
-{\Gamma; A\vdash \lcCP{p}{c_1}{c_2} : t}
+{\Psi; A\vdash \lcCP{p}{c_1}{c_2} : t}
 $$
 We need to consider two cases, one where $p \in P$
 and the other where $p \not \in P$.
@@ -1514,13 +1514,13 @@ $$
     {p\in P \quad \mu_1'; A; P \vdash c_1 \leadsto \mu_2'}
     {\mu_1'; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu_2'}
 $$
-Since $\mu_1 =_{\app{\Gamma}{P}} \mu_1'$ and since $p \in P$,
-by Lemma~\ref{lem:up}, we have $\mu_1 =_{\app{\Gamma\uparrow_p}{P}} \mu_1'$.
-Therefore by the induction hypothesis applied to $\Gamma\uparrow_p ; A \vdash c_1 : t_1$,
+Since $\mu_1 =_{\app{\Psi}{P}} \mu_1'$ and since $p \in P$,
+by Lemma~\ref{lem:up}, we have $\mu_1 =_{\app{\Psi\uparrow_p}{P}} \mu_1'$.
+Therefore by the induction hypothesis applied to $\Psi\uparrow_p ; A \vdash c_1 : t_1$,
 $\mu_1; A; P \vdash c_1 \leadsto \mu_2$ and
 $\mu_1'; A; P \vdash c_1 \leadsto \mu_2'$, we obtain
-$\mu_2 =_{\app{\Gamma\uparrow_p}{P}} \mu_2'$, and by Lemma~\ref{lem:up},
-we get $\mu_2 =_{\app{\Gamma}{P}} \mu_2'$.
+$\mu_2 =_{\app{\Psi\uparrow_p}{P}} \mu_2'$, and by Lemma~\ref{lem:up},
+we get $\mu_2 =_{\app{\Psi}{P}} \mu_2'$.
 
 For the case where $p \not \in P$, we apply a similar reasoning as above,
 but using Lemma~\ref{lem:down} in place of Lemma~\ref{lem:up}.
@@ -1540,8 +1540,8 @@ if for all $\mu_1, \mu'_1, P, v, l_{O}$,
 if the following hold:
 \begin{itemize}
 \item $t'(P) \leq l_{O}$,
-\item $\mu_1 =_{\app{\Gamma}{P}}^{l_{O}} \mu'_1$, where
-$\Gamma = [\overline{x} : \overline{t}, r : t']$,
+\item $\mu_1 =_{\app{\Psi}{P}}^{l_{O}} \mu'_1$, where
+$\Psi = [\overline{x} : \overline{t}, r : t']$,
 \item $\mu_1;A ; P\vdash c \leadsto \mu_2 $, and $\mu'_1; A; P\vdash c\leadsto \mu'_2 $,
 \end{itemize}
 then $\mu_2(r) = \mu_2'(r).$
@@ -1570,11 +1570,11 @@ definitions and proofs can be found in~\cite{Chen17arxiv}.
 \subsubsection{\textbf{Permission Tracing}}\label{sec:trace_rules}
 In an IPC between different apps (components), there may be multiple permission checks in a calling context.
 Therefore, to infer a security type for an expression, a command or a function, we need to track
-the applications of promotions $\Gamma\!\uparrow_{p}$ and demotions $\Gamma\!\downarrow_{q}$ in their typing derivations.
+the applications of promotions $\Psi\!\uparrow_{p}$ and demotions $\Psi\!\downarrow_{q}$ in their typing derivations.
 To this end,  we keep the applications symbolic and collect the promotions and demotions into a sequence.
-In other words, we treat them as a \emph{sequence} of promotions $\uparrow_{p}$ and demotions $\downarrow_{p}$ applied on a typing environment $\Gamma$.
-For example, $(\Gamma\!\uparrow_{p})\downarrow_{q}$ can be viewed as
-an \emph{application} of the sequence $\uparrow_{p}\downarrow_{q}$ on $\Gamma$.
+In other words, we treat them as a \emph{sequence} of promotions $\uparrow_{p}$ and demotions $\downarrow_{p}$ applied on a typing environment $\Psi$.
+For example, $(\Psi\!\uparrow_{p})\downarrow_{q}$ can be viewed as
+an \emph{application} of the sequence $\uparrow_{p}\downarrow_{q}$ on $\Psi$.
 The sequence of promotions and demotions is called a \emph{permission trace} and denoted by {\trace}. The grammar of {\trace} is:
 \begin{equation*}
 \trace~::=~\tplus{p} ::\trace~|~ \tminus{p} :: \trace~|~ \epsilon
@@ -1602,7 +1602,7 @@ t & {\normalfont\text{if}}~\trace = \epsilon\\
 \end{equation*}
 \end{definition}
 
-We also extend the application of a permission trace $\trace$ to a typing environment $\Gamma$ (denoted by $\Gamma\cdot\trace$), such that $\forall x.\; (\Gamma\cdot{\trace})(x) = \Gamma(x)\cdot \trace$.
+We also extend the application of a permission trace $\trace$ to a typing environment $\Psi$ (denoted by $\Psi\cdot\trace$), such that $\forall x.\; (\Psi\cdot{\trace})(x) = \Psi(x)\cdot \trace$.
 Based on permission traces, we give the definition of \termEmph{partial subtyping relation}.
 \begin{definition}\label{def:partial-subtype}
 The \termEmph{partial subtyping relation} $\leq_{\trace} $, which is the subtyping relation applied on the permission trace, is defined as $s\leq_{\trace}  t \text{ iff. } s\cdot \trace \leq t\cdot \trace$.
@@ -1764,62 +1764,62 @@ and that the subtyping relation in the trace rules is the partial subtyping one 
 \begin{tiny}
 \[
 \inference[TT-VAR]{}
-{\Gamma;\trace\vdash_{t} \leVAR{x} : \Gamma(x)}
+{\Psi;\trace\vdash_{t} \leVAR{x} : \Psi(x)}
 \qquad
 \inference[TT-OP]
-{\Gamma;\trace\vdash_{t} e_1: t_1 & \Gamma;\trace \vdash_{t} e_2: t_2}
-{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+{\Psi;\trace\vdash_{t} e_1: t_1 & \Psi;\trace \vdash_{t} e_2: t_2}
+{\Psi;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
 \qquad
 \inference[TT-ASS]
-{\Gamma;\trace \vdash_{t} e : t & t \leq_{\trace} \Gamma(x)}
-{\Gamma;\trace \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+{\Psi;\trace \vdash_{t} e : t & t \leq_{\trace} \Psi(x)}
+{\Psi;\trace \vdash_{t} \lcASS{x}{e} : \Psi(x)}
 \]
 
 
 \[
 \inference[TT-IF]
 {
-\Gamma;\trace \vdash_{t} e : t &
-\Gamma;\trace; A \vdash_{t} c_1 : t_1 &
-\Gamma;\trace; A \vdash_{t} c_2 : t_2 &
+\Psi;\trace \vdash_{t} e : t &
+\Psi;\trace; A \vdash_{t} c_1 : t_1 &
+\Psi;\trace; A \vdash_{t} c_2 : t_2 &
 t \leq_{\trace} t_1\sqcap t_2
 }
-{\Gamma;\trace;  A \vdash_{t} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2}
+{\Psi;\trace;  A \vdash_{t} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2}
 \qquad
 \inference[TT-SEQ]
-{\Gamma;\trace; A \vdash_{t} c_1 : t_1 \quad \Gamma;\trace; A \vdash_{t} c_2 : t _2}
-{\Gamma;\trace; A \vdash_{t} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2}
+{\Psi;\trace; A \vdash_{t} c_1 : t_1 \quad \Psi;\trace; A \vdash_{t} c_2 : t _2}
+{\Psi;\trace; A \vdash_{t} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2}
 \]
 
 \[
 \inference[TT-LETVAR]
-{\Gamma;\trace \vdash_{t} e : s &
-\Gamma[x:s']; \trace; A \vdash_{t} c : t & s \leq_{\trace} s' }
-{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c} :  t}
+{\Psi;\trace \vdash_{t} e : s &
+\Psi[x:s']; \trace; A \vdash_{t} c : t & s \leq_{\trace} s' }
+{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c} :  t}
 \qquad
 \inference[TT-WHILE]
 {
-\Gamma;\trace \vdash_{t} e : s &
-\Gamma;\trace; A \vdash_{t} c : t &  s\leq_{\trace} t  }
-{\Gamma;\trace; A \vdash_{t} \lcWHILE{c}{e} : t }
+\Psi;\trace \vdash_{t} e : s &
+\Psi;\trace; A \vdash_{t} c : t &  s\leq_{\trace} t  }
+{\Psi;\trace; A \vdash_{t} \lcWHILE{c}{e} : t }
 \]
 
 \[
 \inference[TT-CALL]
 {
 \FT(B.f) = \overline{t} \xrightarrow{} t'  &
-\Gamma;\trace \vdash_{t} \overline{e} : \overline{s} &
+\Psi;\trace \vdash_{t} \overline{e} : \overline{s} &
 \overline{s}\leq_{\trace} \overline{\app{t}{\Theta(A)}} &
-\app{t'}{\Theta(A)}\leq_{\trace} \Gamma(x)
+\app{t'}{\Theta(A)}\leq_{\trace} \Psi(x)
 }
-{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+{\Psi;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
 \]
 
 \[
 \inference[TT-CP]
-{\Gamma;\trace::\tplus{ p}; A \vdash_{t} c_1 : t_1 &
-\Gamma;\trace::\tminus{p}; A \vdash_{t} c_2 : t_2}
-{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p} {t_1}{t_2}}
+{\Psi;\trace::\tplus{ p}; A \vdash_{t} c_1 : t_1 &
+\Psi;\trace::\tminus{p}; A \vdash_{t} c_2 : t_2}
+{\Psi;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p} {t_1}{t_2}}
 \qquad
 \inference[TT-FUN]
 {
@@ -1837,25 +1837,25 @@ The next two lemmas show the trace rules are sound and complete with respect to 
 
 \begin{lemma}\label{lem:ptrsound}
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
-\item\label{lem:ptrsound-1} If $\Gamma;\trace\vdash_{t} e : t$, then $\Gamma\cdot\trace\vdash e : (t\cdot\trace)$.\\
-\item\label{lem:ptrsound-2} If $\Gamma;\trace; A \vdash_{t} c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace)$.\\
+\item\label{lem:ptrsound-1} If $\Psi;\trace\vdash_{t} e : t$, then $\Psi\cdot\trace\vdash e : (t\cdot\trace)$.\\
+\item\label{lem:ptrsound-2} If $\Psi;\trace; A \vdash_{t} c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace)$.\\
 \item\label{lem:ptrsound-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$, then $ \vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$.
 \end{enumerate}
 \end{lemma}
 \begin{proof}
-The proof of {\ref{lem:ptrsound-1}}, by induction on $\Gamma;\trace \vdash_{t} e: t$.
+The proof of {\ref{lem:ptrsound-1}}, by induction on $\Psi;\trace \vdash_{t} e: t$.
 \begin{ProofEnumDesc}
 \item[TT-VAR] Trivially.
 \item[TT-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{t} e_1: t_1 & \Gamma;\trace\vdash_{t} e_2: t_2}
-{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+{\Psi;\trace \vdash_{t} e_1: t_1 & \Psi;\trace\vdash_{t} e_2: t_2}
+{\Psi;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
 \end{equation*}
-By induction on $e_i$, we can get $\Gamma\cdot\trace \vdash e_i : (t_i\cdot\trace)$.
+By induction on $e_i$, we can get $\Psi\cdot\trace \vdash e_i : (t_i\cdot\trace)$.
 By Lemma \ref{lem:monotrace} and  $t_i \leq t_1\sqcup t_2$, we have $t_i\cdot \trace \leq (t_1\sqcup t_2)\cdot\trace $.
-By subsumption, we have $\Gamma\cdot\trace \vdash e_i : ((t_1\sqcup t_2)\cdot\trace) $.
-Finally, by applying Rule {(T-OP)}, we get $\Gamma\cdot\trace \vdash  \leOP{e_1}{e_2} :((t_1\sqcup t_2)\cdot\trace)  $.
+By subsumption, we have $\Psi\cdot\trace \vdash e_i : ((t_1\sqcup t_2)\cdot\trace) $.
+Finally, by applying Rule {(T-OP)}, we get $\Psi\cdot\trace \vdash  \leOP{e_1}{e_2} :((t_1\sqcup t_2)\cdot\trace)  $.
 \end{ProofEnumDesc}
 The proof of {\ref{lem:ptrsound-2}}:
 \begin{ProofEnumDesc}
@@ -1863,27 +1863,27 @@ The proof of {\ref{lem:ptrsound-2}}:
 \item[TT-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T_1}) ~ \Gamma;\trace \vdash_{t} e : t & (\mathbf{T_2}) ~ t \leq_{\trace} \Gamma(x)}
-{\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+{(\mathbf{T_1}) ~ \Psi;\trace \vdash_{t} e : t & (\mathbf{T_2}) ~ t \leq_{\trace} \Psi(x)}
+{\Psi;\trace; A \vdash_{t} \lcASS{x}{e} : \Psi(x)}
 \end{equation*}
-By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Gamma\cdot\trace \vdash e : (t\cdot \trace)$.
-From $(\mathbf{T_2})$, we get $ t\cdot \trace \leq (\Gamma\cdot\trace)(x)$.
-So by subsumption, $\Gamma\cdot\trace \vdash e : (\Gamma\cdot\trace)(x)$.
+By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Psi\cdot\trace \vdash e : (t\cdot \trace)$.
+From $(\mathbf{T_2})$, we get $ t\cdot \trace \leq (\Psi\cdot\trace)(x)$.
+So by subsumption, $\Psi\cdot\trace \vdash e : (\Psi\cdot\trace)(x)$.
 Finally, by Rule {(T-ASS)}, the result follows.
 
 \item[TT-LETVAR] %by induction and Rules {(T-SUB$_{c}$)}, {(T-LETVAR)}.
 In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T_1}) ~\Gamma;\trace \vdash_{t} e : s &
+{(\mathbf{T_1}) ~\Psi;\trace \vdash_{t} e : s &
 (\mathbf{T_2}) ~s \leq_{\trace} s'  \\
-(\mathbf{T_3}) ~\Gamma[x:s']; \trace; A \vdash_{t} c' : t }
-{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
+(\mathbf{T_3}) ~\Psi[x:s']; \trace; A \vdash_{t} c' : t }
+{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
 \end{equation*}
-By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Gamma\cdot\trace \vdash e : (s\cdot \trace)$.
+By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Psi\cdot\trace \vdash e : (s\cdot \trace)$.
 From $(\mathbf{T_2})$, we get $ s\cdot \trace \leq s'\cdot\trace$.
-So by subsumption, $\Gamma\cdot\trace \vdash e : s'\cdot\trace$.
-By induction on $(\mathbf{T_3})$,  we have $(\Gamma[x:s']\cdot \trace); A \vdash c' : t \cdot \trace$, that is $(\Gamma\cdot \trace)[x:s'\cdot \trace]; A \vdash c' : t\cdot \trace $.
+So by subsumption, $\Psi\cdot\trace \vdash e : s'\cdot\trace$.
+By induction on $(\mathbf{T_3})$,  we have $(\Psi[x:s']\cdot \trace); A \vdash c' : t \cdot \trace$, that is $(\Psi\cdot \trace)[x:s'\cdot \trace]; A \vdash c' : t\cdot \trace $.
 Finally, by Rule {(T-LETVAR)}, the result follows.
 
 \item[TT-IF] By induction and Rules {(T-SUB$_{c}$)}, {(T-IF)}.
@@ -1895,40 +1895,40 @@ Finally, by Rule {(T-LETVAR)}, the result follows.
 \inference
 {
 (\mathbf{T_1})~\FT(B.f) = \overline{t} \xrightarrow{} t'  &
-(\mathbf{T_2})~\Gamma;\trace \vdash_{t} \overline{e} : \overline{s}\\
+(\mathbf{T_2})~\Psi;\trace \vdash_{t} \overline{e} : \overline{s}\\
 (\mathbf{T_3})~\overline{s}\leq_{\trace} \overline{\app{t}{\Theta(A)}} &
-(\mathbf{T_4})~\app{t'}{\Theta(A)}\leq_{\trace} \Gamma(x)
+(\mathbf{T_4})~\app{t'}{\Theta(A)}\leq_{\trace} \Psi(x)
 }
-{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+{\Psi;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
 \end{equation*}
 By \ref{lem:ptrsound-3} on $(\mathbf{T_1})$, $\vdash B.f : \overline{t} \xrightarrow{} t'$.
-By \ref{lem:ptrsound-1} on $(\mathbf{T_2})$ , $\Gamma\cdot\trace \vdash \overline{e} : \overline{s\cdot\trace}$.
+By \ref{lem:ptrsound-1} on $(\mathbf{T_2})$ , $\Psi\cdot\trace \vdash \overline{e} : \overline{s\cdot\trace}$.
 From $(\mathbf{T_3})$, we get
 $\overline{s\cdot \trace}\leq_{} \overline{(app(t,\Theta(A))\cdot \trace)} = \overline{app(t,\Theta(A))} $.
-So by subsumption, $\Gamma\cdot\trace \vdash \overline{e} : \overline{app(t,\Theta(A))}$.
-Similarly, from $(\mathbf{T_4})$, we get $app(t', \Theta(A))\leq_{} (\Gamma\cdot\trace)(x) $. Then by Rule {(T-ASS)}, $(\Gamma\cdot\trace); A \vdash_{} \lcCALL{x}{B.f}{\overline{e}} : (\Gamma\cdot\trace)(x) $.
+So by subsumption, $\Psi\cdot\trace \vdash \overline{e} : \overline{app(t,\Theta(A))}$.
+Similarly, from $(\mathbf{T_4})$, we get $app(t', \Theta(A))\leq_{} (\Psi\cdot\trace)(x) $. Then by Rule {(T-ASS)}, $(\Psi\cdot\trace); A \vdash_{} \lcCALL{x}{B.f}{\overline{e}} : (\Psi\cdot\trace)(x) $.
 
 \item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace::\tplus p;  A \vdash_{t} c_1 : t_1 &
-\Gamma;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
-{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+{\Psi;\trace::\tplus p;  A \vdash_{t} c_1 : t_1 &
+\Psi;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
+{\Psi;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
 \end{equation*}
 By induction on $c_i$, we have
 \begin{gather*}
-(\Gamma\cdot(\trace :: \tplus {p}));  A \vdash c_1 : (t_1\cdot(\trace::\tplus{p}) )\\
-(\Gamma\cdot (\trace:: \tminus {p})); A \vdash c_2 : (t_2\cdot(\trace::\tminus{ p}))
+(\Psi\cdot(\trace :: \tplus {p}));  A \vdash c_1 : (t_1\cdot(\trace::\tplus{p}) )\\
+(\Psi\cdot (\trace:: \tminus {p})); A \vdash c_2 : (t_2\cdot(\trace::\tminus{ p}))
 \end{gather*}
 which is equivalent to
 \begin{gather*}
-(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : (t_1\cdot\trace)\uparrow_{p}\\
-(\Gamma\cdot \trace)\downarrow_{p}; A \vdash c_2 : (t_2\cdot \trace)\downarrow_{p}
+(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : (t_1\cdot\trace)\uparrow_{p}\\
+(\Psi\cdot \trace)\downarrow_{p}; A \vdash c_2 : (t_2\cdot \trace)\downarrow_{p}
 \end{gather*}
 Let $t'$ be $\omerge{p}{(t_1\cdot\trace)\uparrow_{p}}{(t_2\cdot\trace)\downarrow_{p}}$.
 By Rule {(T-CP)}, we have
 $$
-(\Gamma\cdot\trace);  A \vdash \lcCP{p}{c_1}{c_2} : t'.
+(\Psi\cdot\trace);  A \vdash \lcCP{p}{c_1}{c_2} : t'.
 $$
 Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p\notin \trace$.
 Let's consider any $P$.
@@ -1966,58 +1966,58 @@ To prove the completeness, we need to prove some auxiliary lemmas.
 \begin{lemma}\label{lem:typingtrace}
 Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
-\item\label{lem:typingtrace-1} If $\Gamma \vdash e : t$, then $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace) $
-\item\label{lem:typingtrace-2} If $\Gamma;A \vdash c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace) $.
+\item\label{lem:typingtrace-1} If $\Psi \vdash e : t$, then $(\Psi\cdot\trace) \vdash e : (t\cdot\trace) $
+\item\label{lem:typingtrace-2} If $\Psi;A \vdash c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace) $.
 \end{enumerate}
 \end{lemma}
 
 \begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma \vdash e : t$.
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi \vdash e : t$.
 \begin{ProofEnumDesc}
 \item[T-VAR] Trivially.
 
 \item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma \vdash e_1 : t & \Gamma \vdash e_2 : t}
-{\Gamma \vdash \leOP{e_1}{e_2} : t}
+{\Psi \vdash e_1 : t & \Psi \vdash e_2 : t}
+{\Psi \vdash \leOP{e_1}{e_2} : t}
 \end{equation*}
-By induction on $e_i$, $(\Gamma\cdot\trace) \vdash e_i : (t\cdot\trace)$.
-By Rule {(T-OP)}, we have $(\Gamma\cdot\trace)\vdash_{t} \leOP{e_1}{e_2} : (t\cdot\trace)$.
+By induction on $e_i$, $(\Psi\cdot\trace) \vdash e_i : (t\cdot\trace)$.
+By Rule {(T-OP)}, we have $(\Psi\cdot\trace)\vdash_{t} \leOP{e_1}{e_2} : (t\cdot\trace)$.
 
 \item[T-SUB$_e$] In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma \vdash e : s & (\mathbf{T2})~s \leq t}
-{\Gamma \vdash e : t}
+{(\mathbf{T1})~\Psi \vdash e : s & (\mathbf{T2})~s \leq t}
+{\Psi \vdash e : t}
 \end{equation*}
-By induction on $(\mathbf{T1})$, $(\Gamma\cdot\trace) \vdash_{t} e : (s\cdot\trace)$.
+By induction on $(\mathbf{T1})$, $(\Psi\cdot\trace) \vdash_{t} e : (s\cdot\trace)$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, we get $s\cdot\trace\leq t\cdot\trace $. So by subsumption, the result follows.
 \end{ProofEnumDesc}
 
 %%%%%%%%%%
-The proof of \ref{lem:typingtrace-2}: by induction on $\Gamma; A \vdash c: t$.
+The proof of \ref{lem:typingtrace-2}: by induction on $\Psi; A \vdash c: t$.
 \begin{ProofEnumDesc}
 \item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma \vdash e : \Gamma(x)}
-{\Gamma; A \vdash \lcASS{x}{e} : \Gamma(x)}
+{\Psi \vdash e : \Psi(x)}
+{\Psi; A \vdash \lcASS{x}{e} : \Psi(x)}
 \end{equation*}
-By \ref{lem:typingtrace-1} on $e$,  $(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)$.
+By \ref{lem:typingtrace-1} on $e$,  $(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)$.
 Then by Rule {(T-ASS)},  the result follows.
 
 \item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
 In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma \vdash e : s &
-\Gamma[x:s]; A \vdash c' : t }
-{\Gamma; A\vdash \lcLETVAR{x}{e}{c'} :  t}
+{\Psi \vdash e : s &
+\Psi[x:s]; A \vdash c' : t }
+{\Psi; A\vdash \lcLETVAR{x}{e}{c'} :  t}
 \end{equation*}
-By \ref{lem:typingtrace-1} on $e$, $(\Gamma\cdot\trace) \vdash e :  (s\cdot\trace)$.
-By induction on $c$, $((\Gamma[x:s])\cdot\trace);A \vdash c' :  (t\cdot\trace)$,
-that is $(\Gamma\cdot\trace)[x:s\cdot\trace];A \vdash c' :  (t\cdot\trace)$.
+By \ref{lem:typingtrace-1} on $e$, $(\Psi\cdot\trace) \vdash e :  (s\cdot\trace)$.
+By induction on $c$, $((\Psi[x:s])\cdot\trace);A \vdash c' :  (t\cdot\trace)$,
+that is $(\Psi\cdot\trace)[x:s\cdot\trace];A \vdash c' :  (t\cdot\trace)$.
 Then by Rule {(T-LETVAR)}, the result follows.
 
 \item[T-IF] By induction and Rule {(T-IF)}.
@@ -2029,36 +2029,36 @@ Then by Rule {(T-LETVAR)}, the result follows.
 \inference
 {
 \FT(B.f) = \overline{t} \xrightarrow{} t'  \\
-(\mathbf{T1})~\Gamma \vdash \overline{e} : \overline{\app{t}{\Theta(A)}} &
-(\mathbf{T2})~\app{t'}{\Theta(A)}\leq \Gamma(x)
+(\mathbf{T1})~\Psi \vdash \overline{e} : \overline{\app{t}{\Theta(A)}} &
+(\mathbf{T2})~\app{t'}{\Theta(A)}\leq \Psi(x)
 }
-{\Gamma; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
 \end{equation*}
-By \ref{lem:typingtrace-1} on $(\mathbf{T1})$, $(\Gamma\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}\cdot\trace}$, that is, $(\Gamma\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}}$.
-From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, $\app{t'}{\Theta(A)}\cdot\trace \leq (\Gamma\cdot\trace)(x)$, that is, $\app{t'}{\Theta(A)} \leq (\Gamma\cdot\trace)(x)$.
-Then by Rule {(T-CALL)}, $(\Gamma\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Gamma\cdot\trace)(x)$.
+By \ref{lem:typingtrace-1} on $(\mathbf{T1})$, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}\cdot\trace}$, that is, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}}$.
+From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, $\app{t'}{\Theta(A)}\cdot\trace \leq (\Psi\cdot\trace)(x)$, that is, $\app{t'}{\Theta(A)} \leq (\Psi\cdot\trace)(x)$.
+Then by Rule {(T-CALL)}, $(\Psi\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Psi\cdot\trace)(x)$.
 
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma\uparrow_{p};  A \vdash c_1 : t_1 &
-\Gamma\downarrow_{p}; A \vdash c_2 : t_2}
-{\Gamma; A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+{\Psi\uparrow_{p};  A \vdash c_1 : t_1 &
+\Psi\downarrow_{p}; A \vdash c_2 : t_2}
+{\Psi; A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
 \end{equation*}
 By induction on $c_1$ and $c_2$, we have
 \begin{equation*}
-((\Gamma\uparrow_{p})\cdot \trace); A \vdash c_1 : t_1\cdot\trace
+((\Psi\uparrow_{p})\cdot \trace); A \vdash c_1 : t_1\cdot\trace
 \quad
-((\Gamma\downarrow_{p})\cdot \trace); A \vdash c_2 : t_2\cdot\trace
+((\Psi\downarrow_{p})\cdot \trace); A \vdash c_2 : t_2\cdot\trace
 \end{equation*}
 Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
 By Lemma \ref{lem:traceorder-whole},
-$(\Gamma\uparrow_{p})\cdot \trace= (\Gamma\cdot \trace)\uparrow_{p}$
-and $(\Gamma\downarrow_{p})\cdot \trace= (\Gamma\cdot \trace)\downarrow_{p}$.
+$(\Psi\uparrow_{p})\cdot \trace= (\Psi\cdot \trace)\uparrow_{p}$
+and $(\Psi\downarrow_{p})\cdot \trace= (\Psi\cdot \trace)\downarrow_{p}$.
 Then by Rule {(T-CP)}, we have
 $$
-(\Gamma\cdot \trace); A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)}.
+(\Psi\cdot \trace); A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)}.
 $$
 Finally, by Lemma \ref{lem:tracemerge}, $(\omerge{p}{t_1}{t_2})\cdot \trace = \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)} $, and thus the result follows.
 
@@ -2066,10 +2066,10 @@ Finally, by Lemma \ref{lem:tracemerge}, $(\omerge{p}{t_1}{t_2})\cdot \trace = \o
 In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma;A \vdash c : s & (\mathbf{T2})~t \leq s}
-{\Gamma;A  \vdash c : t}
+{(\mathbf{T1})~\Psi;A \vdash c : s & (\mathbf{T2})~t \leq s}
+{\Psi;A  \vdash c : t}
 \end{equation*}
-By induction on $(\mathbf{T1})$,  $(\Gamma\cdot\trace);A \vdash c : (s\cdot\trace)$.
+By induction on $(\mathbf{T1})$,  $(\Psi\cdot\trace);A \vdash c : (s\cdot\trace)$.
 From $(\mathbf{T2})$ and by Lemma \ref{lem:monotrace}, $t\cdot\trace\leq  s\cdot\trace$.
 Then by subsumption, the result follows.
 \end{ProofEnumDesc}
@@ -2079,8 +2079,8 @@ Then by subsumption, the result follows.
 
 \begin{lemma}\label{lem:typingtrace1}
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
-\item\label{lem:typingtrace1-1} If $\Gamma\cdot\trace \vdash e : t$, then $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace) $
-\item\label{lem:typingtrace1-2} If $(\Gamma\cdot\trace);A \vdash c : t$, then $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace) $.
+\item\label{lem:typingtrace1-1} If $\Psi\cdot\trace \vdash e : t$, then $(\Psi\cdot\trace) \vdash e : (t\cdot\trace) $
+\item\label{lem:typingtrace1-2} If $(\Psi\cdot\trace);A \vdash c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace) $.
 \end{enumerate}
 \end{lemma}
 \begin{proof}
@@ -2088,58 +2088,58 @@ By Lemma \ref{lem:typingtrace} and Lemma \ref{lem:tracesame}.
 \end{proof}
 
 \begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma\cdot\trace \vdash e : t\cdot \trace $.
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi\cdot\trace \vdash e : t\cdot \trace $.
 \begin{ProofEnumDesc}
-\item[T-VAR] Trivially with $s = \Gamma(x)$.
+\item[T-VAR] Trivially with $s = \Psi(x)$.
 
 
 \item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma\cdot\trace\vdash e_1 : t\cdot\trace & \Gamma\cdot\trace \vdash e_2 : t\cdot\trace}
-{\Gamma\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
+{\Psi\cdot\trace\vdash e_1 : t\cdot\trace & \Psi\cdot\trace \vdash e_2 : t\cdot\trace}
+{\Psi\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
 \end{equation*}
-By induction on $e_i$, there exists $s_i$ such that $\Gamma; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
-By Rule {(TT-OP)}, we have $\Gamma; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
+By induction on $e_i$, there exists $s_i$ such that $\Psi; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
+By Rule {(TT-OP)}, we have $\Psi; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
 Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
 
 \item[T-SUB$_e$] In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
-{\Gamma\cdot\trace \vdash e : t\cdot\trace}
+{(\mathbf{T1})~\Psi\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
+{\Psi\cdot\trace \vdash e : t\cdot\trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vdash e : s\cdot \trace$.
-Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace \vdash e : s\cdot \trace$.
+Then by induction, there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
 \end{ProofEnumDesc}
 
-The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
+The proof of \ref{lem:ptrcomplete-2}: by induction on $\Psi\cdot\trace; A \vdash c : t\cdot \trace $. %\\
 \begin{ProofEnumDesc}
 \item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)}
-{(\Gamma\cdot\trace);A \vdash \lcASS{x}{e} : (\Gamma\cdot\trace)(x)}
+{(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)}
+{(\Psi\cdot\trace);A \vdash \lcASS{x}{e} : (\Psi\cdot\trace)(x)}
 \end{equation*}
 By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
-$\Gamma; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Gamma(x)$.
-Then by Rule {(TT-ASS)},  $\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} :\Gamma(x)$.
+$\Psi; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Psi(x)$.
+Then by Rule {(TT-ASS)},  $\Psi;\trace; A \vdash_{t} \lcASS{x}{e} :\Psi(x)$.
 
 \item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
 In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T_1}) ~(\Gamma\cdot\trace) \vdash e : s &
-(\mathbf{T_2}) ~(\Gamma\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
-{(\Gamma\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
+{(\mathbf{T_1}) ~(\Psi\cdot\trace) \vdash e : s &
+(\mathbf{T_2}) ~(\Psi\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
+{(\Psi\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Gamma\cdot\trace) \vdash e : s\cdot\trace$.
-Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Gamma\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
-And by Lemma \ref{lem:tracesame}, we have $(\Gamma[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
-Then by induction, there exists $t'$ such that $\Gamma[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
-Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Psi\cdot\trace) \vdash e : s\cdot\trace$.
+Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Psi\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
+And by Lemma \ref{lem:tracesame}, we have $(\Psi[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
+Then by induction, there exists $t'$ such that $\Psi[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
+Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
 
 \item[T-IF] By induction and Rule {(TT-IF)}.
 \item[T-WHILE] By induction and Rule {(TT-WHILE)}.
@@ -2150,47 +2150,47 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{
 \inference
 {
 \FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-(\mathbf{T1})~\Gamma\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
-(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Gamma\cdot\trace)(x)
+(\mathbf{T1})~\Psi\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
+(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Psi\cdot\trace)(x)
 }
-{\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
+{\Psi\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\cdot \trace}
 \end{equation*}
-From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
-Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
-From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
-Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
+From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
+Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
+From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
+Then by Rule {(TT-CALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
 \inference
-{(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
-(\Gamma\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
-{(\Gamma\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
+{(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
+(\Psi\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
+{(\Psi\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
 \end{equation*}
 where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
 
 Clearly,
-$(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
-and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
+$(\Psi\cdot \trace)\uparrow_{p}= \Psi\cdot (\trace::\tplus{p})$
+and $(\Psi\cdot \trace)\downarrow_{p}= \Psi\cdot (\trace::\tminus{p})$.
 Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
 \begin{equation*}
 \begin{array}{l}
-(\Gamma\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
-(\Gamma\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
+(\Psi\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
+(\Psi\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
 \end{array}
 \end{equation*}
 By induction, there exist $s_1$ and $s_2$ such that
 \begin{equation*}
 \begin{array}{l}
-\Gamma; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
+\Psi; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
 t_1 \leq_{\trace::\tplus p} s_1 \\
-\Gamma; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
+\Psi; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
 t_2 \leq_{\trace::\tminus p} s_2
 \end{array}
 \end{equation*}
 Then by Rule {(TT-CP)}, we have
 $$
-\Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
+\Psi;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
 $$
 The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
 Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
@@ -2215,11 +2215,11 @@ Therefore, the result follows.
 \item[T-SUB$_c$] In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
-{\Gamma\cdot\trace; A\vdash c : t\cdot \trace}
+{(\mathbf{T1})~\Psi\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
+{\Psi\cdot\trace; A\vdash c : t\cdot \trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace; A\vdash c : s\cdot\trace$.
-Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace; A\vdash c : s\cdot\trace$.
+Then by induction, there exists $s'$ such that $\Psi;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
 From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
 
 \end{ProofEnumDesc}
@@ -2241,64 +2241,64 @@ $$\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{}
 
 \begin{lemma}\label{lem:ptrcomplete}
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
-\item\label{lem:ptrcomplete-1} If $\Gamma\cdot\trace \vdash e : t\cdot \trace$, then there exists $s$ such that $\Gamma;\trace \vdash_{t} e : s$ and $s \leq_{\trace} t$.\\
-\item\label{lem:ptrcomplete-2} If $(\Gamma\cdot\trace); A \vdash c : t\cdot \trace$, then there exists $s$ such that $\Gamma;\trace;A \vdash_{t} c : s$ and $t \leq_{\trace} s$.\\
+\item\label{lem:ptrcomplete-1} If $\Psi\cdot\trace \vdash e : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace \vdash_{t} e : s$ and $s \leq_{\trace} t$.\\
+\item\label{lem:ptrcomplete-2} If $(\Psi\cdot\trace); A \vdash c : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace;A \vdash_{t} c : s$ and $t \leq_{\trace} s$.\\
 \item\label{lem:ptrcomplete-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} s$, then $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{t}\xrightarrow{} s$.
 \end{enumerate}
 \end{lemma}
 
 \begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Gamma\cdot\trace \vdash e : t\cdot \trace $.
+The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi\cdot\trace \vdash e : t\cdot \trace $.
 \begin{ProofEnumDesc}
-\item[T-VAR] Trivially with $s = \Gamma(x)$.
+\item[T-VAR] Trivially with $s = \Psi(x)$.
 
 
 \item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma\cdot\trace\vdash e_1 : t\cdot\trace & \Gamma\cdot\trace \vdash e_2 : t\cdot\trace}
-{\Gamma\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
+{\Psi\cdot\trace\vdash e_1 : t\cdot\trace & \Psi\cdot\trace \vdash e_2 : t\cdot\trace}
+{\Psi\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
 \end{equation*}
-By induction on $e_i$, there exists $s_i$ such that $\Gamma; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
-By Rule {(TT-OP)}, we have $\Gamma; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
+By induction on $e_i$, there exists $s_i$ such that $\Psi; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
+By Rule {(TT-OP)}, we have $\Psi; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
 Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
 
 \item[T-SUB$_e$] In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
-{\Gamma\cdot\trace \vdash e : t\cdot\trace}
+{(\mathbf{T1})~\Psi\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
+{\Psi\cdot\trace \vdash e : t\cdot\trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace \vdash e : s\cdot \trace$.
-Then by induction, there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace \vdash e : s\cdot \trace$.
+Then by induction, there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
 \end{ProofEnumDesc}
-The proof of \ref{lem:ptrcomplete-2}: by induction on $\Gamma\cdot\trace; A \vdash c : t\cdot \trace $. %\\
+The proof of \ref{lem:ptrcomplete-2}: by induction on $\Psi\cdot\trace; A \vdash c : t\cdot \trace $. %\\
 \begin{ProofEnumDesc}
 \item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{(\Gamma\cdot\trace) \vdash e : (\Gamma\cdot\trace)(x)}
-{(\Gamma\cdot\trace);A \vdash \lcASS{x}{e} : (\Gamma\cdot\trace)(x)}
+{(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)}
+{(\Psi\cdot\trace);A \vdash \lcASS{x}{e} : (\Psi\cdot\trace)(x)}
 \end{equation*}
 By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
-$\Gamma; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Gamma(x)$.
-Then by Rule {(TT-ASS)},  $\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} :\Gamma(x)$.
+$\Psi; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Psi(x)$.
+Then by Rule {(TT-ASS)},  $\Psi;\trace; A \vdash_{t} \lcASS{x}{e} :\Psi(x)$.
 
 \item[T-LETVAR]
 In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T_1}) ~(\Gamma\cdot\trace) \vdash e : s &
-(\mathbf{T_2}) ~(\Gamma\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
-{(\Gamma\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
+{(\mathbf{T_1}) ~(\Psi\cdot\trace) \vdash e : s &
+(\mathbf{T_2}) ~(\Psi\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
+{(\Psi\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Gamma\cdot\trace) \vdash e : s\cdot\trace$.
-Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Gamma;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Gamma\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
-And by Lemma \ref{lem:tracesame}, we have $(\Gamma[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
-Then by induction, there exists $t'$ such that $\Gamma[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
-Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Psi\cdot\trace) \vdash e : s\cdot\trace$.
+Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
+Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Psi\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
+And by Lemma \ref{lem:tracesame}, we have $(\Psi[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
+Then by induction, there exists $t'$ such that $\Psi[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
+Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
 
 \item[T-IF] By induction and Rule {(TT-IF)}.
 \item[T-WHILE] By induction and Rule {(TT-WHILE)}.
@@ -2309,47 +2309,47 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Gamma; \trace; A \vdash_{t} \lcLETVAR{
 \inference
 {
 \FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-(\mathbf{T1})~\Gamma\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
-(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Gamma\cdot\trace)(x)
+(\mathbf{T1})~\Psi\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
+(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Psi\cdot\trace)(x)
 }
-{\Gamma\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\cdot \trace}
+{\Psi\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\cdot \trace}
 \end{equation*}
-From $(\mathbf{T1})$, we have $\Gamma\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
-Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Gamma;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
-From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)$.
-Then by Rule {(TT-CALL)}, $\Gamma;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Gamma(x)$.
+From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
+Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
+From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
+Then by Rule {(TT-CALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
 \inference
-{(\Gamma\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
-(\Gamma\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
-{(\Gamma\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
+{(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
+(\Psi\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
+{(\Psi\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
 \end{equation*}
 where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
 
 Clearly,
-$(\Gamma\cdot \trace)\uparrow_{p}= \Gamma\cdot (\trace::\tplus{p})$
-and $(\Gamma\cdot \trace)\downarrow_{p}= \Gamma\cdot (\trace::\tminus{p})$.
+$(\Psi\cdot \trace)\uparrow_{p}= \Psi\cdot (\trace::\tplus{p})$
+and $(\Psi\cdot \trace)\downarrow_{p}= \Psi\cdot (\trace::\tminus{p})$.
 Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
 \begin{equation*}
 \begin{array}{l}
-(\Gamma\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
-(\Gamma\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
+(\Psi\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
+(\Psi\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
 \end{array}
 \end{equation*}
 By induction, there exist $s_1$ and $s_2$ such that
 \begin{equation*}
 \begin{array}{l}
-\Gamma; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
+\Psi; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
 t_1 \leq_{\trace::\tplus p} s_1 \\
-\Gamma; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
+\Psi; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
 t_2 \leq_{\trace::\tminus p} s_2
 \end{array}
 \end{equation*}
 Then by Rule {(TT-CP)}, we have
 $$
-\Gamma;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
+\Psi;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
 $$
 The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
 Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
@@ -2374,11 +2374,11 @@ Therefore, the result follows.
 \item[T-SUB$_c$] In this case we have the following derivation
 \begin{equation*}
 \inference
-{(\mathbf{T1})~\Gamma\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
-{\Gamma\cdot\trace; A\vdash c : t\cdot \trace}
+{(\mathbf{T1})~\Psi\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
+{\Psi\cdot\trace; A\vdash c : t\cdot \trace}
 \end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Gamma\cdot\trace; A\vdash c : s\cdot\trace$.
-Then by induction, there exists $s'$ such that $\Gamma;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
+Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace; A\vdash c : s\cdot\trace$.
+Then by induction, there exists $s'$ such that $\Psi;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
 From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
 
 \end{ProofEnumDesc}
@@ -2434,13 +2434,13 @@ In addition,  as the function call chains starting from a command are finite, th
 \begin{tiny}
 \[
 \inference[TG-OP]
-{\Gamma;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
- \Gamma;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
-{\Gamma;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
+{\Psi;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
+ \Psi;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
+{\Psi;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
 \quad
 \inference[TG-ASS]
-{\Gamma;\trace \vdash_{g} e : t \leadsto C }
-{\Gamma;\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma(x)\leadsto C\cup \{ (\trace, t \leq_{} \Gamma(x))\} }
+{\Psi;\trace \vdash_{g} e : t \leadsto C }
+{\Psi;\trace; A \vdash_{g} \lcASS{x}{e} : \Psi(x)\leadsto C\cup \{ (\trace, t \leq_{} \Psi(x))\} }
 \]
 
 
@@ -2448,59 +2448,59 @@ In addition,  as the function call chains starting from a command are finite, th
 \[
 \inference[TG-VAR]
 {}
-{\Gamma;\trace \vdash_{g} \leVAR{x} : \Gamma(x)\leadsto \emptyset}
+{\Psi;\trace \vdash_{g} \leVAR{x} : \Psi(x)\leadsto \emptyset}
 \quad
 \inference[TG-LETVAR]
-{\Gamma;\trace \vdash_{g} e : s \leadsto C_1 \\
-\Gamma[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \\
+{\Psi;\trace \vdash_{g} e : s \leadsto C_1 \\
+\Psi[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \\
 C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 }
-{\Gamma;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
+{\Psi;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
 \]
 
 
 \[
 \inference[TG-WHILE]
 {
-\Gamma;\trace \vdash_{g} e : s  \leadsto C \\
-\Gamma;\trace; A \vdash_{g} c : t \leadsto C'
+\Psi;\trace \vdash_{g} e : s  \leadsto C \\
+\Psi;\trace; A \vdash_{g} c : t \leadsto C'
 }
-{\Gamma;\trace;  A \vdash_{g} \lcWHILE{e}{c} : t  \leadsto C\cup C' \cup\{(\trace,s\leq_{} t)\}}
+{\Psi;\trace;  A \vdash_{g} \lcWHILE{e}{c} : t  \leadsto C\cup C' \cup\{(\trace,s\leq_{} t)\}}
 \quad
 \inference[TG-SEQ]
 {
-\Gamma;\trace; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
-\Gamma;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2
+\Psi;\trace; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+\Psi;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2
 }
-{\Gamma;\trace; A \vdash_{g} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2 \leadsto C_1\cup C_2}
+{\Psi;\trace; A \vdash_{g} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2 \leadsto C_1\cup C_2}
 \]
 
 \[
 \inference[TG-IF]
 {
-\Gamma;\trace; A \vdash_{g} c_1 : t_1 \leadsto C_1 \\
-\Gamma;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2 \\
-\Gamma;\trace \vdash_{g} e : t \leadsto C_e \\
+\Psi;\trace; A \vdash_{g} c_1 : t_1 \leadsto C_1 \\
+\Psi;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2 \\
+\Psi;\trace \vdash_{g} e : t \leadsto C_e \\
 C = C_e\cup C_1\cup C_2 \cup \{(\trace, t \leq_{} t_1\sqcap t_2) \}}
-{\Gamma;\trace;  A \vdash_{g} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2 \leadsto C}
+{\Psi;\trace;  A \vdash_{g} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2 \leadsto C}
 \quad
 \inference[TG-CALL]
 {
 \FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
-\Gamma;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
-C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Gamma(x))\} }
+\Psi;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
+C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Psi(x))\} }
 {
-\Gamma;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\leadsto C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
+\Psi;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\leadsto C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
 }
 \]
 
 \[
 \inference[TG-CP]
 {
-\Gamma;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
- \Gamma;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
+\Psi;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+ \Psi;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
  }
-{\Gamma;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
+{\Psi;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
 \quad
 \inference[TG-FUN]
 {
@@ -2523,10 +2523,10 @@ The next two lemmas show the constraint rules are \emph{sound} and \emph{complet
 \begin{lemma}\label{lem:cgrsound}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
-\item\label{lem:cgrsound-1} If $\Gamma;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $\Gamma\theta;\trace \vdash_{t} e : t\theta $.
+\item\label{lem:cgrsound-1} If $\Psi;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $\Psi\theta;\trace \vdash_{t} e : t\theta $.
 
-\item\label{lem:cgrsound-2} If $\Gamma;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
-then  $\Gamma\theta;\trace;A \vdash_{t} c : t\theta.$
+\item\label{lem:cgrsound-2} If $\Psi;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
+then  $\Psi\theta;\trace;A \vdash_{t} c : t\theta.$
 
 \item\label{lem:cgrsound-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
 \[
@@ -2537,30 +2537,30 @@ then  $\Gamma\theta;\trace;A \vdash_{t} c : t\theta.$
 \end{lemma}
 
 \begin{proof}
-The proof of \ref{lem:cgrsound-1}: by induction on the derivation of $\Gamma;\trace \vdash_{g} e : t\leadsto C$. %\\
+The proof of \ref{lem:cgrsound-1}: by induction on the derivation of $\Psi;\trace \vdash_{g} e : t\leadsto C$. %\\
 \begin{ProofEnumDesc}
 \item[TG-VAR:] In this case we have the following derivation
 \begin{equation*}
 \inference{}
-{\Gamma;\trace\vdash_{g} x : \Gamma(x)\leadsto \emptyset}
+{\Psi;\trace\vdash_{g} x : \Psi(x)\leadsto \emptyset}
 \end{equation*}
 Clearly, for any $\theta$, $\theta \vDash \emptyset$.
 By Rule {(TT-VAR)}, we have
 \begin{equation*}
 \inference{}
-{\Gamma\theta;\trace; A \vdash_{t} \leVAR{x} : \Gamma\theta(x)}
+{\Psi\theta;\trace; A \vdash_{t} \leVAR{x} : \Psi\theta(x)}
 \end{equation*}
 
 \item[TG-OP] In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
- \Gamma;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
-{\Gamma;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
+{\Psi;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
+ \Psi;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
+{\Psi;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
 \end{equation*}
 Since $\theta \vDash C_1\cup C_2$, $\theta\vDash C_1$ and $\theta\vDash C_2$.
-Then by induction on $e_i$, $\Gamma\theta;\trace \vdash_{t} e_i: t_i\theta$.
-So by Rule {(TT-OP)}, we have $\Gamma\theta;\trace \vdash_{t} \leOP{e_1}{e_2}: t_1\theta\sqcup t_2\theta $.
+Then by induction on $e_i$, $\Psi\theta;\trace \vdash_{t} e_i: t_i\theta$.
+So by Rule {(TT-OP)}, we have $\Psi\theta;\trace \vdash_{t} \leOP{e_1}{e_2}: t_1\theta\sqcup t_2\theta $.
 Clearly, $t_1\theta\sqcup t_2\theta = (t_1\sqcup t_2)\theta$.
 \end{ProofEnumDesc}
 
@@ -2569,76 +2569,76 @@ The proof of \ref{lem:cgrsound-2}:%\\
 \item[TG-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{g} e : t \leadsto C_{e} }
-{\Gamma;\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma(x)\leadsto C_{e}\cup \{ (\trace, t \leq_{} \Gamma(x))\} }
+{\Psi;\trace \vdash_{g} e : t \leadsto C_{e} }
+{\Psi;\trace; A \vdash_{g} \lcASS{x}{e} : \Psi(x)\leadsto C_{e}\cup \{ (\trace, t \leq_{} \Psi(x))\} }
 \end{equation*}
-Since $\theta\vDash C_{e}\cup \{ (\trace, t \leq_{} \Gamma(x))\}$,
-$\theta\vDash C_{e}$ and $t\theta \leq_{\trace} \Gamma(x)\theta $.
-By \ref{lem:cgrsound-1} on $e$, $\Gamma\theta;\trace \vdash_{t} e : t \theta$.
-By Rule {(TT-ASS)}, $\Gamma\theta;\trace; A \vdash_{t} x := e : \Gamma\theta(x)$.
+Since $\theta\vDash C_{e}\cup \{ (\trace, t \leq_{} \Psi(x))\}$,
+$\theta\vDash C_{e}$ and $t\theta \leq_{\trace} \Psi(x)\theta $.
+By \ref{lem:cgrsound-1} on $e$, $\Psi\theta;\trace \vdash_{t} e : t \theta$.
+By Rule {(TT-ASS)}, $\Psi\theta;\trace; A \vdash_{t} x := e : \Psi\theta(x)$.
 
 \item[TG-LETVAR] In this case we have $c \cong  \lcLETVAR{x}{e}{c'} $ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{g} e : s \leadsto C_1&
-\Gamma[x:\alpha]; \trace; A \vdash_{g} c' : t \leadsto C_2 \\
+{\Psi;\trace \vdash_{g} e : s \leadsto C_1&
+\Psi[x:\alpha]; \trace; A \vdash_{g} c' : t \leadsto C_2 \\
 C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 }
-{\Gamma;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
+{\Psi;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
 \end{equation*}
 Since $\theta \vDash C$, $\theta \vDash C_1$, $\theta\vDash C_2$, and $s\theta \leq_{\trace} \theta(\alpha)$.
-By \ref{lem:cgrsound-1} on $e$, $\Gamma\theta;\trace \vdash_{t} e : s \theta $.
-By induction on $c'$,  $\Gamma\theta[x:\theta(\alpha)]; \trace; A \vdash_{t} c' : t\theta$.
-Finally, by Rule {(TT-LETVAR)}, $\Gamma\theta; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c}: t\theta $.
+By \ref{lem:cgrsound-1} on $e$, $\Psi\theta;\trace \vdash_{t} e : s \theta $.
+By induction on $c'$,  $\Psi\theta[x:\theta(\alpha)]; \trace; A \vdash_{t} c' : t\theta$.
+Finally, by Rule {(TT-LETVAR)}, $\Psi\theta; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c}: t\theta $.
 
 \item[TG-CALL] In this case we have $c \cong  \lcCALL{x}{B.f}{\overline{e}} $ and the following derivation
 \begin{equation*}
 \inference
 {
 \FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
-\Gamma;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
-C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Gamma(x))\} \\
+\Psi;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
+C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Psi(x))\} \\
 C = C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
 }
 {
-\Gamma;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)\leadsto C
+\Psi;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\leadsto C
 }
 \end{equation*}
 Since $\theta \vDash C$, then $\theta \vDash C_{f}$, $\theta\vDash \overline{C_{e}}$,
 $\overline{s\theta}\leq_{\trace} \overline{\app{t\theta}{\Theta(A)}}$,
-and $\app{t'\theta}{\Theta(A)}\leq_{\trace} \Gamma\theta(x))$.
+and $\app{t'\theta}{\Theta(A)}\leq_{\trace} \Psi\theta(x))$.
 By \ref{lem:cgrsound-3} on $B.f$,  we have
 $$
 \vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{t\theta}\xrightarrow{} t'\theta
 $$
 that is, $\FT(B.f) =  \overline{t\theta}\xrightarrow{} t'\theta$.
 By \ref{lem:cgrsound-1} on $\overline{e}$,
-$$\Gamma\theta;\trace; A \vdash_{t} \overline{e} : \overline{s\theta}.$$
+$$\Psi\theta;\trace; A \vdash_{t} \overline{e} : \overline{s\theta}.$$
 Finally, by Rule  {(TT-CALL)},
 $$
-\Gamma\theta;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma\theta(x)
+\Psi\theta;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi\theta(x)
 $$
 
 \item[TG-CP] In this case we have $c \cong \lcCP{p}{c_1}{c_2}$ and the following derivation
 \begin{equation*}
 \inference
 {
-\Gamma;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
- \Gamma;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
+\Psi;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+ \Psi;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
  }
-{\Gamma;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
+{\Psi;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
 \end{equation*}
 Since $\theta \vDash C_1 \cup C_2$, then $\theta\vDash C_1$ and $\theta \vDash C_2$.
 By induction on $c_1$ and $c_2$, we get
 $$
 \begin{array}{l}
-\Gamma\theta;(\trace::\tplus p);  A \vdash_{t} c_1 : t_1\theta\\
-\Gamma\theta;(\trace::\tminus p); A \vdash_{t} c_2 : t_2\theta
+\Psi\theta;(\trace::\tplus p);  A \vdash_{t} c_1 : t_1\theta\\
+\Psi\theta;(\trace::\tminus p); A \vdash_{t} c_2 : t_2\theta
 \end{array}
 $$
 By Rule {(TT-CP)}, we have
 $$
-\Gamma\theta;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1\theta}{t_2\theta}
+\Psi\theta;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1\theta}{t_2\theta}
 $$
 Moreover, it is clear that $(\omerge{p}{t_1}{t_2})\theta = \omerge{p}{(t_1\theta)}{(t_2\theta)}$.
 
@@ -2673,9 +2673,9 @@ $$
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
 
-\item\label{lem:cgrcomplete-1} If $\Gamma;\trace \vdash_{t} e : t$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta = t$.
+\item\label{lem:cgrcomplete-1} If $\Psi;\trace \vdash_{t} e : t$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta = t$.
 
-\item\label{lem:cgrcomplete-2} If $\Gamma;\trace; A \vdash_{t} c : t$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta = t$.
+\item\label{lem:cgrcomplete-2} If $\Psi;\trace; A \vdash_{t} c : t$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta = t$.
 
 \item\label{lem:cgrcomplete-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
 $$
@@ -2686,53 +2686,53 @@ $\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overlin
 \end{lemma}
 \begin{proof}
 The proof of \ref{lem:cgrcomplete-1}:
-Let $\Gamma_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Gamma) \} $
-and $\theta_{0} = \{\alpha_{x}\mapsto \Gamma(x)~|~x\in dom(\Gamma)\} $, where $\alpha_x$s are fresh type variables.
-Clearly,  we have $\Gamma_{0}\theta_{0} = \Gamma$.
+Let $\Psi_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Psi) \} $
+and $\theta_{0} = \{\alpha_{x}\mapsto \Psi(x)~|~x\in dom(\Psi)\} $, where $\alpha_x$s are fresh type variables.
+Clearly,  we have $\Psi_{0}\theta_{0} = \Psi$.
 The remaining is to prove that
 \begin{equation*}
-\exists C, t'.~\Gamma_{0};\trace \vdash_{g} e : t' \leadsto C,~ \theta_{0}\vDash C  \textrm{ and } t'\theta_{0} = t \tag{1'}
+\exists C, t'.~\Psi_{0};\trace \vdash_{g} e : t' \leadsto C,~ \theta_{0}\vDash C  \textrm{ and } t'\theta_{0} = t \tag{1'}
 \end{equation*}
 %%%%%%%%
 \begin{ProofEnumDesc}
 \item[TT-VAR] In this case we have $e\cong \leVAR{x}$ and the following derivation
 \begin{equation*}
 \inference{}
-{\Gamma;\trace \vdash_{t} \leVAR{x} : \Gamma(x)}
+{\Psi;\trace \vdash_{t} \leVAR{x} : \Psi(x)}
 \end{equation*}
 By Rule {(TG-VAR)}, we have
 \begin{equation*}
 \inference{}
-{\Gamma_{0};\trace \vdash_{g} \leVAR{x} : \Gamma_{0}(x)\leadsto \emptyset}
+{\Psi_{0};\trace \vdash_{g} \leVAR{x} : \Psi_{0}(x)\leadsto \emptyset}
 \end{equation*}
-Clearly, $\theta_{0} \vDash \emptyset$ and $\Gamma_{0}\theta_{0}(x) = \Gamma(x)$.
+Clearly, $\theta_{0} \vDash \emptyset$ and $\Psi_{0}\theta_{0}(x) = \Psi(x)$.
 
 \item[TT-OP] In this case we have $e\cong \leOP{e_1}{e_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{t} e_1: t_1 & \Gamma;\trace \vdash_{t} e_2: t_2}
-{\Gamma;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
+{\Psi;\trace \vdash_{t} e_1: t_1 & \Psi;\trace \vdash_{t} e_2: t_2}
+{\Psi;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
 \end{equation*}
 By induction on $e_i$, there exist $C_i, t'_i$ such that
 \begin{equation*}
-\Gamma_{0};\trace \vdash_{g} e_i: t'_i\leadsto C_i\quad\theta_{0} \vDash C_i\quad t'_i\theta_{0} = t_i.
+\Psi_{0};\trace \vdash_{g} e_i: t'_i\leadsto C_i\quad\theta_{0} \vDash C_i\quad t'_i\theta_{0} = t_i.
 \end{equation*}
 By Rule {(TG-OP)}, we have
 \begin{equation*}
-\Gamma_{0};\trace \vdash_{g} \leOP{e_1}{e_2} : t'_1\sqcup t'_2 \leadsto C_1\cup C_2.
+\Psi_{0};\trace \vdash_{g} \leOP{e_1}{e_2} : t'_1\sqcup t'_2 \leadsto C_1\cup C_2.
 \end{equation*}
 Moreover, it is clear that $\theta_{0} \vDash C_1\cup C_2$ and $(t'_1\sqcup t'_2)\theta_{0} = t_1\sqcup t_2 $.
 \end{ProofEnumDesc}
 %%%%%%%%%%%%%%%%%%%%
 The proof of \ref{lem:cgrcomplete-2}.
-Let $\Gamma_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Gamma) \} $
-and $\theta_{0} = \{\alpha_{x}\mapsto \Gamma(x)~|~x\in dom(\Gamma)\} $, where $\alpha_x$s are fresh type variables.
-Clearly,  we have $\Gamma_{0}\theta_{0} = \Gamma$.
+Let $\Psi_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Psi) \} $
+and $\theta_{0} = \{\alpha_{x}\mapsto \Psi(x)~|~x\in dom(\Psi)\} $, where $\alpha_x$s are fresh type variables.
+Clearly,  we have $\Psi_{0}\theta_{0} = \Psi$.
 Assume that different parameters of different functions have different names.
 Let $V_1 ~\sharp~ V_2 $ denote $V_1\cap V_2 = \emptyset$.
 In the remaining we prove the following statement:
 \begin{gather*}
-\exists C, t',\theta.~\Gamma_{0};\trace; A \vdash_{g} c : t' \leadsto C,~ dom(\theta_{0})~\sharp~ dom(\theta),\\
+\exists C, t',\theta.~\Psi_{0};\trace; A \vdash_{g} c : t' \leadsto C,~ dom(\theta_{0})~\sharp~ dom(\theta),\\
 \theta_{0}\cup\theta \vDash C,  \textrm{ and } t'(\theta_{0}\cup\theta) = t \tag{2'}
 \end{gather*}
 %%%%%%%
@@ -2740,41 +2740,41 @@ In the remaining we prove the following statement:
 \item[TT-ASS] In this case we have $c\cong  \lcASS{x}{e}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{t} e : t \quad   t \leq_{\trace} \Gamma(x) }
-{\Gamma;\trace; A \vdash_{t} \lcASS{x}{e} : \Gamma(x)}
+{\Psi;\trace \vdash_{t} e : t \quad   t \leq_{\trace} \Psi(x) }
+{\Psi;\trace; A \vdash_{t} \lcASS{x}{e} : \Psi(x)}
 \end{equation*}
-By $(1')$ on $e$, there exist $C, t'$ such that $\Gamma_{0};\trace \vdash_{g} e : t' \leadsto C$,
+By $(1')$ on $e$, there exist $C, t'$ such that $\Psi_{0};\trace \vdash_{g} e : t' \leadsto C$,
 $\theta_{0} \vDash C$ and $t'\theta_{0} = t$.
 By Rule {(TG-ASS)}, we get
 \begin{equation*}
-\Gamma_{0};\trace; A \vdash_{g} \lcASS{x}{e} : \Gamma_{0}(x) \leadsto C \cup \{(\trace, t'\leq \Gamma_{0}(x)) \}.
+\Psi_{0};\trace; A \vdash_{g} \lcASS{x}{e} : \Psi_{0}(x) \leadsto C \cup \{(\trace, t'\leq \Psi_{0}(x)) \}.
 \end{equation*}
 Take $\theta = \emptyset $.
-Since $t'\theta_{0} = t \leq_{\trace} \Gamma(x) = \Gamma_{0}\theta_{0}(x)$,
-then $\theta_{0} \vDash \{ (\trace, t' \leq_{} \Gamma_{0}(x)) \} $,
-and thus $\theta_{0} \vDash C \cup  \{ (\trace, t' \leq_{} \Gamma_{0}(x)) \} $.
+Since $t'\theta_{0} = t \leq_{\trace} \Psi(x) = \Psi_{0}\theta_{0}(x)$,
+then $\theta_{0} \vDash \{ (\trace, t' \leq_{} \Psi_{0}(x)) \} $,
+and thus $\theta_{0} \vDash C \cup  \{ (\trace, t' \leq_{} \Psi_{0}(x)) \} $.
 
 
 \item[TT-LETVAR] In this case we have $c\cong \lcLETVAR{x}{e}{c'}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace \vdash_{t} e : s &
-\Gamma[x:s']; \trace; A \vdash_{t} c' : t & s \leq_{\trace} s' }
-{\Gamma;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
+{\Psi;\trace \vdash_{t} e : s &
+\Psi[x:s']; \trace; A \vdash_{t} c' : t & s \leq_{\trace} s' }
+{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
 \end{equation*}
-By $(1')$ on $e$, there exist $C_{e}, s_{e}$ such that $\Gamma_{0};\trace \vdash_{g} e : s_{e} \leadsto C_{e}$,
+By $(1')$ on $e$, there exist $C_{e}, s_{e}$ such that $\Psi_{0};\trace \vdash_{g} e : s_{e} \leadsto C_{e}$,
 $\theta_{0} \vDash C_{e}$ and $s_{e}\theta_{0} = s$.\\
-Let $\Gamma'_{0} = \Gamma_{0}[x:\alpha_x]$ and $\theta'_{0} = \theta_0\cup\{\alpha_x \mapsto s'\}$, where $\alpha_x$ is fresh.
-By induction on $c'$, there exist $C', t',\theta$ such that $\Gamma'_{0};\trace; A \vdash_{g} c' : t' \leadsto C'$,  $dom(\theta'_{0})~\sharp~ dom(\theta)$,  $\theta'_{0}\cup\theta \vDash C'$,  and $t'(\theta'_{0}\cup\theta) = t$. \\
+Let $\Psi'_{0} = \Psi_{0}[x:\alpha_x]$ and $\theta'_{0} = \theta_0\cup\{\alpha_x \mapsto s'\}$, where $\alpha_x$ is fresh.
+By induction on $c'$, there exist $C', t',\theta$ such that $\Psi'_{0};\trace; A \vdash_{g} c' : t' \leadsto C'$,  $dom(\theta'_{0})~\sharp~ dom(\theta)$,  $\theta'_{0}\cup\theta \vDash C'$,  and $t'(\theta'_{0}\cup\theta) = t$. \\
 By Rule (TG-LETVAR), we have
 $$
-\Gamma_0;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t'\leadsto C
+\Psi_0;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t'\leadsto C
 $$
 where $C = C_{e} \cup C' \cup \{ (\trace, s_{e} \leq_{} \alpha_x)\}$.
 Let $\theta' = \theta\cup \{\alpha_x\mapsto s'\}$. It is clear that $dom(\theta_{0})~\sharp~ dom(\theta')$
 and $\theta_{0}\cup\theta' = \theta'_{0}\cup\theta$.
 From the construction of $\theta'$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta')$ are collected from the types of the functions and (local) variables, which are fresh.
-So we also have $\theta_{0}\cup\theta'\vDash C_{e}$ and $\Gamma_{0}(\theta_{0}\cup\theta') =\Gamma_{0}\theta_{0}=\Gamma $.
+So we also have $\theta_{0}\cup\theta'\vDash C_{e}$ and $\Psi_{0}(\theta_{0}\cup\theta') =\Psi_{0}\theta_{0}=\Psi $.
 Moreover,  $s_{e}(\theta_{0}\cup\theta')=s_{e}\theta_{0}=s\leq_{\trace} s' = \alpha_x(\theta_{0}\cup\theta')$.
 Therefore, $\theta_{0}\cup\theta'\vDash C$.
 
@@ -2783,11 +2783,11 @@ Therefore, $\theta_{0}\cup\theta'\vDash C$.
 \inference
 {
 \FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-\Gamma;\trace \vdash_{t} \overline{e} : \overline{s}\\
+\Psi;\trace \vdash_{t} \overline{e} : \overline{s}\\
 \overline{s}\leq_{\trace} \overline{\app{t_p}{\Theta(A)}} &
-\app{t_r}{\Theta(A)}\leq_{\trace} \Gamma(x)
+\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)
 }
-{\Gamma;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Gamma(x)}
+{\Psi;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
 \end{equation*}
 By \ref{lem:cgrcomplete-3} on B.f, there exist $\alpha,\beta, C_{f}, \theta_{f}$ such that
 $$
@@ -2797,14 +2797,14 @@ $\theta_f \vDash C_f $ and $(\overline{\alpha}\xrightarrow{} \beta)\theta_{f} = 
 Since $\alpha_{x}$s are fresh, we can safely get $dom(\theta_{0}) ~\sharp~ dom(\theta_f)$.
 Therefore, $\theta_{0}\cup\theta_f \vDash C_{f}$ and $(\overline{\alpha}\xrightarrow{} \beta)(\theta_{0}\cup\theta_{f}) = \overline{t_p}\xrightarrow{} t_r$.\\
 By $(1')$ on $\overline{e}$, there exist $\overline{s'}, \overline{C_{e}}$ such that
-$\Gamma_{0};\trace; A \vdash_{g} \overline{e} : \overline{s'}\leadsto \overline{C_e}$, $\theta_{0} \vDash \overline{C_e} $, and $\overline{s'(\theta_{0})} = \overline{s}$.\\
+$\Psi_{0};\trace; A \vdash_{g} \overline{e} : \overline{s'}\leadsto \overline{C_e}$, $\theta_{0} \vDash \overline{C_e} $, and $\overline{s'(\theta_{0})} = \overline{s}$.\\
 From the construction of $\theta_f$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_f)$ are collected from the types of functions and (local) variables, which are fresh.
-So we also have $\theta_{0}\cup \theta_f \vDash \overline{C}$,  $\overline{s'(\theta_{0}\cup\theta_f)} = \overline{s}$ and $\Gamma_{0}(\theta_{0}\cup \theta_f) = \Gamma$. \\
+So we also have $\theta_{0}\cup \theta_f \vDash \overline{C}$,  $\overline{s'(\theta_{0}\cup\theta_f)} = \overline{s}$ and $\Psi_{0}(\theta_{0}\cup \theta_f) = \Psi$. \\
 By Rule {(TG-CALL)}, we have
 \begin{equation*}
-\Gamma_{0};\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Gamma_{0}(x) \leadsto C
+\Psi_{0};\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi_{0}(x) \leadsto C
 \end{equation*}
-where $C'= \{(\trace, \overline{s'}\leq \overline{\app{\alpha}{\Theta(A)}}), (\trace, \app{\beta}{\Theta(A)}) \leq \Gamma_{0}(x)) \}$ and $C = C_{f} \cup \bigcup\overline{C} \cup C'$.
+where $C'= \{(\trace, \overline{s'}\leq \overline{\app{\alpha}{\Theta(A)}}), (\trace, \app{\beta}{\Theta(A)}) \leq \Psi_{0}(x)) \}$ and $C = C_{f} \cup \bigcup\overline{C} \cup C'$.
 Since $dom(\theta_f)$ are fresh, we have
 \begin{equation*}
 \overline{s'(\theta_{0}\cup \theta_f)} = \overline{s} \leq_{\trace} \overline{\app{t_p}{\Theta(A)}} = \overline{\app{\alpha(\theta_{0}\cup \theta_f)}{\Theta(A)}}
@@ -2812,36 +2812,36 @@ Since $dom(\theta_f)$ are fresh, we have
 and
 \begin{equation*}
 \app{\beta(\theta_{0}\cup \theta_f)}{\Theta(A)} =  \app{t_r}{\Theta(A)}
-\leq_{\trace} \Gamma(x) = \Gamma_{0}(\theta_{0}\cup \theta_f)(x)
+\leq_{\trace} \Psi(x) = \Psi_{0}(\theta_{0}\cup \theta_f)(x)
 \end{equation*}
 So $(\theta_{0}\cup \theta_f) \vDash C'$, and thus $(\theta_{0}\cup \theta_f)\vDash C$.
 Moreover, we also have
-$(\Gamma_{0}(x))(\theta_0\cup\theta_f)
-= \Gamma(x)$.
+$(\Psi_{0}(x))(\theta_0\cup\theta_f)
+= \Psi(x)$.
 Thus the result follows.
 
 \item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
 \begin{equation*}
 \inference
-{\Gamma;\trace::\tplus p; A \vdash_{t} c_1 : t_1  &
-\Gamma;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
-{\Gamma;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
+{\Psi;\trace::\tplus p; A \vdash_{t} c_1 : t_1  &
+\Psi;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
+{\Psi;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
 \end{equation*}
 By induction on $c_i$, we have
 \begin{equation*}
 \begin{array}{l}
-\exists C_1, s_1,\theta_1.~\Gamma_{0};\trace::\tplus p; A \vdash_{g} c_1 : s_1 \leadsto C_1,~ \theta_{0}\cup\theta_1 \vDash C_1,\\
+\exists C_1, s_1,\theta_1.~\Psi_{0};\trace::\tplus p; A \vdash_{g} c_1 : s_1 \leadsto C_1,~ \theta_{0}\cup\theta_1 \vDash C_1,\\
 \quad\quad dom(\theta_{0})\sharp dom(\theta_1)  \textrm{ and } s_1(\theta_{0}\cup\theta_{1}) = t_1\\
-\exists C_2, s_2,\theta_2.~\Gamma_{0};\trace::\tminus p; A \vdash_{g} c_2 : s_2 \leadsto C_2,~ \theta_{0}\cup\theta_2 \vDash C_2, \\
+\exists C_2, s_2,\theta_2.~\Psi_{0};\trace::\tminus p; A \vdash_{g} c_2 : s_2 \leadsto C_2,~ \theta_{0}\cup\theta_2 \vDash C_2, \\
 \quad\quad dom(\theta_{0})\sharp dom(\theta_2)  \textrm{ and } s_2(\theta_{0}\cup\theta_{2}) = t_2\\
 \end{array}
 \end{equation*}
 By Rule {(TG-CP)}, we get
 \begin{equation*}
-\Gamma_{0};\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}\leadsto C_1\cup C_2
+\Psi_{0};\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}\leadsto C_1\cup C_2
 \end{equation*}
 From the construction of $\theta_1$ and $\theta_2$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_1)$ and $dom(\theta_2)$ are collected from the types of functions and (local) variables, which are fresh. Moreover, if $\theta_1 \cap \theta_2 \neq \emptyset$, that is, they share some functions, then $\theta_1(\alpha_x) = \theta_2(\alpha_x) $ for all $\alpha_x \in dom(\theta_1) \cap dom(\theta_2)$.
-So we can safely get $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_i$ and  $s_i(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = t_i$, and $\Gamma_{0}(\theta_{0}\cup\theta_{1}\cup\theta_{2}) =\Gamma$.
+So we can safely get $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_i$ and  $s_i(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = t_i$, and $\Psi_{0}(\theta_{0}\cup\theta_{1}\cup\theta_{2}) =\Psi$.
 Therefore, $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_1\cup C_2$ and
 $(\omerge{p}{s_1}{s_2})(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = \omerge{p}{t_1}{t_2}$.
 
@@ -2855,13 +2855,13 @@ The proof of \ref{lem:cgrcomplete-3}: \\
 {[\overline{x}: \overline{t_p},\lpRES:t_r];\epsilon; B \vdash_{t} c : s }
 {\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t_p}\xrightarrow{} t_r}
 \end{equation*}
-Let $\Gamma_{0} = \{\overline{x} \mapsto \overline{\alpha}, r\mapsto \beta \} $
+Let $\Psi_{0} = \{\overline{x} \mapsto \overline{\alpha}, r\mapsto \beta \} $
 and $\theta_{0} = \{\overline{\alpha}\mapsto \overline{t_p}, \beta\mapsto t_r\} $,
 where $\overline{\alpha},\beta$ are fresh.
 By $(2')$ on $c$, we have
 \begin{equation*}
 \begin{array}{l}
-\exists t, C_f, \theta .~ \Gamma_{0};\epsilon; B \vdash_{g} c : t\leadsto C_f,~ (\theta_{0}\cup\theta')\vDash C_f,\\
+\exists t, C_f, \theta .~ \Psi_{0};\epsilon; B \vdash_{g} c : t\leadsto C_f,~ (\theta_{0}\cup\theta')\vDash C_f,\\
 \quad\quad dom(\theta_{0}) ~\sharp~ dom(\theta) \textrm{ and } t(\theta_{0}\cup\theta') = s.
 \end{array}
 \end{equation*}
@@ -2875,10 +2875,10 @@ Finally, it is clear that $(\overline{\alpha}\xrightarrow{} \beta) (\theta_{0}\c
 \begin{lemma}\label{lem:cgrsound0}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
-\item\label{lem:cgrsound0-1} If $\Gamma;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $(\Gamma\theta\cdot\trace) \vdash e : (t\theta\cdot\trace) $.
+\item\label{lem:cgrsound0-1} If $\Psi;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $(\Psi\theta\cdot\trace) \vdash e : (t\theta\cdot\trace) $.
 
-\item\label{lem:cgrsound0-2} If $\Gamma;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
-then  $(\Gamma\theta\cdot\trace);~A \vdash c : (t\theta\cdot\trace).$
+\item\label{lem:cgrsound0-2} If $\Psi;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
+then  $(\Psi\theta\cdot\trace);~A \vdash c : (t\theta\cdot\trace).$
 
 \item\label{lem:cgrsound0-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
 $\vdash \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta)$.
@@ -2892,9 +2892,9 @@ By Lemma \ref{lem:ptrsound} and Lemma\ref{lem:cgrsound}.
 \begin{lemma}\label{lem:cgrcomplete0}
 The following statements hold:
 \begin{enumerate}[label={(\alph*)}]
-\item\label{lem:cgrcomplete0-1} If $(\Gamma\cdot\trace) \vdash e : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t'\theta \leq_{\trace} t$.
+\item\label{lem:cgrcomplete0-1} If $(\Psi\cdot\trace) \vdash e : (t\cdot\trace)$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta \leq_{\trace} t$.
 
-\item\label{lem:cgrcomplete0-2} If $(\Gamma\cdot\trace); A \vdash c : (t\cdot\trace)$, then there exist $\Gamma',t',C,\theta$ s.t. $\Gamma';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Gamma'\theta =\Gamma$ and $t \leq_{\trace} t'\theta $.
+\item\label{lem:cgrcomplete0-2} If $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace)$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t \leq_{\trace} t'\theta $.
 
 \item\label{lem:cgrcomplete0-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
 $$
@@ -2912,7 +2912,7 @@ By Lemma \ref{lem:ptrcomplete} and Lemma\ref{lem:cgrcomplete}.
 Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and assume that \textit{getInfo} is defined in app $A$ (thus \textit{A.getInfo}) and called by app $B$ through the function \textit{fun} (thus \textit{B.fun}). The rephrased program is shown in Listing~\ref{lst:eg_solve}, where $l_1, l_2$ are the types for \textit{loc}  and \textit{id} respectively, $\Theta(B) = \{q\}$, and $l_1\sqcup l_2 = H$.
 \begin{lstlisting}[float=tp, caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
 A.getInfo() {
-   init r in { %// $\Gamma({\lpRES})=\alpha$%
+   init r in { %// $\Psi({\lpRES})=\alpha$%
       test(p) {
          test(q) r = loc; %// ${(\oplus p\oplus q, l_1 \leq \alpha)}$ %
          else r = ""; %// ${(\oplus p\ominus q, L \leq \alpha)}$ %
@@ -2924,8 +2924,8 @@ A.getInfo() {
    }
 }
 B.fun() { %// $B$ has permission $q$%
-   init r in { %// $\Gamma({\lpRES})=\beta$%
-      letv x = "" in { %// $\Gamma({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
+   init r in { %// $\Psi({\lpRES})=\beta$%
+      letv x = "" in { %// $\Psi({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
          test(p) r = 0;  %// $(\oplus p, L\leq\beta) $%
          else x = call A.getInfo();
          %//$\FT_{C}(A.getInfo) = ()\rightarrow \alpha$,  $(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma) $%
