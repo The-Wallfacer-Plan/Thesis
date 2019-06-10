@@ -49,12 +49,14 @@ Hence, the second problem is \emph{to make proper adjustments for the dynamic st
 To emphasize the two aforementioned problems, an ideal DGF is expected to hold the following desired properties (\S\ref{subsec:dp}):
 \begin{enumerate}[\textbf{P}1]
 \itemsep0em 
-\item The DGF should have a \emph{robust} distance-based mechanism that can guide the directed fuzzing by considering all traces to the targets and avoiding the bias to certain traces.
-\item The DGF should strike a \emph{balance} between overheads and utilities in static analysis.
-\item The DGF should prioritize and schedule the seeds to reach target sites \emph{rapidly}.\item The DGF should adopt an \emph{adaptive} mutation strategy when the seeds cover different program states. \end{enumerate}
+\item It should provide a \emph{robust} mechanism guiding the directed fuzzing by considering all the possible traces to the targets.
+\item It should strike a \emph{balance} between utilities and overheads as to static analysis.
+\item It should prioritize and schedule the seeds to reach targets \emph{rapidly}.
+\item It should adopt an \emph{adaptive} mutation strategy across different program states.
+\end{enumerate}
 
 
-We propose our solutions to achieve the four desired properties for DGF. 
+We propose our solutions to achieve the 4 properties for DGF. 
 For \textbf{P1}, we propose to apply the static analysis results to augment the adjacent-function distance (\S\ref{subsec:functionDist}); and the function level distance and basic block level distance should be calculated based on the augmented adjacent-function distance to simulate the affinities between functions (\S\ref{subsec:UtilityComputation}).
 Meanwhile, during fuzzing, we calculate \emph{basic block trace distance} and \emph{covered function similarity} of the execution trace to that of the target functions (\S\ref{subsec:powerSche}) by integrating the static analysis results with the runtime execution information.
 For \textbf{P2}, we propose to apply the analysis based on call graph (CG) and control flow graph (CFG), i.e., the function level reachability analysis, the points-to analysis for function pointers (indirect calls), and the basic block metrics (\S\ref{subsec:graghCons}). 

@@ -6,35 +6,30 @@
 \section{Introduction and Motivation}
 
 
-In spite of the popularity and effectiveness of applying grey-box fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a fuzzing framework to easily reuse, integrate and compare different fuzzing extensions and~experiment with new ideas.
-Take {\AFL} as an example, its core fuzzing logic is implemented in one file with around 8K LOC, which contains more than 100 global variables. Hence, the integration of a single new feature often involves modifications in multiple places.
-In short, {\AFL} is compact but also highly coupled since it is designed to \textit{require essentially no configuration}~\cite{afl}.
-In fact, most of the existing fuzzers are designed for easy deployment and usage, but not easy extension.
-Therefore, it is desirable to have a fuzzing framework that allows easy \emph{configuration} and \emph{extension} for new features.
+In spite of the popularity and effectiveness of applying grey-box fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a general fuzzing framework to reuse, integrate and evaluate various fuzzing extensions and~try new ideas.
+For example, {\AFL}'s core fuzzing logic is implemented in one file with around 8K LOC, with more than 100 global variables. Therefore, the integration of a single new feature often involves modifications in multiple places.
+In short, {\AFL} is highly coupled as it is designed to \textit{essentially require no configuration}~\cite{afl}.
+In fact, most of the existing fuzzers are designed for easy deployment and use, without considering easy extension.
+Hence, a fuzzing framework is preferred to allow for both easy \emph{configuration} and \emph{extension}.
 
 
-To this end, we propose our fuzzing framework, namely \emph{Fuzzing Orchestration Toolkit}  ({\FOT}). {\FOT} is designed to hold three properties.
+Due to this, we propose our fuzzing framework, \emph{Fuzzing Orchestration Toolkit} ({\FOT}), which is designed to have the following three properties.
 
 \begin{enumerate}[(1)]
 
-
 \item  \textbf{Versatility.}
-{\FOT} provides a fuzzing ecosystem, including a set of static and dynamic analyses used to aid the fuzzing process.
-
-
+{\FOT} provides a fuzzing ecosystem, including a set of static and dynamic analysis toolchains to aid the fuzzing process.
 \item \textbf{Configurability.}
-{\FOT} provides a set of configurable options.	
-Users can easily tweak the parameters of the fuzzer to improve the fuzzing effectiveness with their experience.
-
+{\FOT} provides multiple configurable options.	
+Users can improve the fuzzing effectiveness with their experience by tweaking the parameters without development efforts.
 \item \textbf{Extensibility.}
-{\FOT} is designed to be of high coherence and low coupling. Specially, the implementation mainly consists of two parts: the library containing general fuzzing utilities and miscellaneous tools on top of it. Therefore, apart from the default fuzzer provided by {\FOT}, developers can write their own fuzzers with modest effort based on the library.
+{\FOT} is of high coherence and low coupling. In fact, the implementation is composed of two parts: the library that contains general fuzzing utilities, and the miscellaneous tools on top of it. Therefore, apart from the default fuzzing tools provided by {\FOT}, developers may also write their own fuzzers with modest effort based on the library.
 \end{enumerate}
 
 
 \section{Architecture Design}\label{sec:details}
 
-In this section, we describe the design of {\FOT} framework.
-More technical details of {\FOT} are available at ~\cite{fot-webpage}.
+This section briefly describes the design of {\FOT} framework. Complementary results {\FOT} are available at ~\cite{fot-webpage}.
 
 
 \begin{figure}[t]
@@ -45,69 +40,68 @@ More technical details of {\FOT} are available at ~\cite{fot-webpage}.
 \end{figure}
 
 Fig.~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
-It consists of three parts, namely the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchain}.
+It has three parts (labeled in pink): the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchains}.
 Components of the framework are represented with \emph{blue} rectangles while the inputs and outputs are in \emph{grey}. All these components inside \FOT are \textit{configurable} and \textit{extensible}.
 
 
 \subsection{Preprocessor}
-This part contains various tools for collecting static information and instrumentation with the PUT.
+This contains various tools to collect static information and apply instrumentations.
 
 
 \subsubsection{Static Analyzer}\label{sec:static_analysis}
-This includes various tools to extract semantic understandings from the PUT.
-For example, we have tools to generate the control flow graph, call graph or statically collected vulnerability information and convert them into suitable representations that can later be instrumented into the PUT and utilized during the fuzzing process.
-This part is \textit{configurable} to generate different levels of static information. It is \textit{extensible} as developers are allowed to add new types of static analysis as long as the generated result follows the specified format.
+It consists of tools to extract semantics from the PUT.
+For example, we provide tools to generate the control flow graph, call graph or statically predicted vulnerabilities and convert them into proper representations which can be later instrumented into the PUT and utilized during dynamic fuzzing.
+It is \textit{configurable} to generate different levels of static information. It is \textit{extensible} as developers are allowed to add new types of static analysis as long as the generated result follows the specified format.
 
 
 \subsubsection{Instrumentor}
-The \emph{binary rewriter} and the \emph{compiler instrumentor} instrument additional static information generated by the static analyzer into the PUT so that the fuzzer can collect feedback from the latter during execution.
-{\FOT} supports Dyninst~\cite{dyninst} based instrumentation when only binary is provided, and LLVM based instrumentation when the source code is available.
-This part is \textit{configurable} as the users can choose to either instrument at source code level or at binary level.
-It is \textit{extensible} since developers can use other tools such as Intel PIN~\cite{pin} for instrumentation as long as the instrumented code can embed the static information and follow the regulations to provide feedback for the fuzzer.
+\emph{Binary rewriter} and \emph{source transformer} instrument static results generated by the static analyzer into the PUT for the fuzzer to collect feedback during runtime execution.
+{\FOT} supports LLVM based instrumentation when program source is available, and Dyninst~\cite{dyninst} instrumentation when only the binary is given.
+It is \textit{configurable} since the users can choose to instrument either on source code or binary.
+It is \textit{extensible} since developers can use instrumentors such as Intel PIN~\cite{pin} as long as the instrumented code can embed the static information and provide sufficient feedback during fuzzing.
 
 \subsection{Fuzzer}
-This part explains {\FOT}'s the main fuzzing process. 
-It is essentially a loop that continuously selects seeds from the queue, applies mutations to the selected seeds, executes the PUT against mutated inputs, and collects feedback for the next iteration.
+This part explains the core fuzzing process. 
+The fuzzer is essentially a loop that continuously selects seeds from a seed queue, applies mutations to the selected seeds, executes the PUT against mutated inputs, and collects statistics for the next iteration.
 
 \subsubsection{Conductor}
-As {\FOT} is designed to support multi-threaded parallel fuzzing, it contains the \emph{conductor} for fuzzing, managing the workload of each worker thread.
-Particularly, it can listen to a special directory to actively import seed inputs from external sources such as symbolic executors like KLEE~\cite{klee} or mutation generators like Radamsa~\cite{radamsa}.
-This part is \textit{configurable} as the users can choose different strategies for the overall management.
-It is \textit{extensible} as it can interoperate with other seed generation tools.
+As {\FOT} is designed to support multi-threaded parallel fuzzing, it contains the \emph{conductor} for fuzzing, scheduling the workload of different fuzzing instances.
+Particularly, it monitor a special directory to actively import seed inputs from external tools such as symbolic executors (e.g., KLEE~\cite{klee}) or mutation generators (e.g., Radamsa~\cite{radamsa}).
+It is \textit{configurable} since the users are allowed to choose different strategies for the overall management.
+It is \textit{extensible} since it can interoperate with other external tools.
 
 
 \subsubsection{Seed Scorer}
-The seed scorer is in charge of selecting a seed from the queue for mutation (seed prioritization) and determining how many new inputs should be generated based on the selected seed (power scheduling).
-This part is \textit{configurable} as the users can select from several built-in scoring strategies to evaluate seeds.
-It is \textit{extensible} as the users can implement their own strategies with the interfaces provided in {\FOT}.
+The seed scorer is in charge of selecting a seed from the queue for mutation (seed selection/prioritization) and determining how many new inputs should be generated based on the selected seed (power scheduling).
+It is \textit{configurable} since the users can select from several built-in scoring strategies to evaluate seeds.
+It is \textit{extensible} since the developers can implement their own strategies with the provided interfaces.
 
 
 \subsubsection{Mutation Manager}
-The mutation manager is in charge of scheduling different mutators.
-It can mutate the seeds in a pure random manner or according to predefined specifications.
-This part is \textit{configurable} as {\FOT} provides various mutators for the users to choose from.
-It is \textit{extensible} as the developers can implement their own mutators with the provided library.
+The mutation manager schedules different kinds of mutators.
+It is \textit{configurable} as {\FOT} provides various mutators the their combinations for the users to select from.
+It is \textit{extensible} as the developers can implement their own mutators with the provided interfaces.
 
 \subsubsection{Executor}
 The executor drives the execution of the PUT.
-This part is \textit{configurable} as the default executor in {\FOT} allows users to choose whether or not to use forkserver~\cite{afl} during fuzzing.
-It is \textit{extensible} as the developers can extend the executor for different scenarios.
-For example, they may add a secondary executor to execute another PUT to perform differential testing.
+It is \textit{configurable} since the default executor in {\FOT} allows users to choose whether or not to use forkserver~\cite{afl} during fuzzing.
+It is \textit{extensible} since the developers can extend the executor for various scenarios.
+For example, they may add a secondary executor to execute another PUT for differential testing.
 
 \subsubsection{Feedback Collector}
 The feedback collector collects the feedback emitted by the PUT.
 The exact feedback often corresponds to the instrumented information.
-This part is \textit{configurable} as the users are allowed to select from the default feedback options provided by {\FOT}.
+It is \textit{configurable} as the users are allowed to select from the default feedback options provided by {\FOT}.
 For now, the feedback can be at basic-block level (like {\AFL}) or function level.
 It is \textit{extensible} as the users can specify their customized types of feedback for collection.
 
 \subsection{Complementary Toolchain}
-{\FOT} additionally contains various tools helping to make the framework \textit{versatile}.
-For instance, we implemented a web-based frontend user interface to monitor the fuzzing results.
+{\FOT} contains various tools helping to make the framework \textit{versatile}.
+For instance, we implemented a web-based frontend user interface to monitor the overall results.
 It provides fruitful information to make the fuzzing process more transparent.
-We also implemented a crash analyzer to analyze the detected crashes and generate reports automatically.
-This reduces the manual efforts of crash triaging.
-In addition, many more extensions are being added to complement the fuzzer.
+We also provided a crash analyzer to analyze the detected crashes and automatically generate reports.
+This greatly reduces the manual efforts of crash triaging.
+Many other extensions are also being added to complement the fuzzer.
 
 
 \begin{figure}[t]
@@ -149,7 +143,7 @@ Additionally, we provide an external minimizer program to prune the all the seri
 
 \subsection{Implementation}\label{sec:fot-impl}
 
-The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4100 lines of C/C++ for the preprocessor, 4800 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain. In Chapter~\ref{ch:dfot} and Chapter~\ref{ch:mtfuzz}, we will introduce two extensions on top of FOT.
+The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4500 lines of C/C++ for the preprocessor, 4200 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain.
   
 
 \section{Comparisons to Other Fuzzing Frameworks and Extensions}
@@ -159,9 +153,9 @@ In this section, we first compare FOT with other fuzzing frameworks, and then di
 
 
 
-Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack features in different aspects, while {\FOT} integrates all of them. {\FOT} stands out in that it provides various configurations for advanced users; it is also highly modularized to be easily extended with other fuzzing techniques. Further, {\FOT} also partially supports structure-aware mutations (by specifying semantic grammars) and interoperability with other seed generation tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory).
+Table~\ref{tbl:cmp_fuzz} compares {\FOT} with existing fuzzing frameworks with respect to 10 major features. As we can see, the existing fuzzing frameworks AFL, libFuzzer and honggfuzz lack \FOT's features in various aspects. {\FOT} stands out in that it provides multiple configurations for advanced users; it is also highly modularized, suitable to be extended with other fuzzing techniques. Moreover, {\FOT} partially supports structure-aware mutations and interoperability with other external tools such as symbolic executors (by monitoring and scheduling newly incoming seed input directory).
 
-Most current fuzzing techniques can be easily integrated into {\FOT} thanks to its highly-modularized design. In fact, these techniques can be applied with some extensions to the different components in Figure~\ref{fig:fot_workflow} and can be used together with the configuration interface. 
+Most current fuzzing extensions can be easily integrated into {\FOT} owing to its design. In reality, they can be applied with some extensions to the different components in Figure~\ref{fig:fot_workflow} and can be used together with the configuration interface. 
 
 \begin{enumerate}[1)]
 	\item AFLFast~\cite{Bohme:2016:CGF} can be implemented by applying a Markov Chain model based seed \emph{power scheduling} in the fuzzer. 
@@ -174,7 +168,7 @@ Most current fuzzing techniques can be easily integrated into {\FOT} thanks to i
 \begin{table}[t]
 \centering
 	\small
-	\caption{Comparisons between Different Fuzzing Frameworks (\Circle: not supported, \LEFTcircle: partially supported, \CIRCLE: fully supported)}
+	\caption{Comparisons between fuzzing frameworks (\Circle: not supported, \LEFTcircle: partially supported, \CIRCLE: fully supported)}
 	\label{tbl:cmp_fuzz}
 	\begin{tabular}{|l|c|c|c|c|}
 		\hline

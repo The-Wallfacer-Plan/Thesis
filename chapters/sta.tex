@@ -346,8 +346,7 @@ are either introduced by \textbf{letvar} or from the set $\{\overline{x}, r\}$.
 {\eta;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto \eta[x \mapsto \eta'(r) ]}
 \]
 }
-\caption{Evaluation rules for expressions and commands,
-given a function definition table $\FD$ and a permission assignment $\Theta.$
+\caption{Evaluation rules for the expressions and commands with function definition table $\FD$ and permission assignment $\Theta.$
 }
 \label{fig:semantics}
 \end{figure*}
@@ -612,7 +611,7 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 { \vdash \lpFUN{B.f}{\overline{x}}{c} :
   \overline{t} \rightarrow t'}
 \]
-\caption{Typing rules for expressions, commands and functions.}
+\caption{Typing rules for expressions, commands, and functions.}
 \label{fig:typing-rules}
 \end{figure*}
 
@@ -1829,7 +1828,7 @@ t \leq_{\trace} t_1\sqcap t_2
 {\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
 \]
 \end{tiny}
-\caption{Permission trace rules for expressions, commands and functions} \label{fig:infer-rules}
+\caption{Permission trace rules for expressions, commands, and functions} \label{fig:infer-rules}
 \end{figure*}
 
  
@@ -2512,7 +2511,7 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 }
 \]
 \end{tiny}
-\caption{Constraint generation rules for expressions, commands and functions, given function type table $FT_C$.}
+\caption{Constraint generation rules for expressions, commands, and functions, with function type table $FT_C$.}
 \label{fig:constraint-rules}
 \end{figure*}
 

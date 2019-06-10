@@ -304,7 +304,7 @@
       {\large School of Computer Science and Engineering \par}
 \vspace{0.35in}
         \begin{spacing}{1.1}
-      { A thesis submitted to the Nanyang Technological University \\
+      { A thesis submitted to Nanyang Technological University \\
       in partial  fulfillment of the requirement for the degree of \\
       Doctor of Philosophy \par}
       \end{spacing}
