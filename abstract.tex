@@ -15,7 +15,7 @@ We therefore present \mtfuzz, a novel thread-aware technique which effectively g
 
 Secondly, we apply \emph{type checking based verification} to detect those vulnerabilities introduced by logic errors. Particularly, we focus on the information leakage vulnerability caused by inter-app communications on an Android system. 
 We propose a lightweight security type system that models permission mechanism on Android, where the permissions are assigned statically and used to enforce access control across applications. 
-The soundness of our type system is proved with respect to noninterference. With this type system, we are able to soundly prove the absence of information leakage among various apps in an Android system.
+The soundness of our type system is proved in terms of non-interference. With this type system, we are able to soundly prove the absence of information leakage among various apps in an Android system.
  Additionally, we also presented a deterministic type inference algorithm for the underlying type system. 
 
 Finally, based on the attempts that we have made so far, we will briefly discuss the differences of the two applied vulnerability detection approaches in terms of the capability, the practicality, as well as their potential combinations in detecting vulnerabilities for modern software.

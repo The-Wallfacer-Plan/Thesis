@@ -4,16 +4,15 @@
 
 \section{Introduction and Motivation}\label{sec:sta_intro}
 
-Mobile security has become increasingly important for our daily life due to the pervasive use of mobile applications.
-Among the mobile devices that are currently in the market, Android devices account for the majority of them so analysis of their security
-has been of significant interests. There has been a large number of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) focusing on detecting potential security violations. Here we are interested instead in the problem of constructing secure applications,
-in particular, in providing guarantee of information flow security in the constructed applications. In order to achieve this, we apply a type checking based verification approach.
+Owing to the prevasive use of mobile applications, mobile security has become increasingly important for our daily life.
+Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of constructing secure applications.
+In particular, we aim to provide a guarantee for information flow security in the constructed applications. In order to achieve this, we apply a type checking based verification approach.
 
 \subsection{Motivating Examples}
 
 
-In designing an information flow type system for Android, we encounter
-a common pattern of conditionals that would not be typable using conventional type systems.
+During designing an information flow type system for Android, we encounter
+a common pattern of conditionals that would not be typeable using conventional type systems.
 Consider the pseudo-code in Listing~\ref{lst:eg_contact}.
 \begin{figure}[ht]
 \begin{lstlisting}[caption={Sample code for getting contact info with a permission check.}, label={lst:eg_contact}]
@@ -181,30 +180,29 @@ Due to space constraints, most proofs are omitted but they can be found in a tec
 
 
 \subsection{Contributions}
-The contributions of this chapter are three-fold.
-\begin{enumerate}\item We develop a lightweight type system in which security types are dependent on a permission-based access control mechanism, and prove its soundness with respect to noninterference (Section~\ref{sec:type_system}). A novel feature of the type system is the type merging constructor, used for typing the conditional branch in permission checking, which allows us to model non-monotonic information flow policies.
-	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during function calls. This problem
+The contributions of this chapter are threefold.
+\begin{enumerate}\item We develop a lightweight type system where security types are dependent on a permission-based access control mechanism, and prove its soundness in terms of non-interference (Section~\ref{sec:type_system}). A novel feature of our type system is the type merging constructor, used for typing the conditional branch for permission checking. This makes it possible to model non-monotonic information flow policies.
+	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during calls. This problem
 	arises as a byproduct of Android's permission model, which is significantly different from that in JVM, and adopting a standard typing rule for function calls such as the one proposed for Java in~\cite{Banerjee:2005ht} 
-	would lead to unsoundness. We call this problem the parameter laundering problem and we propose a typing rule for function calls that prevents it.
-	\item We show that the type inference is decidable for our type system, by reducing it to a constraint solving problem (Section~\ref{sec:constraint_gen}).
+	would result in unsoundness. We name this the parameter laundering problem and propose a typing rule for function calls that prevents it.
+	\item We provide a type inference for our proposed type system, and show its decidability by reducing it to a constraint solving problem (Section~\ref{sec:constraint_gen}).
 \end{enumerate}
  \section{A Secure Information Flow Type System}\label{sec:type_system}
 
 In this section, we present the proposed information flow type system. Section~\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
 Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
 constructs based on the abstract permission model.
-Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness with respect to a notion of noninterference.
+Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness in terms of non-interference.
 
 \subsection{A Model of Permission-based Access Control}
 \label{sec:permission_model}
 
 Instead of taking all the language features and the library dependencies of Android apps into account, we focus on the permission model used in inter-component communications within and across apps. Such permissions are used to regulate access to protected resources, such as device id, location information, contact information, etc.
 
-In Android, an app specifies the permissions it needs at installation time via a manifest file. In recent versions of Android (since Android 6.0, API level 23), some of these permissions need to be granted by users at runtime. But
+In Android, an app specifies its required permissions at installation time via a manifest file. In recent versions of Android (since Android 6.0, API level 23), some of these permissions need to be granted by users at runtime. But
 at no point a permission request is allowed if it is not already specified in the manifest.
 For now, we assume a permission enforcement mechanism that applies to Android versions prior to version 6.0, so it does not
-account for permission granting at runtime. To be specific, runtime permission request requires the compatible version specified in the manifest file to be greater than or equal to API level 23, and running OS should be at least Android 6.0~\cite{url:android-perm}. Runtime permission granting poses some problems in typing non-monotonic
-policies; we shall come back to this point later in Section~\ref{sec:conclusion}.
+account for permission granting at runtime. To be specific, runtime permission request requires the compatible version specified in the manifest file to be greater than or equal to API level 23, and the running OS should be at least Android 6.0~\cite{url:android-perm}. Runtime permission granting poses some problems in typing non-monotonic policies, which shall be discussed further in Section~\ref{sec:conclusion}.
 
 An Android app may provide services to other apps,
 or other components within the app itself. Such a service provider
@@ -212,9 +210,11 @@ may impose permissions on other apps who want to
 access its services. Communication between apps is implemented
 through Binder IPC (inter-process communications)~\cite{Android-Binder-IPC}.
 
-In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we shall not model explicitly the IPC mechanism of Android, but will instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, together with the modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than noninterference certification.}, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
+In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we will not model explicitly the IPC mechanism of Android, but instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, with the extra modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}%
+%~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than non-interference certification.}
+, IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
 
-One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must be careful to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
+One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions which have been assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must take care to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
 
 \subsection{A Language with Permission Checks}\label{sec:language}
 
@@ -260,14 +260,14 @@ The commands of the language are given in the following grammar:
   \quad \mid \lcLETVAR{x}{e}{c} \mid \lcCALL{x}{A.f}{\overline{e}} \mid \lcCP{p}{c}{c}
 \end{array}
 \end{equation*}
-The first four constructs are respectively assignment, conditional, while-loop and sequential composition.
+The first four constructs are assignment, conditional, while-loop and sequential composition, respectively.
 The statement ``\lcLETVAR{x}{e}{c}'' is a local variable declaration statement. Here $x$ is
 declared and initialized to $e$, and its scope is the command $c$. We require
 that $x$ does not occur in $e.$
 The statement ``\lcCALL{x}{A.f}{\overline{e}}''  denotes an assignment whose right hand side is
 a function call to $A.f$. The statement
 ``\lcCP{p}{c_1}{c_2}''
-checks whether the calling app has permission $p$: if it does then $c_1$ is executed,
+checks whether the calling app has permission $p$: if so then $c_1$ is executed,
 otherwise $c_2$ is executed.
 This is similar to the \textbf{test} construct in {\BN} system, except that we allow testing only
 one permission at a time. This is a not real restriction since both versions of the \textbf{test} can simulate one another.
@@ -296,7 +296,7 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 
 \[
 \inference[E-OP]{\mu \vdash e_1 \leadsto v_1\quad \mu \vdash e_2 \leadsto v_2}
-{\mu \vdash \leOP{e_1}{e_2} \leadsto v_1~op~v_2}
+{\mu \vdash \leOP{e_1}{e_2} \leadsto \leOP{v_1}{v_2}}
 \qquad
 \inference[E-LETVAR]{\mu \vdash e \leadsto v \quad \mu [ x \mapsto v ]; A ; P \vdash c \leadsto \mu'}
 {\mu; A; P \vdash \lcLETVAR{x}{e}{c} \leadsto \mu' - x}
@@ -339,7 +339,7 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 \]
 
 \[
-\inference[E-CALL]{
+\inference[E-ICALL]{
 \FD(B.f) = \lpPROG{B.f}{\overline{y}}{c}{\lpRES} \qquad
 \mu\vdash\overline{e} \leadsto \overline{v} \quad
 [\overline{y} \mapsto \overline{v}, r \mapsto 0] ; B; \Theta(A) \vdash c \leadsto \mu'}
@@ -355,7 +355,7 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 We assume that function definitions are stored in a table $\FD$ indexed by function names, and the permission sets assigned to apps are given by a table $\Theta$ indexed by app names.
 
 An {\termEmph{evaluation environment}
-is a finite mapping from variables to values (i.e., integers).
+is a finite mapping from variables to values (i.e., integers in the simplified language).
 We denote with $EEnv$ the set of evaluation environments.
 Elements of $EEnv$ are ranged over by $\mu$.
 We  use the notation
@@ -393,7 +393,7 @@ The operational semantics of most commands are straightforward.
 We explain the semantics of the \emph{test} primitive and the function call.
 Rules (\ruleTagText{E-CP-T}) and (\ruleTagText{E-CP-F}) capture the semantics of the \textbf{test} primitive.
 These are where the permission context $P$ in the evaluation judgement is used.
-The semantics of function calls is given by (\ruleTagText{E-CALL}). 
+The semantics of function calls is given by (\ruleTagText{E-ICALL}). 
  Notice that $c$ inside the body of \emph{callee} is executed under
 the permission context $\Theta(A)$, which is the permission set of $A$. The permission context $P$
 in the conclusion of that rule, which denotes the permission of the app that calls $A$, 
@@ -599,7 +599,7 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 \]
 
 \[
-\inference[T-CALL]
+\inference[T-ICALL]
 {\FT(B.f) = \overline{t} \rightarrow t' &
 \Psi \vdash \overline{e} : \app{\overline{t}}{\Theta(A)} &
 \app{t'}{\Theta(A)} \leq \Psi(x)}
@@ -689,7 +689,7 @@ a return value of type at most $\app{t'}{P}$.
 \end{itemize}
 The typing rules are given in Fig.~\ref{fig:typing-rules}.
 Most of them are common to
-information flow type systems~\cite{Volpano:1996,Banerjee:2005ht,Sabelfeld:2003} except for \ruleTagText{T-CP} and \ruleTagText{T-CALL}. Note that in the subtyping rule for commands (\ruleTagText{T-SUB$_c$}), the security type of the effect of the command
+information flow type systems~\cite{Volpano:1996,Banerjee:2005ht,Sabelfeld:2003} except for \ruleTagText{T-CP} and \ruleTagText{T-ICALL}. Note that in the subtyping rule for commands (\ruleTagText{T-SUB$_c$}), the security type of the effect of the command
 can be safely downgraded, since typing for commands keeps track of a lower bound of the write effects of the command. This typing rule for
 command is standard, see, e.g., \cite{Volpano:1996} for a more detailed discussion.
 
@@ -715,7 +715,7 @@ $
 for all $P$ such that $p \in P$, which holds by definition. A dual scenario arises when
 $p$ is not in the permissions of the execution context.
 
-In \ruleTagText{T-CALL}, the callee function $B.f$ is assumed to be type checked beforehand
+In \ruleTagText{T-ICALL}, the callee function $B.f$ is assumed to be type checked beforehand
 and its type is given in the $FT$ table. Here the function $B.f$ is called
 by $A$ so the type of $B.f$ as seen by $A$ should be
 a projection of the type given in $FT(B.f)$ on the permissions of $A$ (given by $\Theta(A)$):
@@ -727,10 +727,10 @@ and the return type (as viewed by $A$) should be dominated
 by the type of $x$, i.e., $\app{t'}{\Theta(A)} \leq \Psi(x)$.
 
 
-\textbf{Parameter laundering}~It is essential that in Rule \ruleTagText{T-CALL}, the arguments $\overline{e}$ and the return value of
-the function call are typed according to the projection of $\overline{t}$ and $t'$ on $\Theta(A)$. If they are instead typed with $\overline{t}$, then there is a potential implicit flow via a ``parameter laundering'' attack. To see why, consider the following alternative to \ruleTagText{T-CALL}:
+\textbf{Parameter laundering}~It is essential that in Rule \ruleTagText{T-ICALL}, the arguments $\overline{e}$ and the return value of
+the function call are typed according to the projection of $\overline{t}$ and $t'$ on $\Theta(A)$. If they are instead typed with $\overline{t}$, then there is a potential implicit flow via a ``parameter laundering'' attack. To see why, consider the following alternative to \ruleTagText{T-ICALL}:
 \begin{equation*}
-\inference[T-CALL']
+\inference[T-ICALL']
 {
  \FT(B.f) = \overline{t} \rightarrow t' &
  \Psi \vdash \overline{e} :\overline{t} &
@@ -774,7 +774,7 @@ of security level $H$ that needs to be protected, so function \textit{C.getsecre
 the secret value.
 Suppose the permissions assigned to the apps are given by:  $\Theta(A) =  \Theta(B) = \emptyset, \Theta(C) = \Theta(M) = \{p\}.$
 
-If we were to adopt the modified \ruleTagText{T-CALL'} instead of \ruleTagText{T-CALL}, then we can assign the following
+If we were to adopt the modified \ruleTagText{T-ICALL'} instead of \ruleTagText{T-ICALL}, then we can assign the following
 types to the above functions:
 \[
 FT := \left\{
@@ -788,9 +788,9 @@ M.main & \mapsto  & () \rightarrow \hat{L}
 \]
 Notice that the return type of $M.main$ is $\hat{L}$ despite having a
 return value that contains sensitive value \textit{P\_INFO}.
-If we were to use \ruleTagText{T-CALL'} in place of \ruleTagText{T-CALL}, the above functions can
+If we were to use \ruleTagText{T-ICALL'} in place of \ruleTagText{T-ICALL}, the above functions can
 be typed as shown in Fig.~\ref{fig:type1}.
-Finally, still assuming \ruleTagText{T-CALL'}, a partial typing
+Finally, still assuming \ruleTagText{T-ICALL'}, a partial typing
 derivation for $M.main$ is given in Fig.~\ref{fig:type2}.
 
 As shown in Fig.~\ref{fig:type1}, \textit{B.g} can be given type $t \rightarrow \hat{L}$. Intuitively, it checks that the
@@ -803,7 +803,7 @@ In the run where \textit{A.f} is called from \textit{M.main}, the value of $x$ i
 However, when it goes through \textit{A.f} to \textit{B.g}, the value of $x$ is perceived as \emph{non-sensitive} by $B$, since
 the caller in this case ($A$) has no permissions. The use of the intermediary $A$ in this case in effect launders the permissions
 associated with $x.$
-Therefore, if the rule \ruleTagText{T-CALL'} is used in place of \ruleTagText{T-CALL}, the call chain
+Therefore, if the rule \ruleTagText{T-ICALL'} is used in place of \ruleTagText{T-ICALL}, the call chain
 from \textit{M.main} to \textit{A.f} and finally to \textit{B.g} can
 all be typed.
 This is correct in a setting where permissions are \emph{propagated}
@@ -811,7 +811,7 @@ along with calling context (e.g., \cite{Banerjee:2005ht}) however it
 is incorrect in the Android permission model~\ref{sec:permission_model}. 
 To avoid the parameter laundering problem, our approach is to make sure that an app may only pass an argument
 to another function if the app itself is authorized to access the content of the argument in the first place,
-as formalized in the rule \ruleTagText{T-CALL}.
+as formalized in the rule \ruleTagText{T-ICALL}.
 
 \begin{figure*}[ht]
 \begin{scriptsize}
@@ -819,7 +819,7 @@ as formalized in the rule \ruleTagText{T-CALL}.
 \AxiomC{$FT(B.g) = t \rightarrow \hat{L}$}
 \AxiomC{$x : t, r : \hat{L} \vdash x : t$}
 \AxiomC{$\hat{L} \leq t$}
-\LeftLabel{T-CALL'}
+\LeftLabel{T-ICALL'}
 \TrinaryInfC{$x : t, r : \hat{L} ; A \vdash \lcCALL{r}{B.g}{x} : \hat{L}$}
 \LeftLabel{T-FUN}
 \UnaryInfC{$\vdash \lpPROG{A.f}{x} {\lcCALL{r}{B.g}{x} }{\lpRES} : t \rightarrow \hat{L}$}
@@ -891,7 +891,7 @@ where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are
 \AxiomC{$FT(C.getsecret) = () \rightarrow t$}
 \AxiomC{$\Psi \vdash () : () $}
 \AxiomC{$t \leq \Psi(x_H) = t $}
-\LeftLabel{T-CALL'}
+\LeftLabel{T-ICALL'}
 \TrinaryInfC{$\Psi; M \vdash \lcCALL{x_H}{C.getsecret}{~} : t$}
 \LeftLabel{T-SUB${}_c$}
 \UnaryInfC{$\Psi; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
@@ -903,7 +903,7 @@ where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are
 \AxiomC{$FT(A.f) = t \rightarrow \hat{L}$}
 \AxiomC{$\Psi \vdash x_H : t$}
 \AxiomC{$\hat{L} \leq \Psi(x_H) = t$}
-\LeftLabel{T-CALL'}
+\LeftLabel{T-ICALL'}
 \TrinaryInfC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \end{prooftree}
 \end{scriptsize}
@@ -912,7 +912,7 @@ where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are
 \end{figure*}
 
 With the correct typing rule for function calls, the function $A.f$ cannot be assigned type
-$t \rightarrow \hat{L}$, since that would require the instance of T-CALL (i.e., when making the
+$t \rightarrow \hat{L}$, since that would require the instance of T-ICALL (i.e., when making the
 call to $B.g$) in this case to satisfy
 the constraint:
 \[
@@ -932,7 +932,7 @@ type $\hat{H}$, and thus cannot be passed to $A.f$ as an argument.
 
 
 
-\subsection{Noninterference and Soundness}\label{sec:noninterference}
+\subsection{Non-interference and Soundness}\label{sec:non-interference}
 
 We first define an \termEmph{indistinguishability} relation between evaluation environments.
 Such a definition typically assumes an observer who may observe values of variables at a certain security level.
@@ -1005,7 +1005,7 @@ $\forall x\in dom(\Psi)$, we need to prove that when $\app{\Psi}{P}(x)\leq l_O$ 
 
 
 We hereby give the definitions for well-typed property
-(Definition~\ref{def:cmd-welltype}) and noninterference for the type
+(Definition~\ref{def:cmd-welltype}) and non-interference for the type
 system (Defintion~\ref{def:ni} and Definition~\ref{def:sys-ni}),
 together with the final soundness conclusion
 (Theorem~\ref{thm:ni}).
@@ -1099,8 +1099,8 @@ it is deducible that $v = \mu(x) = \mu'(x) = v'$.
 \end{equation*}
 and
 \begin{equation*}
-\inference{\mu \vdash e_i \leadsto v_i}{\mu\vdash \leOP{e_1}{e_2}\leadsto v_1~op~v_2} ~
-\inference{\mu' \vdash e_i \leadsto v'_i}{\mu'\vdash \leOP{e_1}{e_2}\leadsto v'_1~op~v'_2}
+\inference{\mu \vdash e_i \leadsto v_i}{\mu\vdash \leOP{e_1}{e_2}\leadsto  \leOP{v_1}{v_2}} ~
+\inference{\mu' \vdash e_i \leadsto v'_i}{\mu'\vdash \leOP{e_1}{e_2}\leadsto \leOP{v'_1}{v'_2}}
 \end{equation*}
 By induction on $e_i$, we can get $v_i = v'_i$. Therefore $v = v'$.
 %%%%%%%%%%%%%%%%%%
@@ -1152,7 +1152,7 @@ at level $l_O.$
 It then follows from Definition~\ref{def:envequ}
 that $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu' $.
 
-\item[T-CALL] In this case
+\item[T-ICALL] In this case
 the command $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$
 and the typing derivation
@@ -1379,7 +1379,7 @@ we obtain $\mu_2 =_{\app{\Psi} P} \mu_2'.$
   Otherwise, this case follows from the induction hypothesis and the fact
   that the mapping for the local variable $x$ is removed
   in $\mu_2$ and $\mu_2'.$
-\item[T-CALL]
+\item[T-ICALL]
 In this case, $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$. Suppose the typing
 derivation is the following (where we label the premises
@@ -1421,7 +1421,7 @@ $\mu_2 = \mu_1[x \mapsto \mu_3(r)]$
 and $\mu_2' = \mu_1'[x \mapsto \mu_3'(r)].$
 
 Moreover, since we consider only well-typed systems,
-the function $\FD(B.f)$ is also typable:
+the function $\FD(B.f)$ is also typeable:
 $$
 \inference
     {
@@ -1805,7 +1805,7 @@ t \leq_{\trace} t_1\sqcap t_2
 \]
 
 \[
-\inference[TT-CALL]
+\inference[TT-ICALL]
 {
 \FT(B.f) = \overline{t} \xrightarrow{} t'  &
 \Psi;\trace \vdash_{t} \overline{e} : \overline{s} &
@@ -1833,7 +1833,7 @@ t \leq_{\trace} t_1\sqcap t_2
 
  
 
-The next two lemmas show the trace rules are sound and complete with respect to the typing rules, i.e., an expression (command, function, resp.)  is typable under the trace rules, if and only if it is typable under the typing rules.
+The next two lemmas show the trace rules are sound and complete with respect to the typing rules, i.e., an expression (command, function, resp.)  is typeable under the trace rules, if and only if it is typeable under the typing rules.
 
 \begin{lemma}\label{lem:ptrsound}
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
@@ -1890,7 +1890,7 @@ Finally, by Rule {(T-LETVAR)}, the result follows.
 \item[TT-WHILE] By induction and Rules {(T-SUB$_{c}$)}, {(T-WHILE)}.
 \item[TT-SEQ] By induction and Rules {(T-SUB$_{c}$)}, {(T-SEQ)}.
 
-\item[TT-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\item[TT-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
 \begin{equation*}
 \inference
 {
@@ -2024,7 +2024,7 @@ Then by Rule {(T-LETVAR)}, the result follows.
 \item[T-WHILE] By induction and Rule {(T-WHILE)}.
 \item[T-SEQ] By induction and Rule {(T-SEQ)}.
 
-\item[T-CALL] in this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\item[T-ICALL] in this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
 \begin{equation*}
 \inference
 {
@@ -2036,7 +2036,7 @@ Then by Rule {(T-LETVAR)}, the result follows.
 \end{equation*}
 By \ref{lem:typingtrace-1} on $(\mathbf{T1})$, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}\cdot\trace}$, that is, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}}$.
 From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, $\app{t'}{\Theta(A)}\cdot\trace \leq (\Psi\cdot\trace)(x)$, that is, $\app{t'}{\Theta(A)} \leq (\Psi\cdot\trace)(x)$.
-Then by Rule {(T-CALL)}, $(\Psi\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Psi\cdot\trace)(x)$.
+Then by Rule {(T-ICALL)}, $(\Psi\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Psi\cdot\trace)(x)$.
 
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
@@ -2145,7 +2145,7 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}
 \item[T-WHILE] By induction and Rule {(TT-WHILE)}.
 \item[T-SEQ] By induction and Rule {(TT-SEQ)}.
 
-\item[T-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\item[T-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
 \begin{equation*}
 \inference
 {
@@ -2158,7 +2158,7 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}
 From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
 Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
 From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-CALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
+Then by Rule {(TT-ICALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
@@ -2304,7 +2304,7 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}
 \item[T-WHILE] By induction and Rule {(TT-WHILE)}.
 \item[T-SEQ] By induction and Rule {(TT-SEQ)}.
 
-\item[T-CALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\item[T-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
 \begin{equation*}
 \inference
 {
@@ -2317,7 +2317,7 @@ Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}
 From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
 Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
 From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-CALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
+Then by Rule {(TT-ICALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
 
 \item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
 \begin{equation*}
@@ -2518,7 +2518,7 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 
 
  
-The next two lemmas show the constraint rules are \emph{sound} and \emph{complete} with respect to permission trace rules, i.e., the constraint set generated by the derivation of an expression (command, function, resp.) under the constraint rules is solvable, if and only if an expression (command, function, resp.) is typable under trace rules.
+The next two lemmas show the constraint rules are \emph{sound} and \emph{complete} with respect to permission trace rules, i.e., the constraint set generated by the derivation of an expression (command, function, resp.) under the constraint rules is solvable, if and only if an expression (command, function, resp.) is typeable under trace rules.
 
 \begin{lemma}\label{lem:cgrsound}
 The following statements hold:
@@ -2614,7 +2614,7 @@ $$
 that is, $\FT(B.f) =  \overline{t\theta}\xrightarrow{} t'\theta$.
 By \ref{lem:cgrsound-1} on $\overline{e}$,
 $$\Psi\theta;\trace; A \vdash_{t} \overline{e} : \overline{s\theta}.$$
-Finally, by Rule  {(TT-CALL)},
+Finally, by Rule  {(TT-ICALL)},
 $$
 \Psi\theta;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi\theta(x)
 $$
@@ -2778,7 +2778,7 @@ So we also have $\theta_{0}\cup\theta'\vDash C_{e}$ and $\Psi_{0}(\theta_{0}\cup
 Moreover,  $s_{e}(\theta_{0}\cup\theta')=s_{e}\theta_{0}=s\leq_{\trace} s' = \alpha_x(\theta_{0}\cup\theta')$.
 Therefore, $\theta_{0}\cup\theta'\vDash C$.
 
-\item[TT-CALL] In this case we have $c\cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
+\item[TT-ICALL] In this case we have $c\cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
 \begin{equation*}
 \inference
 {
@@ -3248,7 +3248,7 @@ By Lemma  \ref{lem:consolcorrect} and Lemma \ref{lem:unifycomplete}.
 \end{proof}
 
 
-To conclude, an expression (command, function, resp.) is typable, iff it is derivable under the constraint rules with a solvable constraint set by our algorithm.
+To conclude, an expression (command, function, resp.) is typeable, iff it is derivable under the constraint rules with a solvable constraint set by our algorithm.
 Therefore, our type inference system is sound and complete.
 Moreover, as the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by our algorithm in finite steps.
 Thus, our type inference system terminates.
@@ -3258,16 +3258,16 @@ The type inference system is sound, complete and decidable.
 \end{theorem}
 \begin{proof}
 \begin{itemize}
-\item \textbf{sound}: By Lemma  \ref{lem:cgrsound0} and Lemma \ref{lem:solsound}.
-\item \textbf{complete}: By Lemma  \ref{lem:cgrcomplete0} and Lemma \ref{lem:solcomplete}.
-\item \textbf{decidable}: as the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by $sol$ in finite steps. Thus, the type inference system terminates.
+\item \textbf{soundness}: By Lemma  \ref{lem:cgrsound0} and Lemma \ref{lem:solsound}.
+\item \textbf{completeness}: By Lemma  \ref{lem:cgrcomplete0} and Lemma \ref{lem:solcomplete}.
+\item \textbf{decidablity}: As the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by $sol$ in finite steps. In this sense, the type inference system always terminates.
 \end{itemize}
 \end{proof}
 
 
 \section{Related Work}
 
-There is a large body of work on language-based information flow security. We discuss only closely related work.
+We discuss only those closely related work on the type checking based verification on information flow security for Android.
 
 We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:sta_intro}.
 
@@ -3303,7 +3303,7 @@ It may be possible to encode our notion of security types as a
 dependent type in their setting, by treating permission sets
 explicitly as an additional parameter to a function or a service, and
 to specify security levels of the output of the function as a type
-dependent on that parameter.  Currently it is not yet clear to us how
+dependent on that parameter. It remains unclear to us how
 one could give a general construction of the index types in their type
 system that would correspond to our security types, and how the merge
 operator would translate to their dependent type constructors, among
@@ -3331,28 +3331,29 @@ Necula and Lee~\cite{necula:pcc:1996} and does not require extra
 changes on existing Android application supply chain systems.
 
 
- \section{Conclusion and Future Work}\label{sec:conclusion}
+% \section{Conclusion and Future Work}\label{sec:conclusion}
+\section{Conclusion}\label{sec:conclusion}
 
-We have provided a lightweight yet precise type system featuring Android permission model for enforcing secure information flow in an
-imperative language and proved its soundness with respect to noninterference.
+We have provided a lightweight yet precise type system featuring Android permission model that enforces secure information flow in an
+imperative language and proved its soundness in terms of non-interference.
 Compared to existing work, our type system can specify a broader range of security policies, including non-monotonic ones.
 We have also proposed a decidable type inference algorithm by reducing it to a constraint solving problem.
 
-We next discuss briefly several directions for future work.
-
-The immediate one is to extend our system to richer programming languages. We have been working on adding another security typing for global variables. The addition of global variables presents a potential side channel, i.e., when they are \emph{written} and \emph{read} by apps with different permission contexts, so they need to be treated differently than local variables. Other extensions include object-oriented feature (like~\cite{Sun:SAS04}), exceptions (like~\cite{Barthe:2006jh}), etc.
-
-We also plan to apply our type system to real Android applications to enforce permission-dependent information flow policies.
-A main challenge is to facilitate type inference so that a programmer does not need to type every variable and instead focuses only on 
-policy specifications of a service. To enable this, we need to be able to extract all permissions relevant to an app and to identify 
-all commands relevant to permission checking in an app. The former is straightforward since the permissions that can be granted to an app 
-is statically specified in the app's manifest file. For the latter, the permission checking code segments (typically library function calls) can be located with 
-pre-processed static analyses (e.g., \cite{Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357}). 
-
-Another interesting direction is in modeling runtime permission request. From Android 6.0 and above, several permissions are classified as \emph{dangerous permissions} and granting of these permissions is subject to users' approval at runtime. This makes enforcing non-monotonic policies impossible in some cases, e.g., when
-a policy specifies the absence of a dangerous permission in releasing sensitive information. However, an app can only request for a permission it has explicitly declared in the manifest file, so to this extent, we can statically determine whether a permission request is definitely \emph{not} going to be granted (as it is absent from the manifest), and whether it can {\em potentially} be granted. 
-And fortunately (but unfortunately from a security perspective) the typical scenarios are that users grant all the requested permissions during runtime when requested (in order to gain a better user experience with the app). Therefore one can assume optimistically that all permissions in the manifest are finally granted. In the future, we plan to resolve this issue with weaker assumptions. One feasible approach is to model dangerous permissions in a typing environment separately and allow policies to be non-monotonic on non-dangerous permissions only.
-
-Lastly, our eventual goal is to translate source code typing into Dalvik bytecode typing, following a similar approach done by Gilles Barthe et al~\cite{Barthe:2005ju,Barthe:2006jh,Barthe:2007fxa} from Java source to JVM bytecode. The key idea, i.e., precise characterizations of security of IPC channels that depends on permission checks, can still be applied to richer type systems such as those used in the Cassandra project~\cite{Lortz:2014ku} or Gunadi's type system~\cite{Gunadi:2015}. We envision our implementation can piggyback on, say, Cassandra system to improve the coverage of typable applications.
+%We next discuss briefly several directions for future work.
+%
+%The immediate one is to extend our system to richer programming languages. We have been working on adding another security typing for global variables. The addition of global variables presents a potential side channel, i.e., when they are \emph{written} and \emph{read} by apps with different permission contexts, so they need to be treated differently than local variables. Other extensions include object-oriented feature (like~\cite{Sun:SAS04}), exceptions (like~\cite{Barthe:2006jh}), etc.
+%
+%We also plan to apply our type system to real Android applications to enforce permission-dependent information flow policies.
+%A main challenge is to facilitate type inference so that a programmer does not need to type every variable and instead focuses only on 
+%policy specifications of a service. To enable this, we need to be able to extract all permissions relevant to an app and to identify 
+%all commands relevant to permission checking in an app. The former is straightforward since the permissions that can be granted to an app 
+%is statically specified in the app's manifest file. For the latter, the permission checking code segments (typically library function calls) can be located with 
+%pre-processed static analyses (e.g., \cite{Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357}). 
+%
+%Another interesting direction is in modeling runtime permission request. From Android 6.0 and above, several permissions are classified as \emph{dangerous permissions} and granting of these permissions is subject to users' approval during runtime. This makes enforcing non-monotonic policies impossible in some cases, e.g., when
+%a policy specifies the absence of a dangerous permission in releasing sensitive information. However, an app can only request for a permission it has explicitly declared in the manifest file, so to this extent, we can statically determine whether a permission request is definitely \emph{not} going to be granted (as it is absent from the manifest), and whether it can {\em potentially} be granted. 
+%And fortunately (but unfortunately from a security perspective) the typical scenarios are that users grant all the requested permissions during runtime when requested (in order to gain a better user experience with the app). Therefore one can assume optimistically that all permissions in the manifest are finally granted. In the future, we plan to resolve this issue with weaker assumptions. One feasible approach is to model dangerous permissions in a typing environment separately and allow policies to be non-monotonic on non-dangerous permissions only.
+%
+%Lastly, our eventual goal is to translate source code typing into Dalvik bytecode typing, following a similar approach done by Gilles Barthe et al~\cite{Barthe:2005ju,Barthe:2006jh,Barthe:2007fxa} from Java source to JVM bytecode. The key idea, i.e., precise characterizations of security of IPC channels that depends on permission checks, can still be applied to richer type systems such as those used in the Cassandra project~\cite{Lortz:2014ku} or Gunadi's type system~\cite{Gunadi:2015}. We envision our implementation can piggyback on, say, Cassandra system to improve the coverage of typeable applications.
 
 

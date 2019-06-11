@@ -33,8 +33,6 @@
 \newcommand*{\Lbrack}{[\hspace{-.02in}[}
 \newcommand*{\Rbrack}{]\hspace{-.02in}]}
 \newcommand*{\se}[1]{\Lbrack #1 \Rbrack}
-\newcommand*{\MyPTE}[1]{\Gamma;\Lambda;\Theta;{#1}\vdash_{t}\;}
-\newcommand*{\MyPE}[1]{(\Gamma\cdot\Lambda);\Theta;{#1}\vdash \;}
 
 \makeatletter
 \def\maketag@@@#1{\hbox{\m@th\normalfont\scriptsize#1}}
@@ -45,14 +43,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*{\leVAL}[1]{\ensuremath{#1}}
 \newcommand*{\leVAR}[1]{\ensuremath{#1}}
-\newcommand*{\leOP}[2]{\ensuremath{{#1}~\textbf{op}~{#2}}}
+\newcommand*{\leOP}[2]{\ensuremath{{#1}~\circ~{#2}}}
 
 %---------------------------
 \newcommand*{\lcASS}[2]{\ensuremath{{#1}:={#2}}}
 \newcommand*{\lcIF}[3]{\ensuremath{{\textbf{if}~{#1}~\textbf{then}~{#2}~\textbf{else}~{#3}}}}
 \newcommand*{\lcSEQ}[2]{\ensuremath{{#1};{#2}}}
 \newcommand*{\lcWHILE}[2]{\ensuremath{\textbf{while}~{#1}~\textbf{do}~{#2}}}
-\newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{fcall}~{#2}({#3})}}
+\newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{Icall}~{#2}({#3})}}
 \newcommand*{\lcCP}[3]{\ensuremath{{\textbf{test}({#1})~{#2} ~\textbf{else}~ {#3}}}}
 \newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letv}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
 
