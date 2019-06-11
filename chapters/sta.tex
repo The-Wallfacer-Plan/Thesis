@@ -4,9 +4,9 @@
 
 \section{Introduction and Motivation}\label{sec:sta_intro}
 
-Owing to the prevasive use of mobile applications, mobile security has become increasingly important for our daily life.
-Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of constructing secure applications.
-In particular, we aim to provide a guarantee for information flow security in the constructed applications. In order to achieve this, we apply a type checking based verification approach.
+Owing to the pervasive use of mobile applications (apps), mobile security has become increasingly important for our daily life.
+Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of constructing secure apps.
+In particular, we aim to provide a guarantee for information flow security in the constructed apps. In order to achieve this, we apply a type checking based verification approach.
 
 \subsection{Motivating Examples}
 
@@ -35,9 +35,9 @@ If the interface is invoked by an app that has the required permission,
 the phone number ($H$) is returned; otherwise an empty string ($L$)
 is returned. In both cases, no data leakage happens: in the former case, the calling app is authorized; and in the latter case, no sensitive data is ever returned. By this informal reasoning, the function complies with the implicit security policy and it
 should be safe to be called in \emph{any} context, regardless of the permissions the calling app has.
-However, in the traditional (non-value dependent) typing rule for the if-then-else construct, one would assign \emph{the same} security level to both branches,
+However, in the traditional (non-value dependent) typing rule for the if-then-else construct, one would assign \emph{the same} security labels to both branches,
 and the return value of the function would be assigned level $H$.
-As a result, if this function is called from an app with \emph{no} permission, assigning the return value to a variable with security level $L$ has to be rejected by the type system even though no sensitive information is leaked.
+As a result, if this function is called from an app with \emph{no} permission, assigning the return value to a variable with security labels $L$ has to be rejected by the type system even though no sensitive information is leaked.
 To cater for such a scenario, we need to make the security type of \textit{getContactNo}
  \emph{depend on} the permissions possessed by the caller.
 
@@ -50,7 +50,7 @@ We say a permission is {\em disabled} for an class if it is \emph{not assigned} 
 Depending on the permissions of
 the calling class (corresponding to an \emph{app} in the above example), a function such as \textit{getContactNo} can have a collection of types. In {\BN} type system, the types of a function take
 the form $(l_1,\dots, l_n)\xrightarrow{~P~}l$
-where $l_1,\dots,l_n$ denote security levels of the input, $l$ denotes the security level of the output
+where $l_1,\dots,l_n$ denote security labels of the input, $l$ denotes the security labels of the output
 and $P$ denotes a set of permissions that are disabled by the caller.
 The idea is that permissions are guards to sensitive values. Thus conservatively, one would type the return value of \textit{getContactNo} as $L$ only if
 one knows that the permission READ\_CONTACT is disabled.
@@ -152,7 +152,7 @@ cannot precisely capture non-monotonic policies appears to be a design decision:
 they cited in \cite{Banerjee:2005ht} the lack of motivating examples for non-monotonic policies, and
 suggested that to accommodate such policies one might need to consider a notion of declassification.
 As we have seen, however, non-monotonic policies can arise naturally in mobile
-applications. In a study on Android
+apps. In a study on Android
 malwares~\cite{Enck:2009:UAS:1512148.1512324}, Enck et. al. 
 identify several combinations of permissions that are potentially
 `dangerous', in the sense that they allow potentially unsafe information flow.
@@ -160,8 +160,8 @@ An information flow policy that requires
 the {\em absence} of such combinations of permissions in 
 information release would obviously be non-monotonic.
 In general, non-monotonic policies can be required to solve the {\em aggregation problem}
-studied in the information flow theory~\cite{Landauer93}, where several pieces of low security level information may
-be pooled together to learn information at a higher security level.
+studied in the information flow theory~\cite{Landauer93}, where several pieces of low security labels information may
+be pooled together to learn information at a higher security labels.
 
 We therefore designed a more precise type system for information flow
 under an access control model inspired by Android framework.
@@ -346,7 +346,7 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 {\mu;A;P \vdash \lcCALL{x}{B.f}{\overline{e}} \leadsto \mu[x \mapsto \mu'(r) ]}
 \]
 }
-\caption{Evaluation rules for the expressions and commands with function definition table $\FD$ and permission assignment $\Theta.$
+\caption{Evaluation rules for expressions and commands, in the presence of function definition table $\FD$ and permission assignment $\Theta.$
 }
 \label{fig:semantics}
 \end{figure*}
@@ -406,12 +406,12 @@ where permission contexts are inherited by successive function calls.
  \subsection{Security Types}\label{sec:types}
 
 In information flow type systems such as \cite{Volpano:1996}, it is common to adopt a lattice
-structure to encode security levels. Security types in this setting are just security
+structure to encode security labels. Security types in this setting are just security
 levels. In our case, we generalize the security types to account for
-the dependency of security levels on permissions. So we shall distinguish
-security levels, given by a lattice structure which encodes sensitivity levels
-of information, and security types, which are mappings from permissions to security levels.
-We assume the security levels are given by a lattice $\SL$, with a partial order $\leq_{\SL}$.
+the dependency of security labels on permissions. So we shall distinguish
+security labels, given by a lattice structure which encodes sensitivity levels
+of information, and security types, which are mappings from permissions to security labels.
+We assume the security labels are given by a lattice $\SL$, with a partial order $\leq_{\SL}$.
 Security types are defined in the following.
 
 \begin{definition}\label{def:base_type}
@@ -437,7 +437,7 @@ $s\leq_\Tcal t$ \text{iff} $\forall$ $P\in \PPS$, $s(P) \leq_{\SL} t(P)$.
 As we shall see, if a variable is typed by a base type, the sensitivity of
 its content may depend on the app's permissions which writes to the variable.
 In contrast, in traditional information flow type systems,
-a variable annotated with a security level has a fixed sensitivity level
+a variable annotated with a security labels has a fixed sensitivity level
 regardless of the permissions of the app that writes to the variable.
 
 The set of base types with the order $\leq_{\Tcal}$ forms a lattice. The join and meet
@@ -478,11 +478,11 @@ From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when 
 
 \begin{definition}
 \label{def:embed}
-Given a security level $l$, we define $\hat{l}$ as:
+Given a security labels $l$, we define $\hat{l}$ as:
 for all $P \in \PPS$, we have $\hat{l}(P) = l$.
 \end{definition}
 
-Accordingly, a security level $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
+Accordingly, a security labels $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
 
 
 
@@ -770,7 +770,7 @@ M.main() { %// $M$ \emph{has} permission $p$%
 \end{lstlisting}
 Let $\PS=\{p\}$ and $t$ be the base type $t =  \{\emptyset \mapsto L, \{p\} \mapsto H\}$,
 where $L$ and $H$ are bottom and top levels respectively. Here we assume \textit{P\_INFO} is a sensitive value
-of security level $H$ that needs to be protected, so function \textit{C.getsecret} is required to have type $() \rightarrow t$. That is, only apps that have the required permission $p$ may obtain
+of security labels $H$ that needs to be protected, so function \textit{C.getsecret} is required to have type $() \rightarrow t$. That is, only apps that have the required permission $p$ may obtain
 the secret value.
 Suppose the permissions assigned to the apps are given by:  $\Theta(A) =  \Theta(B) = \emptyset, \Theta(C) = \Theta(M) = \{p\}.$
 
@@ -795,7 +795,7 @@ derivation for $M.main$ is given in Fig.~\ref{fig:type2}.
 
 As shown in Fig.~\ref{fig:type1}, \textit{B.g} can be given type $t \rightarrow \hat{L}$. Intuitively, it checks that the
 caller has permission $p$. If it does, then \textit{B.g} returns 0 (non-sensitive), otherwise it returns the
-argument of the function (i.e., $x$). This is as expected and is sound, under the assumption that the security level of
+argument of the function (i.e., $x$). This is as expected and is sound, under the assumption that the security labels of
 the content of $x$ is dependent on the permissions of the caller. If the caller of \textit{B.g} is the original creator of the content of $x$,
 then the assumption is trivially satisfied. The situation gets a bit tricky when the caller simply passes on the content  it
 receives from another app to $x$. In our example, app $A$ makes a call to \textit{B.g}, and passes on the value of $x$ it receives.
@@ -852,7 +852,7 @@ Note that $t\uparrow_p = \hat{H}$, $t\downarrow_p = \hat{L} = \hat{L}\downarrow 
 \end{prooftree}
 Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
 \end{scriptsize}
-\caption{Typing derivations for functions A.f, B.g and C.getsecret}
+\caption{Typing derivations for A.f, B.g and C.getsecret}
 \label{fig:type1}
 \end{figure*}
 
@@ -907,7 +907,7 @@ where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are
 \TrinaryInfC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \end{prooftree}
 \end{scriptsize}
-\caption{A typing derivation for function M.main}
+\caption{A typing derivation for M.main}
 \label{fig:type2}
 \end{figure*}
 
@@ -935,17 +935,17 @@ type $\hat{H}$, and thus cannot be passed to $A.f$ as an argument.
 \subsection{Non-interference and Soundness}\label{sec:non-interference}
 
 We first define an \termEmph{indistinguishability} relation between evaluation environments.
-Such a definition typically assumes an observer who may observe values of variables at a certain security level.
-In the non-dependent setting, the security level of the observer is fixed, say at $l_O$, and valuations
-of variables at level $l_O$ or below are required to be identical. In our setting, the security level of
+Such a definition typically assumes an observer who may observe values of variables at a certain security labels.
+In the non-dependent setting, the security labels of the observer is fixed, say at $l_O$, and valuations
+of variables at level $l_O$ or below are required to be identical. In our setting, the security labels of
 a variable in a function can vary depending on the permissions of the caller app (which may be the observer itself), so
 it may seem more natural to define indistinguishability in terms of the permission set assigned to the observer. However,
 we argue that such a definition is subsumed by the  
-more traditional definition that is based on the security level of the observer.
+more traditional definition that is based on the security labels of the observer.
 Assuming that the observer app is assigned a permission set $P$, 
 then given two variables $x : t$ and $y : t'$,
 the level of information that the observer can access through $x$ and $y$ is at most $t(P) \sqcap t'(P).$
-In general the least upper bound of the security level that an observer with permission $P$ has access to can
+In general the least upper bound of the security labels that an observer with permission $P$ has access to can
 be computed from the least upper bound of projections (along $P$) of the types of variables and the return types
 of functions in the system.
 In the following definition of indistinguishability, we simply assume that
@@ -955,7 +955,7 @@ which this upper bound is derived.
 
 \begin{definition}\label{def:envequ}
 Given two evaluation environments $\mu, \mu'$,
-a typing environment $\Psi$, a security level $l_O \in \SL$ of the observer,
+a typing environment $\Psi$, a security labels $l_O \in \SL$ of the observer,
 the {\termEmph{indistinguishability relation}}  $=_{\Psi}^{l_O}$ is defined as: \begin{equation*}
 \mu =_{\Psi}^{l_{O}} \mu' \text{ iff}
 \forall x\in dom(\Psi) .\; \big(\Psi(x) \leq \hat{l_{O}} \Rightarrow \mu(x) = \mu'(x) \big)
@@ -967,11 +967,11 @@ or both sides are undefined.
 
 Note that in Definition~\ref{def:envequ}, $\mu$ and $\mu'$ may not have the same domain, but they must agree on
 their valuations for the variables in the domain of $\Psi$. 
-Note also that since base types are functions from permissions to security level, the security
+Note also that since base types are functions from permissions to security labels, the security
 level $l_O$ needs to be lifted to a base type in the comparison $\Psi(x) \leq \hat{l_{O}}$.
 The latter implies that
 $\Psi(x)(P) \leq l_O$ (in the latice $\SL$) for every permission set $P.$
-If the base type of each variable assigns the same security level to every permission set (i.e., the security level
+If the base type of each variable assigns the same security labels to every permission set (i.e., the security labels
 is independent of the permissions), then our notion of indistinguishability coincides with the standard definition
 for the non-dependent setting.
 
@@ -2511,7 +2511,7 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 }
 \]
 \end{tiny}
-\caption{Constraint generation rules for expressions, commands, and functions, with function type table $FT_C$.}
+\caption{Constraint generation rules for expressions, commands, and functions, with function type table {\FT}.}
 \label{fig:constraint-rules}
 \end{figure*}
 
@@ -2793,7 +2793,7 @@ By \ref{lem:cgrcomplete-3} on B.f, there exist $\alpha,\beta, C_{f}, \theta_{f}$
 $$
 \vdash_{g}\lpPROG{B.f}{\overline{x}}{c}{\lpRES}:  \overline{\alpha}\xrightarrow{} \beta \leadsto C_{f},
 $$
-$\theta_f \vDash C_f $ and $(\overline{\alpha}\xrightarrow{} \beta)\theta_{f} = \overline{t_p}\xrightarrow{} t_r$. So we have $\FT_C(B.f) =(\overline{\alpha}\xrightarrow{} \beta, C_{f}) $.
+$\theta_f \vDash C_f $ and $(\overline{\alpha}\xrightarrow{} \beta)\theta_{f} = \overline{t_p}\xrightarrow{} t_r$. So we have $\FT_{C}(B.f) =(\overline{\alpha}\xrightarrow{} \beta, C_{f}) $.
 Since $\alpha_{x}$s are fresh, we can safely get $dom(\theta_{0}) ~\sharp~ dom(\theta_f)$.
 Therefore, $\theta_{0}\cup\theta_f \vDash C_{f}$ and $(\overline{\alpha}\xrightarrow{} \beta)(\theta_{0}\cup\theta_{f}) = \overline{t_p}\xrightarrow{} t_r$.\\
 By $(1')$ on $\overline{e}$, there exist $\overline{s'}, \overline{C_{e}}$ such that
@@ -3282,7 +3282,7 @@ account in the analysis, and demonstrated that the system is precise
 but can be simply described.
 Mantel et. al.~\cite{MantelSS11} introduced a rely-guarantee style
 reasoning for information flow security in which the same variable can
-be assigned different security levels depending on whether some
+be assigned different security labels depending on whether some
 assumption is guaranteed, which is similar to our notion of
 permission-dependent security types.
 Li and Zhang~\cite{Li:csf17} proposed 
@@ -3302,7 +3302,7 @@ values in the system.
 It may be possible to encode our notion of security types as a
 dependent type in their setting, by treating permission sets
 explicitly as an additional parameter to a function or a service, and
-to specify security levels of the output of the function as a type
+to specify security labels of the output of the function as a type
 dependent on that parameter. It remains unclear to us how
 one could give a general construction of the index types in their type
 system that would correspond to our security types, and how the merge
@@ -3316,7 +3316,7 @@ with Android security issues
 (\cite{Ernst:2014,Chin:2011wa,Nadkarni:2016tf,Lortz:2014ku,Gunadi:2015,Chaudhuri:2009ii,Fuchs2010}).
 SCandroid~\cite{Chaudhuri:2009ii,Fuchs2010} is a tool automating
 security certification of Android apps that focuses on typing
-communication between applications. Unlike our work, they do not
+communication between apps. Unlike our work, they do not
 consider implicit flows, and do not take into account access control
 in their type system. Ernst et al~\cite{Ernst:2014} proposed a
 verification model, SPARTA, for use in app stores to guarantee that
@@ -3326,7 +3326,7 @@ the additional modification of Android permission model to fit for
 their Information Flow Type-checker;
 soundness proof is also absent. Our work is done in the context of
 providing information flow security \emph{certificates} for Android
-applications, following the Proof-Carrying-Code  architecture by
+apps, following the Proof-Carrying-Code  architecture by
 Necula and Lee~\cite{necula:pcc:1996} and does not require extra
 changes on existing Android application supply chain systems.
 

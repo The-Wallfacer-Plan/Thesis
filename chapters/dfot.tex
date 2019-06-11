@@ -121,7 +121,7 @@ From a patch testing perspective, we would like to target \texttt{concat\_filena
 	    ... 	 	  &     ...       & \textsf{$Z$}\\\hline
 	\end{tabular}
 \vspace{-5pt}
-	\caption{Two execution traces related to CVE-2017-15939: $M$ is the main function, $T$ is the target function, $Z$ is the exit.}
+	\caption{Two execution traces relevant with CVE-2017-15939, where $M$ is the entry function, $T$ is the target function, and $Z$ is the exit.}
 	\label{fig:exam_trace}
 \end{figure}
 
@@ -143,7 +143,7 @@ As observed from the above example, an ideal DGF should possess the following de
 	\centering
 	\includegraphics[width=0.16\columnwidth]{res/dfot/eg_callchain.pdf}
 	\vspace{-5pt}
-	\caption{The fuzzing scenario modeled from Fig.~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$, and $\langle a, e, f , Z\rangle$ is a trace not passing $T$.}
+	\caption{Fuzzing traces for Fig.~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$; $\langle a, e, f , Z\rangle$ does not pass $T$.}
 	\label{fig:call_chain}
 \end{figure}
 
@@ -332,7 +332,7 @@ void fa(int i) {
 \caption{}
 \label{subfig:dist2}      
 \end{subfigure}
-\caption{An example illustrating different call patterns}
+\caption{An example that illustrates different call patterns}
 \label{figure:dists}
 \end{figure}
 
