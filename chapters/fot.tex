@@ -6,10 +6,10 @@
 \section{Introduction and Motivation}
 
 
-In spite of the popularity and effectiveness of applying greybox fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there lacks a general fuzzing framework to reuse, integrate and evaluate various fuzzing extensions and~try new ideas.
-For example, {\AFL}'s core fuzzing logic is implemented in one file with around 8K LOC, with more than 100 global variables. Therefore, the integration of a single new feature often involves modifications in multiple places.
-In short, {\AFL} is highly coupled as it is designed to \textit{essentially require no configuration}~\cite{afl}.
-In fact, most of the existing fuzzers are designed for easy deployment and use, without considering easy extension.
+In spite of the popularity and effectiveness of applying greybox fuzzing techniques in detecting vulnerabilities(c.f. Sec~\ref{sec:intro-gbf}), there does not exist a general greybox fuzzing framework to reuse, integrate and evaluate fuzzing extensions as well as try new techniques.
+For example, {\AFL}'s core fuzzing logic, around 8000 lines of code, all resides in one single file, with more than 100 global variables. Therefore, the integration of one new feature often involves modifications in multiple places; this changes are usually erroneous since a minor mistake may cause whole logic wrong.
+In reality, {\AFL} is highly coupled as it is designed to \textit{essentially require no configuration}~\cite{afl}.
+Further, most of the existing fuzzers are designed for easy deployment and use, without considering easy extension.
 Hence, a fuzzing framework is preferred to allow for both easy \emph{configuration} and \emph{extension}.
 
 
@@ -18,18 +18,18 @@ Due to this, we propose our fuzzing framework, \emph{Fuzzing Orchestration Toolk
 \begin{enumerate}[(1)]
 
 \item  \textbf{Versatility.}
-{\FOT} provides a fuzzing ecosystem, including a set of static and dynamic analysis toolchains to aid the fuzzing process.
+{\FOT} provides a fuzzing toolkit, including static analysis enhanced fuzzing preprocessors, collaborative fuzzing core, as well as a set of toolchains for extra analysis purpose.
 \item \textbf{Configurability.}
-{\FOT} provides multiple configurable options.	
-Users can improve the fuzzing effectiveness with their experience by tweaking the parameters without development efforts.
+{\FOT} has builtin support for multiple options.	
+It is possible to tweak fuzzing parameters to improve the overall fuzzing effectiveness easily.
 \item \textbf{Extensibility.}
-{\FOT} is of high coherence and low coupling. In fact, the implementation is composed of two parts: the library that contains general fuzzing utilities, and the miscellaneous tools on top of it. Therefore, apart from the default fuzzing tools provided by {\FOT}, developers may also write their own fuzzers with modest effort based on the library.
+{\FOT} consists of the library for general-purpose fuzzing utilities, and the miscellaneous tools on top of it, which makes it possible for developers to customize their own fuzzers with modest efforts.
 \end{enumerate}
 
 
 \section{Architecture Design}\label{sec:details}
 
-This section briefly describes the design of {\FOT} framework. Complementary results {\FOT} are available at ~\cite{fot-webpage}.
+This section describes the overall design of {\FOT}. Complementary results {\FOT} are available at ~\cite{fot-webpage}.
 
 
 \begin{figure}[t]
@@ -41,7 +41,7 @@ This section briefly describes the design of {\FOT} framework. Complementary res
 
 Fig.~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
 It has three parts (labeled in pink): the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchains}.
-Components of the framework are represented with \emph{blue} rectangles while the inputs and outputs are in \emph{grey}. All these components inside \FOT are \textit{configurable} and \textit{extensible}.
+Components of the framework are represented with \emph{blue} rectangles while the inputs and outputs are in \emph{grey}.
 
 
 \subsection{Preprocessor}
@@ -49,31 +49,30 @@ This contains various tools to collect static information and apply instrumentat
 
 
 \subsubsection{Static Analyzer}\label{sec:static_analysis}
-It consists of tools to extract semantics from the target program.
-For example, we provide tools to generate the control flow graph, call graph or statically predicted vulnerabilities and convert them into proper representations which can be later instrumented into the target programs and utilized during dynamic fuzzing.
+This includes several analyzers to extract interesting semantics from the target program, such as control flow graph generation, data flow analysis results, as well as the metric utility to fit them for instrumentation.
 It is \textit{configurable} to generate different levels of static information. It is \textit{extensible} as developers are allowed to add new types of static analysis as long as the generated result follows the specified format.
 
 
 \subsubsection{Instrumentor}
 \emph{Binary rewriter} and \emph{source transformer} instrument static results generated by the static analyzer into the target program for the fuzzer to collect feedback during runtime execution.
-{\FOT} supports LLVM based instrumentation when program source is available, and Dyninst~\cite{dyninst} instrumentation when only the binary is given.
-It is \textit{configurable} since the users can choose to instrument either on source code or binary.
-It is \textit{extensible} since developers can use instrumentors such as Intel PIN~\cite{pin} as long as the instrumented code can embed the static information and provide sufficient feedback during fuzzing.
+{\FOT} supports LLVM based instrumentation when program source is available, and Dyninst~\cite{dyninst} instrumentation when only the binary is provided.
+It is \textit{configurable} since it allows instrumentation either on source code or binary.
+It is \textit{extensible} since developers can use other instrumentors (e.g., Intel PIN~\cite{pin}), as long as the instrumented code can embed the static information and provide sufficient feedback during fuzzing.
 
 \subsection{Fuzzer}
 This part explains the core fuzzing process. 
-The fuzzer is essentially a loop that continuously selects seeds from a seed queue, applies mutations to the selected seeds, executes the target program against mutated inputs, and collects statistics for the next iteration.
+The fuzzer is essentially a loop that continuously selects seeds from a seed queue, applies mutations to the selected seeds, executes the target program against seed variants, and collects statistics for subsequent iterations.
 
 \subsubsection{Conductor}
-As {\FOT} is designed to support multi-threaded parallel fuzzing, it contains the \emph{conductor} for fuzzing, scheduling the workload of different fuzzing instances.
-Particularly, it monitor a special directory to actively import seed inputs from external tools such as symbolic executors (e.g., KLEE~\cite{klee}) or mutation generators (e.g., Radamsa~\cite{radamsa}).
+As {\FOT} is designed to support parallel fuzzing in multithreading mode, it contains a \emph{conductor} for fuzzing, scheduling workload of different fuzzing instances.
+Particularly, it monitors a special directory to actively import seed inputs from external tools such as symbolic executors (e.g., KLEE~\cite{klee}) or mutation generators (e.g., Radamsa~\cite{radamsa}).
 It is \textit{configurable} since the users are allowed to choose different strategies for the overall management.
 It is \textit{extensible} since it can interoperate with other external tools.
 
 
 \subsubsection{Seed Scorer}
-The seed scorer is in charge of selecting a seed from the queue for mutation (seed selection/prioritization) and determining how many new inputs should be generated based on the selected seed (power scheduling).
-It is \textit{configurable} since the users can select from several built-in scoring strategies to evaluate seeds.
+The seed scorer is in charge of selecting a seed from the queue for mutation (seed selection/prioritization) and determining how many new seeds should be generated based on the selected seed (power scheduling).
+It is \textit{configurable} since the users can select from several builtin scoring strategies to evaluate seeds.
 It is \textit{extensible} since the developers can implement their own strategies with the provided interfaces.
 
 
@@ -92,14 +91,14 @@ For example, they may add a secondary executor to execute another program for di
 The feedback collector collects the feedback emitted by the target program.
 The exact feedback often corresponds to the instrumented information.
 It is \textit{configurable} as the users are allowed to select from the default feedback options provided by {\FOT}.
-For now, the feedback can be at basic-block level (like {\AFL}) or function level.
+For now, the feedback can be at basicblock level (same as {\AFL}) or function level.
 It is \textit{extensible} as the users can specify their customized types of feedback for collection.
 
 \subsection{Complementary Toolchain}
-{\FOT} contains various tools helping to make the framework \textit{versatile}.
+{\FOT} contains various tools which help to make the framework \textit{versatile}.
 For instance, we implemented a web-based frontend user interface to monitor the overall results.
 It provides fruitful information to make the fuzzing process more transparent.
-We also provided a crash analyzer to analyze the detected crashes and automatically generate reports.
+We also provide a crash analyzer to analyze the detected crashes and automatically generate reports.
 This greatly reduces the manual efforts of crash triaging.
 Many other extensions are also being added to complement the fuzzer.
 
@@ -113,21 +112,22 @@ Many other extensions are also being added to complement the fuzzer.
 
 
 \subsection{Trace Update and Synchronization}\label{sec:trace_sync}
-One of {\FOT}'s key features is the builtin coordination among different fuzzing instances (Fig.~\ref{fig:mt_workflow}). One important issue is the trace synchronization between fuzzing instances. For instrumentation, we made a slight change to the conventional instrumentation runtime to make the target binaries able to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated/specified by different fuzzing workers. Each fuzzing worker allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
+One of {\FOT}'s key features is the builtin coordination among different fuzzing instances (Fig.~\ref{fig:mt_workflow}). One important issue is the trace synchronization between fuzzing instances. For instrumentation, we made a slight change to the conventional instrumentation runtime to enable the target binaries to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated by different fuzzing instances. Each fuzzing instance allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
 
-The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing workers; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each test case in the queue, when customizable conditions are triggered (usually the conditions are about the executions and time since last synchronization).
+The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing instances; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each test case in the queue, when customizable conditions are triggered.
+% (usually the conditions are about the executions and time since last synchronization).
 
-The actual synchronization of the trace information still applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
+The actual synchronization of the trace information applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the test cases indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
 
 
   \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
- The selection of mutation operators during fuzzing on one test input is determined by two factors:
- \begin{enumerate}
+ The selection of mutation operators during fuzzing on one test input is determined by:
+ \begin{enumerate}[1.]
  	\item The whitelist mutation operators used for the targeted binaries. Some mutation operators are only effective on certain programs, but is almost a waste of time for the other programs (for example, bitflip operations are quite expensive and rarely useful for text-based parser programs running against large files). This can be specified by the experienced {\FOT} users.
- 	\item The one-time mutation operators for \emph{this fuzz}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the test cases.
+ 	\item The one-time mutation operators for \emph{this turn}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the test cases.
  \end{enumerate}
 
-On the other hand, being super general, {\AFL} has limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well~\cite{junjie:2017sp:skyfire,mopt-fuzz}.
+%On the other hand, {\AFL} has rather limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well~\cite{junjie:2017sp:skyfire,mopt-fuzz}.
 
 
 \subsection{Refinement on Variable Behaviors}\label{sec:entry_var_behavior}
@@ -161,7 +161,7 @@ Most current fuzzing extensions can be easily integrated into {\FOT} owing to it
 	\item AFLFast~\cite{Bohme:2016:CGF} can be implemented by applying a Markov Chain model based seed \emph{power scheduling} in the fuzzer. 
 	\item AFLGo~\cite{Bohme:2017:DGF} can be implemented by a combination of \emph{static analyzer}, \emph{instrumentation} and \emph{power scheduling}.
 	\item CollAFL~\cite{CollAFL} can be implemented by using a collision-resistant algorithm to increase the uniqueness of the path trace labeling during \emph{instrumentation}.
-	\item Skyfire~\cite{junjie:2017sp:skyfire}, Radamsa~\cite{radamsa}, Csmith~\cite{csmith} can be used in the preprocessor to generate seeds for the \emph{external seeds} and a structure-aware mutator assigned by \emph{mutation manager}.
+	\item Skyfire~\cite{junjie:2017sp:skyfire}, Radamsa~\cite{radamsa}, Csmith~\cite{csmith} can be used to generate \emph{external seeds} which will be \emph{imported}, or integrated as structure-aware mutators conducted by \emph{mutation manager}.
 	\item Symbolic executors such as KLEE~\cite{klee} can be integrated in the Driller's~\cite{driller} style with the help of \emph{conductor}.
 \end{enumerate}
 

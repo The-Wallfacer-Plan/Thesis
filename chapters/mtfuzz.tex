@@ -241,7 +241,7 @@ We use $\stpn$ as the probability to \emph{selectively} instrument on the first 
 \end{equation}
 where $0<\stpnO<1$. Empirically, we set $\stpnO=0.5$.
 
-On the other hand, for each basicblock \aBB inside the given function~\aFUNC, we calculate the total number of instructions $N(\aBB)$, and the total number of memory operation instructions  $N_m(\aBB)$, e.g., load/store operations, or built-in memory function calls such as \func{memcpy}, \func{strncat}, \func{malloc}, \func{free}, etc. 
+On the other hand, for each basicblock \aBB inside the given function~\aFUNC, we calculate the total number of instructions $N(\aBB)$, and the total number of memory operation instructions  $N_m(\aBB)$, e.g., load/store operations, or builtin memory function calls such as \func{memcpy}, \func{strncat}, \func{malloc}, \func{free}, etc. 
 Then for each of the instructions, we instrument based on the probability as:
 \begin{equation}
     \mtp{\aFUNC}{\aBB} = \min\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}
