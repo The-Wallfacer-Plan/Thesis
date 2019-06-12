@@ -22,7 +22,7 @@ Following the definition in~\cite{Bohme:2017:DGF}, we name those fuzzers that ca
 As the state-of-the-art directed greybox fuzzer (DGF for short), {\aflgo}~\cite{Bohme:2017:DGF}~casts the reachability of target locations as an \emph{optimization problem} and adopts a meta-heuristic to promote the test seeds with shorter distances.
 Here, the distance is calculated according to the average \emph{weight} of basicblocks on the input seed's execution trace to the target basicblock(s), where the weight
  is determined by the edges in the call graph and control flow graphs of the program, and the meta-heuristic is simulated annealing~\cite{kirkpatrick1983optimization}.
-Based on these, \aflgo solves the \emph{power scheduling problem} for directed fuzzing --- how many new inputs (termed ``energy'' in \aflgo) should be generated from the current test seed.
+Based on these, \aflgo solves the \emph{power scheduling problem} for directed fuzzing --- how many new seeds (termed ``energy'' in \aflgo) should be generated from the current test seed.
 To summarize, represented by \aflgo, DGF achieves the goal of reaching the target locations by \emph{combing both static analysis and dynamic analysis}.
 
 
@@ -30,7 +30,7 @@ A pure dynamic execution can only get the feedback based on the traces it has \e
 Thus, \textbf{\emph{static analysis}} is required to extract the necessary information for guiding the execution towards the target locations for DGFs. The most widely used approach is to calculate the \emph{distance} (or weight) to the target locations for the components (e.g., basicblocks, functions) of the PUT, so that when executed, DGFs can judge the \emph{affinity} between current seed and the target locations from the components in the execution traces. 
 The major challenge is that the distance needs to be effectively calculated without compromising certain desired features.
 Particularly, it should help to retain the seed diversity~\cite{Audibert09}.
-For example, the existing seed distance calculation algorithm used in \aflgo always favors shortest path that leads to the targets (see \S~\ref{subsec:motiv}), which may starve inputs that could be more easily mutated to reach the target site and further trigger crashes.
+For example, the existing seed distance calculation algorithm used in \aflgo always favors shortest path that leads to the targets (see \S~\ref{subsec:motiv}), which may starve seeds that could be more easily mutated to reach the target location and further trigger crashes.
 The author of libFuzzer~\cite{libfuzzer} argues that not taking into account \emph{all possible traces} may fail to expose the bugs hidden deeply in longer paths~\cite{kcc_aflgo}.
 This derives the first desired property \textbf{P1}.
 Another challenge is that the static analysis should provide precise information with acceptable overheads.
@@ -39,7 +39,7 @@ This challenge derives the second desired property \textbf{P2}.
 Hence, the first problem is \emph{to have a proper static analysis which can collect necessary information for DGF}.
 
 After extracting the information with static analysis, there are several  challenges in \textbf{\emph{dynamic analysis}} --- how to dynamically adjust different strategies for the purpose of reaching the target locations as fast as possible.
-The first challenge is how to properly \emph{allocate} energy to the inputs with different distances and how to \emph{prioritize} the inputs closer to the targets.
+The first challenge is how to properly \emph{allocate} energy to the seeds with different distances and how to \emph{prioritize} the seeds closer to the targets.
 This derives the third desired property \textbf{P3}.
 The second challenge is how to adaptively change the mutation strategies, since GBFs may possess various mutation operators at both coarse-grained (e.g., bulk deletion) and fine-grained (e.g., bitwise flip) levels.
  This derives the fourth desired property \textbf{P4}.
@@ -75,7 +75,7 @@ The main contributions of this chapter are summarized as follows:
 \item We analyzed the challenges in directed greybox fuzzing and summarized the four desired properties for DGFs.
 \item We provided a measure of power function that can guide the fuzzer towards the target locations effectively.
 \item We proposed a novel approach to boost the convergence speed to the target locations by utilizing power scheduling, adaptive mutation and seed prioritization.
-\item We implemented a novel fuzzing framework that organically combines these ideas and thoroughly evaluated our results in both crash reproduction and target site covering.
+\item We implemented a novel fuzzing framework that organically combines these ideas and thoroughly evaluated our results in both crash reproduction and target location covering.
 \end{enumerate} 
 
 \section{Desired Properties of DGF}\label{sec:mx}
@@ -148,9 +148,9 @@ As observed from the above example, an ideal DGF should possess the following de
 \end{figure}
 
 \subsubsection{\textbf{P1}. DGF should define a \textbf{robust} distance mechanism to guide directed fuzzing by avoiding the bias to certain traces}  \label{subsec:p1}
-Different from general GBFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing inputs due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
+Different from general GBFs, to reach the targets, there may exist several execution traces towards the targets. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that can cover the targets before the targets have been executed; and even if the targets have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to these targets.  Hence, the guiding mechanism should help find all the traces that lead to the targets --- taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing seeds due to the existence of a strong precondition before $a$. Hence, \emph{the guiding mechanism could provide the knowledge of all possible traces leading to targets and guide the mutation towards it via gradually reducing the distance}. 
 
-However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target site, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target site. 
+However, for DGF, awareness of all possible traces towards the targets is not enough: the distance to the targets for all traces should be properly calculated so that all traces reachable to the targets will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know previously that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as the target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target location, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target location. 
 
 
 
@@ -160,7 +160,7 @@ However, for DGF, awareness of all possible traces towards the targets is not en
 To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a greybox fuzzing setting.
 
 \subsubsection{\textbf{P3}. DGF should \textbf{prioritize} seeds near target locations.} \label{subsec:p3}
- AFL determines how many new inputs should be generated (i.e., ``energy'') from a test seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular targets} as fast as possible. Hence, power scheduling in DGF should determine how many new inputs should be generated from a test seed in order to get a new mutated input that leads to the target locations~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of test seeds to reach target locations as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target locations. 
+ AFL determines how many new seeds should be generated (i.e., ``energy'') from a test seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular targets} as fast as possible. Hence, power scheduling in DGF should determine how many new seeds should be generated from a seed in order to get a new mutated seed that leads to the target locations~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of test seeds to reach target locations as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target locations. 
  
  For \emph{power scheduling}, the desired design is that the seed trace with a smaller distance to targets should be assigned more energy for fuzzing, as the trace closer to the target locations gets better chance to reach there. Therefore, $\langle a, e, T, Z\rangle$ should be allocated with similar energy with $\langle a, b, c, d, T, Z\rangle$, and $\langle a, e, f, Z\rangle$ should have less energy than the previous two. For \emph{seed prioritization}, seeds that have smaller distance (``closer'') to the targets should be fuzzed earlier in subsequent mutations. Therefore, $\langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be put ahead of $\langle a, e, f, Z\rangle$.
 
@@ -241,7 +241,7 @@ In this section, we briefly introduce the workflow of our proposed approach, nam
 
 \subsection{Static Analysis}\label{subsec:static_flow}
 
-The inputs of static analysis are the \textit{program source code} and the~\textit{target locations} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basicblocks and functions where the ~target~sites~reside in, and call them \textit{target basicblocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basicblock level distance}.
+The inputs of static analysis are the \textit{program source code} and the~\textit{target locations} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basicblocks and functions where the target locations reside in, and call them \textit{target basicblocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basicblock level distance}.
 
 First, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all possible  calls. Besides, for each function, we construct the  control flow graph (CFG) (\S\ref{subsec:graghCons}).
 
@@ -252,7 +252,7 @@ Second, we compute several~utilities that are used to facilitate the directednes
     
 \item \textbf{Basic block level distance} is computed based on the function level distance, together with the CG and the functions' CFGs. This distance is statically instrumented for each basicblock that is considered to be able to reach one of the target locations. During the fuzzing loop, it is also used to calculate the \emph{basicblock trace distance} (\S\ref{subsec:powerSche}).
 
-\item \textbf{Target function trace closure} is computed for each target site~according to the CG to obtain the functions that can reach the target locations. It is used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
+\item \textbf{Target function trace closure} is computed for each target location~according to the CG to obtain the functions that can reach the target locations. It is used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
 \end{enumerate}
 
 Finally, the target program is instrumented to keep track of the edge transitions (similar to AFL), the accumulated basicblock trace distance (similar to AFLGo), and the covered functions.
@@ -425,7 +425,7 @@ The covered function similarity is then determined by the following formula:
 $\traceFnDist{f}{\tgtfnset}$ is the function level distance calculated with Equation~\ref{eq:aflgo_func_dist}. Similar to \traceDistn, a feature scaling normalization is also applied and the final similarity is denoted as \covDistnN. Note that this similarity metric is uniquely proposed in our approach.
 
 \textbf{Scheduling.}
-Scheduling deals with the problem how many mutation chances will be assigned to the given seed. The intuition is that if the trace that the current seed executes is ``closer'' to any of the expected traces that can reach the target site in the program, more mutations on that seed should be more beneficial for generating expected seeds. A scheduling purely based on \emph{trace distance} may favor certain patterns of traces. For \aflgo, as mentioned in \S\ref{subsec:p2}, the shorter paths will be assigned more energy, which may starve longer paths that are still reachable to the target locations. To \emph{mitigate} this, we propose the \emph{power function} that considers both \emph{trace distance} (based on basicblock level distance) and \emph{trace similarities} (based on covered function similarity): 
+Scheduling deals with the problem how many mutation chances will be assigned to the given seed. The intuition is that if the trace that the current seed executes is ``closer'' to any of the expected traces that can reach the target location in the program, more mutations on that seed should be more beneficial for generating expected seeds. A scheduling purely based on \emph{trace distance} may favor certain patterns of traces. For \aflgo, as mentioned in \S\ref{subsec:p2}, the shorter paths will be assigned more energy, which may starve longer paths that are still reachable to the target locations. To \emph{mitigate} this, we propose the \emph{power function} that considers both \emph{trace distance} (based on basicblock level distance) and \emph{trace similarities} (based on covered function similarity): 
 \begin{equation}\label{eq:aflgo_power}
 p(s, \tgtbbset) = \covDistN{s}{\tgtfnset}\cdot(1 - \traceDistFinal{s}{\tgtbbset})
 \end{equation}
@@ -673,7 +673,7 @@ Here we mainly follow \aflgo's practice to only use AFL as the baseline for cove
 
 In the experiments, all AFL based fuzzers (AFL, {\aflgo} and {\dGO}) are run in their ``fidgety'' mode~\cite{FidgetyAFL}. For both {\aflgo} and {\dGO}, ``time-to-exploitation'' is set to 45 minutes for the fuzzer. Except for the experiments against GNU Binutils (Table~\ref{tbl:cr_aflgo_binutils}) , where we follow exactly the setup in {\aflgo}~\cite{Bohme:2017:DGF} , all the other experiments are repeated 8 times, with a time budget of 4 hours. 
 We use ``time-to-exposure'' (TTE) to measure the length of the
-fuzzing campaign until the first test input is generated that triggers a given error (in~\S\ref{subsec:evalcrashrepro}) or reaches a target site (in~\S\ref{subsec:evalsrcloc}).
+fuzzing campaign until the first test input is generated that triggers a given error (in~\S\ref{subsec:evalcrashrepro}) or reaches a target location (in~\S\ref{subsec:evalsrcloc}).
 We use \emph{hitting round} to measure the number of runs in which a fuzzer triggers the error or reaches the target.
 For all the experiments, if the fuzzer cannot find the target crash within the time budget in one run, TTE is set to the time budget value. 
 
@@ -826,7 +826,7 @@ From the results, we can conclude that the dynamic analysis strategies used in \
 \end{table} 
 
 
-\subsection{Target Site Covering}\label{subsec:evalsrcloc}
+\subsection{Target Location Covering}\label{subsec:evalsrcloc}
 Certain locations in the target programs are hard to reach, though they may not trigger crashes.
 In practice, the generated seeds that can cover the such locations can also be used as initial seeds for GBFs to boost their coverage. 
 Therefore, this criterion is an important factor for measuring DGFs' capabilities. 
@@ -848,7 +848,7 @@ It is worth noting that the \utte~to cover the target locations (Table \ref{tbl:
 \begin{table}[t]
 	\small
 	\centering
-	\caption{Target site covering results in \dFOT, \dGO and AFL against libjpeg-turbo, libpng, freetype2 (Fuzzer Test Suite).}
+	\caption{Target location covering results in \dFOT, \dGO and AFL against libjpeg-turbo, libpng, freetype2 (Fuzzer Test Suite).}
 	\label{tbl:discover_src}
 	\begin{tabular}{c|c"c|c|r|c|c}
 		\thickhline
@@ -898,7 +898,7 @@ The work in this chapter is related to the following lines of research:
 
 \subsection{Directed Greybox Fuzzing}
 Some other DGF techniques have been proposed besides \dFOT.
-\aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed greybox fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to inputs that hold the trace closer to the target locations.
+\aflgo~\cite{Bohme:2017:DGF} is the state-of-the-art directed greybox fuzzer which utilizes a simulated annealing-based power schedule that gradually assigns more energy to seeds that hold the trace closer to the target locations.
 In \aflgo, the authors proposed a novel idea of calculating the distance between the input traces and the target locations.
 This is a good starting point by combining such target distance calculation with greybox fuzzer.
 \dFOT is inspired from \aflgo however provides significant improvements on both the static analysis and dynamic fuzzing.

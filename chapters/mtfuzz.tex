@@ -12,7 +12,7 @@
 \end{center}	
 \end{figure}
 
-Multithreading as a popular programming paradigm is an effective way of utilizing multi-core computation resources in modern processors. Meanwhile, the \emph{non-deterministic} behaviors caused by thread-interleavings also pose substantial challenges to vulnerability or bug detection in multithreaded programs~\cite{mtbugs_survey}. On one hand, the interleavings across threads inherently introduce multiple subtle concurrency bugs, e.g., data races, atomic violations, and deadlocks. These bugs can cause undefined program behaviors and sometimes can induce vulnerabilities such as use-after-free (CVE-2016-1972, CVE-2018-5873) and heap-buffer-overflow (CVE-2017-8244), denial-of-service (CVE-2018-0381). On the other hand, as multithreaded programs may accept some inputs, some bugs or vulnerabilities may be difficult or impossible to be triggered with limited seed inputs, regardless of whether such bugs are caused by concurrency bugs.
+Multithreading as a popular programming paradigm is an effective way of utilizing multi-core computation resources in modern processors. Meanwhile, the \emph{non-deterministic} behaviors caused by thread-interleavings also pose substantial challenges to vulnerability or bug detection in multithreaded programs~\cite{mtbugs_survey}. On one hand, the interleavings across threads inherently introduce multiple subtle concurrency bugs, e.g., data races, atomic violations, and deadlocks. These bugs can cause undefined program behaviors and sometimes can induce vulnerabilities such as use-after-free (CVE-2016-1972, CVE-2018-5873) and heap-buffer-overflow (CVE-2017-8244), denial-of-service (CVE-2018-0381). On the other hand, as multithreaded programs may accept some inputs, some bugs or vulnerabilities may be difficult or impossible to be triggered with limited initial seed inputs, regardless of whether such bugs are caused by concurrency bugs.
 
 
 {\noindent\textbf{ Categories of Multithreading-relevant Vulnerabilities and Bugs}\quad} Fig.~\ref{fig:venn_con_vul} depicts the multithreading relevant vulnerabilities and bugs. The rectangle represents all the bugs. The left red circle denotes the vulnerabilities ($Vul$) and the right blue circles denotes the concurrency bugs (\textsf{C-Bug}). The intersection of $Vul$ and \textsf{C-Bug} is the concurrency bug induced vulnerabilities ($V_c$). It may be surprising that there is another category of vulnerabilities $V_m$ which is a proper superset of $V_c$. In fact, there are several vulnerabilities that are tightly relevant with multithreading environment however is not caused by concurrency bugs (\textsf{C-Bug}).
@@ -557,7 +557,7 @@ evaluated fuzzers.
 \textbf{Seed Generation.} 
 We collect both the number of all new tests (\testsALL) and the number of tests that trigger 
 non-deterministic behaviors (\testsMT). \testsMT~ reflects the number of seeds that can reach 
-the concurrency-related code. We sum up the generated test cases of all 4 fuzzing runs to form 
+the concurrency-related code. We sum up the generated seeds of all 4 fuzzing runs to form 
 \testsALL~ and \testsMT~in Table~\ref{tbl:eval_overall}. The $\frac{\testsMT}{\testsALL}$ column 
 shows the percentage of \testsMT~against \testsALL.
     
