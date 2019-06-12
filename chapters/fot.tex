@@ -63,9 +63,8 @@ This part explains the core fuzzing process.
 In essence, the fuzzer is a loop that continuously selects seeds from a seed queue, applies mutations to the selected seeds, executes the target program against seed variants, and collects statistics for subsequent iterations.
 
 \subsubsection{Conductor}
-As {\FOT} is designed to support parallel fuzzing in multithreading mode, it contains a \emph{conductor} for fuzzing, scheduling workload of different fuzzing instances.
-Particularly, it monitors a specific directory to retrieve seed inputs from external tools such as symbolic executors (e.g., KLEE~\cite{klee}) or random seed generators (e.g., Radamsa~\cite{radamsa}).
-It is \textit{configurable} since end-users are allowed to choose different strategies for the overall management.
+{\FOT} a \emph{conductor} to schedule workloads of different workers. This specifically allows for parallel fuzzing in a multithreading mode by collaborating different fuzzing instances. In addition, a monitoring worker can also be woke up regularly to retrieve seed inputs from external tools such as symbolic executors (e.g., KLEE~\cite{klee}) or random seed generators (e.g., Radamsa~\cite{radamsa}) by monitoring a specific seed directory.
+It is \textit{configurable} since end-users are allowed to choose different fuzzing modes.
 It is \textit{extensible} since it can interoperate with other external tools.
 
 
@@ -76,30 +75,29 @@ It is \textit{extensible} since developers can implement their own strategies wi
 
 
 \subsubsection{Mutation Manager}
-The mutation manager schedules different kinds of mutators.
+The mutation manager schedules different kinds of mutators, which includes bitwise flips, bytewise flips, arithmetic operations on bytes, byte chunk addition, modification or deletion, crossover between two seeds, etc.
 It is \textit{configurable} as {\FOT} provides various mutators the their combinations for end-users to select from.
 It is \textit{extensible} as developers can implement their own mutators with the provided interfaces.
 
 \subsubsection{Program Executor}
-The executor drives the execution of the target program.
+The program executor drives the execution of the target program.
 It is \textit{configurable} since the default executor in {\FOT} allows end-users to choose whether or not to use forkserver~\cite{afl} during fuzzing.
-It is \textit{extensible} since developers can extend the executor for various scenarios.
+It is \textit{extensible} since developers can extend the program executor for various scenarios.
 For example, they may add a secondary executor to execute another program for differential testing.
 
 \subsubsection{Feedback Collector}
-The feedback collector collects the feedback emitted by the target program.
-The exact feedback often corresponds to the instrumented information.
+The feedback collector collects the feedback provided by the instrumentations on the target program as well as the program's execution status.
 It is \textit{configurable} as end-users are allowed to select from the default feedback options provided by {\FOT}.
-For now, the feedback can be at basicblock level (same as {\AFL}) or function level.
+For now, the feedback can be at basicblock level (same as {\AFL}) or function level (specific to \FOT).
 It is \textit{extensible} as end-users can specify their customized types of feedback for collection.
 
 \subsection{Complementary Toolchain}
-{\FOT} contains various tools which help to make the framework \textit{versatile}.
-For instance, we implemented a web-based frontend user interface to monitor the overall results.
+{\FOT} contains various complementary tools which help to make the framework \textit{versatile}.
+For instance, we implemented a web-based frontend user interface to observe the overall results.
 It provides fruitful information to make the fuzzing process more transparent.
-We also provide a crash analyzer to analyze the detected crashes and automatically generate reports.
+We also have a crash analyzer to analyze the detected crashes and automatically generate reports.
 This greatly reduces the manual efforts of crash triaging.
-Many other extensions are also being added to complement the fuzzer.
+Many other tools are also being added to complement the fuzzer.
 
 
 \begin{figure}[t]
@@ -135,7 +133,7 @@ Some programs have variable behaviors for the same seed, due to randomness, mult
 
 
  \subsection{Trimming on Duplicated Cases}
-Due to the existence of the potential lag of the trace synchronization, there still exists a seed that runs with the same running trace. In other cases, the seed might not be in its ``simplest'' form: by removing some bytes, the seed can still result in the same running trace. {\FOT}'s approach in handling this is to trim the calibrated seeds immediately before being parceled as the message and sent to the message queue buffer managed by the conductor. And the conductor maintains a checksum set of all the generated seed files. Therefore when the newly generated seed has the same checksum as one of the existing ones, this seed will be discarded.
+Due to the existence of the potential lag of the trace synchronization, there still exist some seeds that run with the same running trace. In other cases, certain seeds might not be in its ``simplest'' form: by removing some bytes, the seed can still result in the same running trace. {\FOT}'s approach in handling this is to trim the calibrated seeds immediately before being parceled as the message and sent to the message queue buffer managed by the conductor. And the conductor maintains a checksum set of all the generated seed files. Therefore when the newly generated seed has the same checksum as one of the existing ones, this seed will be discarded.
 
 Additionally, we provide an external minimizer program to prune the all the serialized seeds (which can be normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting seeds.
  
@@ -148,7 +146,7 @@ The {\FOT} project started from June, 2017 and has been actively developed by tw
 \section{Relations with Other Fuzzing Frameworks and Extensions}
 
 
-In this section, we first compare FOT with other fuzzing frameworks, and then discuss its relationship to current fuzzing extensions.
+%In this section, we first compare FOT with other fuzzing frameworks, and then discuss its relationship to current fuzzing extensions.
 
 
 
