@@ -129,7 +129,7 @@ refer AFL's default selection strategy over the \emph{deputy} instruction as \AF
 During calibration execution, AFL labels a calculated value to each transition that 
 connects the \emph{deputies} of two consecutively executed basicblocks~\cite{afl_detail}. 
 By maintaining a set of values for queued seeds, AFL \emph{tracks} the ``coverage'' 
-of a PUT. Procedure \emph{cov\_new\_trace} in Algo.~\ref{algo:gbf} is to check whether a value has already been contained in the set.
+of a target program. Procedure \emph{cov\_new\_trace} in Algo.~\ref{algo:gbf} is to check whether a value has already been contained in the set.
 
 Fig.~\ref{subfig:transition} depicts the transitions upon executing the functions \func{compute} 
 and \func{inc}. For brevity, we use source code to explain the problem and use \emph{statements} to represent the lower level \emph{instructions} in assembly or LLVM IR~\cite{Lattner:2004:LCF:977395.977673}. The arrows denote the transitions between \emph{all} the statements. The pentagons denote the first statements of basicblocks while the other statements are 
@@ -358,7 +358,7 @@ To implement $\func{cov\_new\_mt\_ctx(t)}$, we track the context of calling a mu
 
 \subsection{Calibration Execution}\label{sec:calibrate}
 Multithreaded programs introduce non-deterministic behaviors when different interleavings are involved.
-As seen in Algo.~\ref{algo:gbf}, for a mutated seed, a GBF typically executes the PUT with multiple times. 
+As seen in Algo.~\ref{algo:gbf}, for a mutated seed, a GBF typically executes the target program with multiple times. 
 Owing to~\rtifunc, we are now able to tell whether the current non-deterministic behavior is relevant with a multithreading execution. In fact, since we focus on multithreading only, based on the times of the threading forking operations the fuzzer has observed, the fuzzer can distinguish the calibration on those seeds that have non-deterministic behaviors purely by checking whether the execution traces have touched the threading relevant regions. Further, if we know that a seed may have more distinct values of \tctxSign (the number of distinct values for seed $t$ is denoted as \Nmt(t)), there will be more interleavings. To determine the calibration times~\Ncal, we rely on \Nmt. In AFL, the calibration times is calculated by the equation below:
 \begin{equation}
     \Ncal(t) = \NcalO + \NcalV\cdot\NcalB \label{eq:afl_cal}
@@ -573,7 +573,7 @@ context and the number is denoted as \vulsST.
 
 \textbf{Concurrency Bugs.} 
 We detect concurrency bugs in the \emph{replaying procedure}. Specifically, we compile the target programs 
-with \ts~\cite{lwn_tsan} and re-run them with the newly test seeds generated in {Seed Generation}. 			 
+with \ts~\cite{lwn_tsan} and re-run them with the new seeds generated during {Seed Generation}. 			 
 Also, we design a \emph{weighted round-robin} strategy to continuously replay the seeds against 
 the non-deterministic program behaviors until reaching a given time budget (2 hours). 
 
@@ -634,7 +634,7 @@ For instance, the crash in \emph{pbzip2-d} stems from a stack overflow error in 
 stack size of each thread. But certain corrupted BZip2 files may use up the stack in a short
 time. This crash can never happen when \emph{pbzip2-d} works in single-threaded mode since \emph{pbzip2-d} executes another \emph{separate function} when only one thread is specified.  In fact, the vulnerability can only be triggered when the carefully crafted input is fed to
 multithreaded \emph{pbzip2-d}. In our evaluation, \mtfuzz detects this crash in 3 runs (out of 4) 
-with 5 proof-of-crash test seeds; while AFL or \mtfuzzc cannot detect this crash. 
+with 5 proof-of-crash generated seeds; while AFL or \mtfuzzc cannot detect this crash. 
 
 We speculate the reason that \mtfuzz generate more valuable seeds (totally 47) than other two 
 fuzzers (AFL: 7; \mtfuzzc: 12). To support this conjecture, we feed both AFL and \mtfuzzc the 47 
