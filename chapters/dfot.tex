@@ -18,7 +18,7 @@ Following the definition in {\aflgo}~\cite{Bohme:2017:DGF}, we name those fuzzer
 
 
 
-{\aflgo}~\cite{Bohme:2017:DGF} is the state-of-the-art directed greybox fuzzer (DGF for short) that reduces the reachability of target locations to an \emph{optimization problem}. It adopts a meta-heuristic to promote the  seeds with shorter distances. The distance is calculated based on the average the \emph{weight} of basicblocks on seed's execution trace to the target basicblock(s), where the weight
+{\aflgo}~\cite{Bohme:2017:DGF} is the state-of-the-art directed greybox fuzzer (DGF) that reduces the reachability of target locations to an \emph{optimization problem}. It adopts a meta-heuristic to promote the  seeds with shorter distances. The distance is calculated based on the average the \emph{weight} of basicblocks on seed's execution trace to the target basicblock(s), where the weight
  is determined by the edges in the call graph and control flow graphs of the program, and the applied meta-heuristic is simulated annealing~\cite{kirkpatrick1983optimization}.
 Owing to these, \aflgo improves the \emph{power scheduling} for fuzzing directedness --- how many new seeds (a.k.a. ``energy'' in \aflgo) should be generated from the current seed.
 %DGF achieves the goal of reaching the target locations by \emph{combing both static analysis and dynamic analysis}.
@@ -28,22 +28,22 @@ Thus, \textbf{\emph{static analysis}} is required to extract the necessary infor
 The major challenge is that the distance needs to be efficiently calculated while not compromise certain desired features.
 In particular, it should help to keep to some extent the seed diversity~\cite{Audibert09}.
 For example, the existing seed distance calculation algorithm used in \aflgo always favors shortest path that leads to the target locations (see \S~\ref{subsec:motiv}), which may starve seeds that could be more easily mutated to reach the target location and further trigger crashes.
-The author of libFuzzer~\cite{libfuzzer} argues that not taking into account \emph{all possible traces} may fail to expose the bugs hidden deeply in longer paths~\cite{kcc_aflgo}.
+The author of libFuzzer~\cite{libfuzzer} argues that not taking into account \emph{all the possible traces} may fail to expose the bugs hidden deeply in longer paths~\cite{kcc_aflgo}.
 This derives the first desired property \textbf{P1}.
 Another challenge is that the static analysis should provide precise information with acceptable overheads.
 This is because that coarse static analyses will not benefit the dynamic fuzzing much, while \emph{heavyweight static analyses themselves may take considerable time} before the dynamic fuzzing starts.
 This challenge derives the second desired property \textbf{P2}.
-Therefore, the first issue is \emph{how DGF applies proper static analysis effectively and efficiently to collect necessary metrics}.
+Therefore, the first issue is \emph{how a DGF applies proper static analysis effectively and efficiently to collect necessary metrics}.
 
 After static analysis, there are several  challenges in \textbf{\emph{dynamic analysis}} --- how to dynamically adjust different strategies for the purpose of reaching the target locations as fast as possible.
 The first challenge is how to properly \emph{allocate energy} to the seeds with different distances and how to \emph{prioritize} the seeds closer to the target locations.
 This derives the third desired property \textbf{P3}.
-The second challenge is how to adaptively change the mutation strategies, since GBFs may possess various mutation operators at both coarse-grained (e.g., bulk deletion) and fine-grained (e.g., bitwise flip) levels.
+The second challenge is how to adaptively change the mutation strategies, since GBFs may possess various mutation operators at both coarse-grained (e.g., chunk replacement) and fine-grained (e.g., bitwise/bytewise flip) levels.
  This derives the fourth desired property \textbf{P4}.
-Hence, the second problem is \emph{to make proper adjustments for the dynamic strategies used in DGF}.
+Therefore, the second issue is \emph{how a DGF applies adaptive strategies during the dynamic fuzzing procedure}.
 
 
-To emphasize the two aforementioned problems, an ideal DGF is expected to hold the following desired properties (\S\ref{subsec:dp}):
+To emphasize the two aforementioned issues, we suggest that an ideal DGF is expected to hold the following desired properties (\S\ref{subsec:dp}):
 \begin{enumerate}[\textbf{P}1]
 \itemsep0em 
 \item It should provide a \emph{robust} mechanism guiding the directed fuzzing by considering all the possible traces to the target locations.
@@ -146,9 +146,9 @@ As observed from the above example, an ideal DGF should possess the following de
 
 \textbf{P1. DGF should define a \emph{robust} distance mechanism to guide directed fuzzing by avoiding the bias to certain traces}  \label{subsec:p1}
 Different from general GBFs, to reach the specified locations, there may exist several execution traces towards them. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that cover the target locations before they have been executed; and even if the locations have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to them.  
-Taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing seeds due to the existence of a strong precondition before $a$. Therefore, \emph{the guiding mechanism should provide the knowledge of all possible traces that lead to the target locations and guide the mutation towards it via gradually reducing the distance}. 
+Taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing seeds due to the existence of a strong precondition before $a$. Therefore, \emph{the guiding mechanism should provide the knowledge of all the possible traces that lead to the target locations and guide the mutation towards it via gradually reducing the distance}. 
 
-However, for DGF, awareness of all possible traces towards target locations is not enough: the distance to specified locations for all traces should be properly calculated so that all traces reachable to them will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know in advance that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target location, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target location. 
+However, for DGF, awareness of all the possible traces towards target locations is not enough: the distance to specified locations for all traces should be properly calculated so that all traces reachable to them will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know in advance that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target location, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target location. 
 
 
 
@@ -242,7 +242,7 @@ In this section, we briefly introduce the workflow of our proposed approach, nam
 
 The inputs of static analysis are the \textit{program source code} and the~\textit{target locations} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basicblocks and functions where the target locations reside in, and call them \textit{target basicblocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basicblock level distance}.
 
-First, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all possible  calls. Besides, for each function, we construct the  control flow graph (CFG) (\S\ref{subsec:graghCons}).
+First, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all the possible calls. Besides, for each function, we construct the  control flow graph (CFG) (\S\ref{subsec:graghCons}).
 
 
 Second, we compute several~utilities that are used to facilitate the directedness in \dFOT based on CG and CFG (\S\ref{subsec:UtilityComputation}).
@@ -495,9 +495,9 @@ $\mathcal{M}_s\leftarrow \mathcal{M}_s \cup  \{(s^{\prime\prime},s^{\prime\prime
 In \S\ref{subsec:powerSche}, for each seed, the output of power scheduling is the energy (a.k.a. the times of applied mutations), which will be the input of the step of our adaptive mutation. The problem is that, given the total energy available for a seed, we still need to assign the number of mutations for \emph{each type of mutators}. 
 
 
-In general, two categories of mutators are used in GBFs. Some are coarse-grained in the sense that they change bulks of bytes during the mutations. Others are fine-grained since they only involve a few byte-level modifications, insertions or deletions. For coarse-grained mutations, we consider them to be:
+In general, two categories of mutators are used in GBFs. Some are coarse-grained in the sense that they change a bulk of bytes during the mutations. Others are fine-grained since they only involve a few byte-level modifications, insertions or deletions. For coarse-grained mutations, we consider them to be:
 \begin{enumerate}[(1)] 
-	\item \textbf{Mixed havoc}. This includes several bulk mutations, namely deleting a chunk of bytes, overwriting the given chunk with other bytes in the buffer, deleting a certain lines, duplicating certain lines multiple times, etc. The actual mutation involves their combinations.
+	\item \textbf{Mixed havoc}. This includes several chunk mutations, namely deleting a bulk of bytes, overwriting the given chunk with other bytes in the buffer, deleting a certain lines, duplicating certain lines multiple times, etc. The actual mutation involves their combinations.
 	\item \textbf{Semantic mutation}. This is used when the target program is known to process semantic relevant input files such as javascript, xml, css, etc. In detail, this follows Skyfire~\cite{junjie:2017sp:skyfire}, which includes three meta mutations, inserting another subtree into a random AST position, deleting a given AST, and replacing the given position with another AST.
 	\item \textbf{Splice}. This includes a crossover between two seeds in the queue and subsequent mixed havocs.
 \end{enumerate}
@@ -642,10 +642,10 @@ For each program with the given target locations, the instrumentation of {\dFOT}
 In the experiments, we aim to answer the following questions:
 
 \begin{enumerate}[\textbf{RQ}1]
-    \item  Is the static analysis really worth the effort?
-    \item  How good is {\dFOT}'s performance in terms of reproducing the target crashes?
+    \item  Is it worth applying static analysis?
+    \item  What are {\dFOT}'s performance in reproducing the crashes on target locations?
     \item  How effective are the dynamic strategies in {\dFOT}?
-    \item  How good is the ability of {\dFOT} for reaching the specific target locations?  
+    \item  What are {\dFOT}'s performance in reaching target locations?  
 \end{enumerate}
 
 \textbf{Evaluation Dataset.}
@@ -653,7 +653,7 @@ We evaluated \dFOT with diverse real-world programs:
 \begin{enumerate}[(1)] 
     \item \textbf{GNU Binutils}~\cite{binutils} is a set of binary analysis tools on Linux. 
 This also serves a benchmark in other works such as~\cite{Bohme:2016:CGF, Bohme:2017:DGF, FairFuzz}.
-    \item \textbf{MJS}~\cite{mjs} is an embedded JavaScript interpreter for IoT development.
+    \item \textbf{MJS}~\cite{mjs} is a JavaScript interpreter for embedded devices.
     It is used to compare \dFOT directly with {\aflgo} due to implementation limitations of the latter.
     \item \textbf{Oniguruma}~\cite{oniguruma} is a versatile regular expression library used by multiple world famous projects such as PHP~\cite{php}.
     \item \textbf{Fuzzer Test Suite}~\cite{fuzzer-test-suite} is a set of benchmarks for fuzzing engines.
@@ -668,11 +668,11 @@ Compared to AFL, it also instruments basicblock distance information.
 \item \textbf{{\dGO}} is the fuzzer whose basicblock level distance is generated with our static analysis procedure (Fig.~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
 \end{enumerate}
 
-Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GBFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not publicly available (e.g., Angora~\cite{Angora}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
+Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GBFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not easily comparable (e.g., libFuzzer~\cite{libfuzzer}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
 
 In the experiments, all AFL based fuzzers (AFL, {\aflgo} and {\dGO}) are run in their ``fidgety'' mode~\cite{FidgetyAFL}. For both {\aflgo} and {\dGO}, ``time-to-exploitation'' is set to 45 minutes for the fuzzer. Except for the experiments against GNU Binutils (Table~\ref{tbl:cr_aflgo_binutils}) , where we follow exactly the setup in {\aflgo}~\cite{Bohme:2017:DGF} , all the other experiments are repeated 8 times, with a time budget of 4 hours. 
 We use ``time-to-exposure'' (TTE) to measure the length of the
-fuzzing campaign until the first test input is generated that triggers a given error (in~\S\ref{subsec:evalcrashrepro}) or reaches a target location (in~\S\ref{subsec:evalsrcloc}).
+fuzzing campaign until the first seed is generated that triggers a given error (in~\S\ref{subsec:evalcrashrepro}) or reaches a target location (in~\S\ref{subsec:evalsrcloc}).
 We use \emph{hitting round} to measure the number of runs in which a fuzzer triggers the error or reaches the target.
 For all the experiments, if the fuzzer cannot find the target crash within the time budget in one run, TTE is set to the time budget value. 
 

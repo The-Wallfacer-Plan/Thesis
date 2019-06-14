@@ -302,7 +302,7 @@ usually provide the APIs to control the low level process or thread scheduling~\
 In order to intervene the interleavings during the execution of the multithreaded program, we adjust the thread priorities.
 This heavily resorts to the POSIX API \func{pthread\_setschedparam}. Our intervention of scheduling follows two principles: 1) the intervened schedule should be possible to happen in reality without this intervention; 2) the schedule should make the interleavings more diverse. We therefore instrument a function call \rtifunc at the start of the thread routine. This instrumented function does two things:
 \begin{enumerate}[(1)]
-    \item For each newly mutated test input, it calls \func{pthread\_self} in the entry of \FSStart to collect the runtime thread IDs. This serves two purposes.
+    \item For each newly mutated seed, it calls \func{pthread\_self} in the entry of \FSStart to collect the runtime thread IDs. This serves two purposes.
     First, it marks the entering of the multithreading region in order to inform the fuzzer that the execution trace has covered the thread spawning statements.
     Second, each collected thread ID will also be associated with a unique number \ntid starting from $1,2,\ldots$, which will be used to calculate the threading context in \S\ref{sec:instrument_thread_ctx}.
     \item During the calibration execution~\S~\ref{sec:calibrate}, whenever the thread comes to call \rtifunc, it changes the schedule policy to \emph{SCHED\_RR}, and assigns a \emph{ranged random value} to its priority.
