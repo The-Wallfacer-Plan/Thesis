@@ -10,9 +10,9 @@ One interesting phenomenon needs to pay attention to is that it is usually a lon
 
 In order to avoid the damages brought by the software defects, it is favorable to \emph{disclose these vulnerabilities as early as possible and fix them immediately}. The most widely applied approaches are \emph{testing} and \emph{verification}~\cite{Hailpern:2002:SDT:1660992.1660994,Felderer:2016:MST:2904681.2904685,mc-at}. For testing, we feed the software with multiple initial seeds, which can be a variety of test files, a sequence of syscalls, etc. This checks the different functionalities of the target program by considering different application scenarios. It can detect the weakness when it finds a violation with the given test suite; if no error reports, however, it does not mean there are no vulnerabilities inside. On the other hand, verification usually guarantees that the underlying software systems are free of certain considered vulnerabilities. Due to its complexity nature, the programs or the systems that are verified are usually abstracted in an intermediate representation and the focus is a relative higher level security guarantee.
 
-\begin{figure}[ht]
+\begin{figure}[t]
 	\begin{center}
-		\includegraphics[width=0.9\textwidth]{res/contributions}
+		\includegraphics[width=0.95\textwidth]{res/contributions}
 		\caption{Main work of this thesis and the relations among its counterparts}
 		\label{fig:works}
 	\end{center}
