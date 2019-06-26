@@ -41,20 +41,20 @@ As a result, if this function is called from an app with \emph{no} permission, a
 To cater for such a scenario, we need to make the security type of \textit{getContactNo}
  \emph{depend on} the permissions possessed by the caller.
 
-Banerjee and Naumann~\cite{Banerjee:2005ht} proposed a type system (which we shall refer to as {\BN} system)
+Banerjee and Naumann~\cite{Banerjee:2005ht} proposed a type system (refered to as {\BN} system)
 that incorporates permissions into function types.
 Their type system was designed for an access control mechanism different from ours,
 but the basic principles are still applicable.
 In {\BN} system, a Java class may be assigned a set of permissions which need to be {\em explicitly enabled} via an \textbf{enable} command for them to have any effect.
 We say a permission is {\em disabled} for an class if it is \emph{not assigned} to the class, or it is \emph{assigned} to the class but is \emph{not explicitly enabled}.
 Depending on the permissions of
-the calling class (corresponding to an \emph{app} in the above example), a function such as \textit{getContactNo} can have a collection of types. In {\BN} type system, the types of a function take
+the calling class (corresponding to an \emph{app} in the above example), a function such as \textit{getContactNo} can have a collection of types. In {\BN} system, the types of a function take
 the form $(l_1,\dots, l_n)\xrightarrow{~P~}l$
 where $l_1,\dots,l_n$ denote security labels of the input, $l$ denotes the security labels of the output
 and $P$ denotes a set of permissions that are disabled by the caller.
 The idea is that permissions are guards to sensitive values. Thus conservatively, one would type the return value of \textit{getContactNo} as $L$ only if
 one knows that the permission READ\_CONTACT is disabled.
-In {\BN} system, \textit{getContactNo} admits the following types:
+In {\BN} system, \textit{getContactNo} admits:% the following types:
 \begin{equation*}
 \textit{getContactNo} : L~\xrightarrow{~P~}~L\qquad
 \textit{getContactNo} : L~\xrightarrow{~\emptyset~}~H
@@ -63,7 +63,7 @@ where $P = \{ \mathrm{READ\_CONTACT} \}.$
 When typing a call to \textit{getContactNo} by
 an app without permissions,
 the first type of \textit{getContactNo} is used; otherwise
-the second type is used.
+the second type.% is used.
 
 In {\BN} system, the typing judgment is parameterized
 by a permission set $Q$ containing the permissions that are
@@ -98,7 +98,7 @@ When $Q \cap P = \emptyset$, there can be two possible runtime scenarios.
 One scenario is that all permissions in $P$ are enabled, so ``\textbf{test}(P)'' succeeds and $c_1$ is executed.
 The other is that some permissions in $P$ are disabled, but are not accounted for in $Q$.
 So in this case, one cannot determine statically which branch of \textbf{test} will be
-taken at runtime. The typing rule R1 therefore conservatively considers typing both branches.
+taken at runtime. Therefore, R1 conservatively considers typing both branches.
 
 When adapting {\BN} system to Android, R1
 is still too strong in some scenarios, especially when it is desired that the \emph{absence} of some permissions
@@ -174,10 +174,7 @@ are propagated across method invocations among apps. This is due to the fact tha
 chains across apps. As we shall see in Section~\ref{sec:typing_rules}, this may give rise to a type of attack which we call
 ``parameter laundering'' attack if one adopts a naive typing rule for function calls.
 The soundness proof for our type system is significantly different from that for {\BN} type system due to the difference
-in permission model and the new merging operator on types in our type system.  
-
-Due to space constraints, most proofs are omitted but they can be found in a technical report~\cite{Chen17arxiv}. 
-
+in permission model and the new merging operator on types in our type system.
 
 \subsection{Contributions}
 The contributions of this chapter are threefold.
@@ -192,7 +189,7 @@ The contributions of this chapter are threefold.
 In this section, we present the proposed information flow type system. Section~\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
 Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
 constructs based on the abstract permission model.
-Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe the type system for our language and prove its soundness in terms of non-interference.
+Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe our type system and prove its soundness in terms of non-interference.
 
 \subsection{A Model of Permission-based Access Control}
 \label{sec:permission_model}
@@ -210,7 +207,7 @@ may impose permissions on other apps who want to
 access its services. Communication between apps is implemented
 through Binder IPC (inter-process communications)~\cite{Android-Binder-IPC}.
 
-In our model, a program can be seen as a highly abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we will not model explicitly the IPC mechanism of Android, but instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, with the extra modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}%
+In our model, a program is an abstracted version of an app, and the intention is to show how one can reason about information flow in such a service provider when access control is imposed on the calling app. In the following we will not model explicitly the IPC mechanism of Android, but instead model it as a function call. Note that this abstraction is practical since it can be achieved by conventional data and control flow analyses, with the extra modeling of Android IPC specific APIs. The feasibility has been demonstrated by frameworks like FlowDroid~\cite{Arzt:2014:FPC:2666356.2594299}, Amandroid~\cite{Wei:2014:APG:2660267.2660357}%
 %~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than non-interference certification.}
 , IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
 
@@ -277,10 +274,10 @@ A function declaration has the following syntax:
 \begin{equation*}
 F ::= \lpPROG{A.f}{\overline{x}}{c}{{\lpRES}}
 \end{equation*}
-where $A.f$ is the name of the function, $\bar x$ are function parameters,
-$c$ is a command and {\lpRES} is a local variable
+where $A.f$ is the function name, $\bar x$ are function parameters,
+$c$ is a command, and {\lpRES} is a local variable
 that holds the return value of the function.
-The variables $\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{ret}~r$'' in their scopes.
+$\overline{x}$ and $r$ are bound variables with the command ``$c; \textbf{ret}~r$'' in their scopes.
 We consider only {\em closed functions}, i.e., the variables occurring in $c$
 are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 
@@ -468,7 +465,7 @@ Immediately from Definition~\ref{def:base_type}.
 $(\Tcal, \leq_\Tcal)$ forms a lattice.
 \end{lemma}
  \begin{proof}
- $\forall s,t\in\PPS$, according to Lemma~\ref{lem:bound}, $s \sqcup t$ is their upper bound. Suppose $r$ is another upper bound of them, i.e., $s\leq_\Tcal r$ and $t\leq_\Tcal r$, which means $\forall P\in\PPS, (s\sqcup t)(P)=s(P)\sqcup t(P)\leq_{\SL} r(P)$, so $s\sqcup t\leq r$. Therefore $s\sqcup t$ is the least upper bound of $\left\{s,t\right\}$. Similarly, $s\sqcap t$ is $s$ and $t$'s greatest lower bound. This makes $(\Tcal, \leq_\Tcal)$ a lattice.
+ $\forall s,t\in\PPS$, according to Lemma~\ref{lem:bound}, $s \sqcup t$ is their upper bound. Suppose $r$ is another upper bound, i.e., $s\leq_\Tcal r$ and $t\leq_\Tcal r$, which means $\forall P\in\PPS, (s\sqcup t)(P)=s(P)\sqcup t(P)\leq_{\SL} r(P)$, so $s\sqcup t\leq r$. Therefore $s\sqcup t$ is the least upper bound of $\left\{s,t\right\}$. Similarly, $s\sqcap t$ is $s$ and $t$'s greatest lower bound. This makes $(\Tcal, \leq_\Tcal)$ a lattice.
  \end{proof}
 
 
@@ -478,7 +475,7 @@ From now on, we shall drop the subscripts in $\leq_{\SL}$ and $\leq_\Tcal$ when 
 
 \begin{definition}
 \label{def:embed}
-Given a security labels $l$, we define $\hat{l}$ as:
+Given a security label $l$, we define $\hat{l}$ as:
 for all $P \in \PPS$, we have $\hat{l}(P) = l$.
 \end{definition}
 
@@ -528,7 +525,7 @@ with respect to $p$ are: \begin{align*}
 (t\downarrow_{p}) (P) = t(P\setminus\{p\}), \forall P\in \PPS
 \tag{demotion}
 \end{align*}
-The \termEmph{promotion} and \termEmph{demotion} of a function type~$\overline{t}\rightarrow t$,
+The \termEmph{promotion} and \termEmph{demotion} of $\overline{t}\rightarrow t$,
 where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 \begin{align*}
 (\overline{t}\rightarrow t)\uparrow_{p} = \overline{t}\uparrow_{p} \rightarrow t\uparrow_{p},~
@@ -617,7 +614,7 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 
 
  
-We first define a couple of operations on security types and permissions that will
+We first define operations on security types and permissions which will
 be used later.
 
 \begin{definition}\label{def:projection}
@@ -670,7 +667,7 @@ This says that under $\Psi$,
 the expression $e$ has a base type at most $t$.
 
 \item Command typing: $\Psi; A \vdash c : t$.
-This means that the command $c$ writes to variables with type at least $t$, when
+It means that the command $c$ writes to variables with type at least $t$, when
 executed by app $A$, under the typing environment $\Psi.$
 
 \item Function typing:
@@ -679,7 +676,7 @@ where $\overline{x} = (x_1,\dots,x_n)$ and
 $\overline{t} = (t_1,\dots,t_n)$ for some $n \geq 0.$
 Functions are
 polymorphic in the permissions of the caller.
-Intuitively, this means that each caller of the function above with permission set $P$
+Intuitively, each caller of the function above with permission set $P$
 ``sees'' the function as having type
 $\app{\overline{t}}{P} \rightarrow \app{t'}{P}.$
 That is, if the function is called from another app with permission $P$,
@@ -693,20 +690,19 @@ information flow type systems~\cite{Volpano:1996,Banerjee:2005ht,Sabelfeld:2003}
 can be safely downgraded, since typing for commands keeps track of a lower bound of the write effects of the command. This typing rule for
 command is standard, see, e.g., \cite{Volpano:1996} for a more detailed discussion.
 
-In \ruleTagText{T-CP}, to type statement \lcCP{p}{c_1}{c_2},
+In \ruleTagText{T-CP}, to type \lcCP{p}{c_1}{c_2},
 we type $c_1$ in a promoted typing environment for a successful permission check on $p$, and $c_2$ in a demoted typing environment for a failed permission check on $p$.
 The challenge is how to combine the types of the two premises  to obtain the type
 for the conclusion. One possibility is to force
 the type of the two premises and the conclusion to be identical (i.e., treat permission check the same as other if-then-else statements and apply \ruleTagText{T-IF}).
 This, as we have seen in Section~\ref{sec:sta_intro},
-leads to a loss in precision of the type for \textbf{test} construct. Instead, we consider
+leads to a loss in precision of the type for \textbf{test} construct. We consider
 a more refined \emph{merged} type $\omerge{p}{t_1}{t_2}$ for the conclusion,
 where $t_1$ ($t_2$ resp.) is the type of the left (right resp.) premise.
 To understand the merged type,
 consider a scenario where the statement
 is executed in a context where permission $p$ is \emph{present}.
-Then the permission check succeeds and
-the statement $\lcCP{p}{c_1}{c_2}$ is equivalent to $c_1$.
+The permission check succeeds and $\lcCP{p}{c_1}{c_2}$ is equivalent to $c_1$.
 In this case, one would expect that the behavior of $\lcCP{p}{c_1}{c_2}$ would be
 equivalent to that of $c_1$. This is in fact captured by the equation
 $
@@ -808,8 +804,8 @@ from \textit{M.main} to \textit{A.f} and finally to \textit{B.g} can
 all be typed.
 This is correct in a setting where permissions are \emph{propagated}
 along with calling context (e.g., \cite{Banerjee:2005ht}) however it
-is incorrect in the Android permission model~\ref{sec:permission_model}. 
-To avoid the parameter laundering problem, our approach is to make sure that an app may only pass an argument
+is incorrect in the Android permission model (\S\ref{sec:permission_model}). 
+To avoid the parameter laundering problem, our approach ensures that an app may only pass an argument
 to another function if the app itself is authorized to access the content of the argument in the first place,
 as formalized in the rule \ruleTagText{T-ICALL}.
 

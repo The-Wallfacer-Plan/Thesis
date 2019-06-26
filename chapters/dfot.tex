@@ -134,11 +134,11 @@ in particular, the indirect calls among functions should not be ignored. If the 
 
 \subsection{Desired Properties of Directed Fuzzing} \label{subsec:dp}
 
-As observed from the above example, an ideal DGF should possess the following desired properties.
+We observe that an ideal DGF should possess the following desired properties.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.16\columnwidth]{res/dfot/eg_callchain.pdf}
+	\includegraphics[width=0.15\columnwidth]{res/dfot/eg_callchain.pdf}
 	\vspace{-5pt}
 	\caption{Fuzzing traces for Fig.~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$; $\langle a, e, f , Z\rangle$ does not pass $T$.}
 	\label{fig:call_chain}
@@ -170,14 +170,14 @@ In general, these mutators can be categorized into two levels: fine-grained muta
  
 For the example in Fig.~\ref{fig:call_chain}, consider the case where the DGF has already reached the target function via trace $\langle a, b, c, d, T, Z\rangle $, but crash is not triggered yet.
 Now, the DGF should allocate less chances for coarse-grained mutations for the input of $\langle a, b, c, d, T, Z\rangle $.
-Meanwhile, if DGF has just started up and $\langle a, b, c, d, T, Z\rangle $ has not been reached yet, then the DGF should give more chances for coarse-grained mutations.
+Meanwhile, if DGF has just started up and $\langle a, b, c, d, T, Z\rangle $ has not been reached yet, the DGF should give more chances for coarse-grained mutations.
 
 
 
 \subsection{AFLGo's Solution} \label{subsec:aflgo_sol}
 
 
-In this section, we evaluate the solution of \aflgo against the four desired properties to demonstrate the significances of these properties as well as some useful concepts in DGF.
+In this section, we evaluate the solution of \aflgo against the four desired properties to demonstrate the significances of these properties in DGF.
 
 
 
@@ -191,7 +191,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 
 \textbf{For P1.} 
 For Fig.~\ref{fig:call_chain}, based on the distance formula defined in \aflgo
-the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In fact, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
+the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
 Given these three execution traces, the energy assigned to them will be $ \langle a, e, T, Z\rangle$ $>$ $\langle a, e, f , Z\rangle$ $>$ $\langle a, b, c, d, T, Z\rangle$.
 This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphasized; the crashing trace $\langle a, b, c, d, T, Z\rangle$ is however considered the least important, even less important than the trace $\langle a, e, f , Z\rangle$ that fails to reach the target $T$.
 
@@ -202,8 +202,6 @@ As a result, all function pointers are treated as \emph{external nodes} which
 are ignored during distance calculation. 
 This means that, in an extreme case, if the target function is called via a function pointer, its distance from the actual caller is undefined. 
 For example, in Fig.~\ref{fig:call_chain}, if $d$ and $e$ call $T$ via function pointers, both $d$ and $e$ will be mistakenly considered unreachable to $T$; consequently, all nodes except for $T$ will be considered unreachable to $T$. Therefore essentially there is no directedness in such a case.
-
-
 Besides, \aflgo counts the same callee in its callers only once, and it does not differentiate multiple call patterns between the caller and callee (see \S\ref{subsec:functionDist}).
 The function level distance is calculated on the call graph with the Dijkstra shortest path, assuming the weight of two adjacent nodes (functions) in the call graph always to be 1, which will distort the distance calculation. 
 
@@ -221,8 +219,7 @@ In fact, some subtle vulnerabilities can only be reached with some special preco
 Hence, \aflgo lacks the adaptive mutation strategies, which will mutate arbitrarily even when the current seeds are close to the specified locations enough.
 
 
-\textbf{Summary.} Taking \aflgo as example, we can summarize the following suggestions to improve DGFs:
-
+\textbf{Summary.} We summarize the following suggestions to improve DGFs:
 \begin{enumerate}[(1)] 
 	\itemsep0em
 	\item For \textbf{P1}, a more accurate distance definition is needed to retain trace diversity, avoiding the focus on short traces.
@@ -242,19 +239,18 @@ In this section, we briefly introduce the workflow of our proposed approach, nam
 
 The inputs of static analysis are the \textit{program source code} and the~\textit{target locations} (i.e., the lines of code that the fuzzer is directed to reach). We derive the basicblocks and functions where the target locations reside in, and call them \textit{target basicblocks} and \textit{target functions}, respectively. The main output of static analysis is the \textit{instrumented program~binary} with the information of \textit{basicblock level distance}.
 
-First, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all the possible calls. Besides, for each function, we construct the  control flow graph (CFG) (\S\ref{subsec:graghCons}).
+Firstly, we precisely construct the call graph (CG) of the target~program based on the inclusion-based pointer analysis~\cite{Andersen94programanalysis} to include all the possible calls. For each function, we construct its  control flow graph (CFG) (\S\ref{subsec:graghCons}).
 
-
-Second, we compute several~utilities that are used to facilitate the directedness in \dFOT based on CG and CFG (\S\ref{subsec:UtilityComputation}).
+Secondly, we compute several~utilities to facilitate the directedness in \dFOT based on CG and CFG (\S\ref{subsec:UtilityComputation}).
 \begin{enumerate}[(1)]
 \item \textbf{Function level distance} is computed based on CG by augmenting adjacent-function distance (\S\ref{subsec:functionDist}).~This distance is utilized~to calculate the \textit{basicblock level distance}. It is also~used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
     
-\item \textbf{Basic block level distance} is computed based on the function level distance, together with the CG and the functions' CFGs. This distance is statically instrumented for each basicblock that is considered to be able to reach one of the target locations. During the fuzzing loop, it is also used to calculate the \emph{basicblock trace distance} (\S\ref{subsec:powerSche}).
+\item \textbf{Basic block level distance} is computed based on the function level distance with the CG and the functions' CFGs. This distance is statically instrumented for each basicblock considered to be able to reach one of the target locations. In the fuzzing loop, it is also used to calculate the \emph{basicblock trace distance} (\S\ref{subsec:powerSche}).
 
 \item \textbf{Target function trace closure} is computed for each target location~according to the CG to obtain the functions that can reach the target locations. It is used during the fuzzing loop to calculate the \emph{covered function similarity} (\S\ref{subsec:powerSche}).
 \end{enumerate}
 
-Finally, the target program is instrumented to keep track of the edge transitions (similar to AFL), the accumulated basicblock trace distance (similar to AFLGo), and the covered functions.
+Lastly, the target program is instrumented to keep track of the edge transitions (similar to AFL), the accumulated basicblock trace distance, and the covered functions.
 
 
 \subsection{Dynamic Fuzzing Loop}\label{sec:fuzz_flow}
@@ -271,7 +267,7 @@ Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those t
 
 \section{Methodology}
 
-In this section, we will elaborate the key components in Fig.~\ref{fig:overview} featuring the four desired properties.
+This section elaborates the key components in Fig.~\ref{fig:overview} featuring the four properties.
 
 
 \subsection{Graph Construction} \label{subsec:graghCons}
@@ -353,7 +349,7 @@ As an example, in Fig.~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\c
 
 A special case not shown in the above examples is that some branches form cycles (i.e., loops). Indeed, these functions may be called multiple times at runtime. However, it is uncertain that \emph{how many times} they will be executed across different runs when fed with different seeds. Fortunately, actual execution on one call site of a callee inside one loop typically has similar effect --- the loop explores the similar program states and benefits less in covering new paths. Hence, the function call inside the loop does not bring many execution trace diversities like the scenario where the same callee occurs in multiples branches with significantly different parameters.
 
-The applied approach aims to make a trade-off between the efficiency and the utility of the static analysis. Therefore, we do not consider the solution space of any branch condition that may affect the \emph{runtime reachability} in the CFG. For example, in Fig.~\ref{subfig:dist1}, if we change the condition check \emph{i>0} to be \emph{i==0}, the true branch will be executed only when the input value of $i$ is 0. It is tempting to assign a smaller distance to the code segments in the false branch. However, since the target program is usually nontrivial, it is impractical to statically formulate the exact constraint set of the preconditions before reaching function $f_a$ and predicate the branches's actual execution probabilities. One common scenario is that the branch condition \emph{i==0} is used for checking the return status code of an external function call, at runtime it may actually execute the true branch more often than the false branch.
+The applied approach aims to make a trade-off between the efficiency and the utility of the static analysis. Therefore, we do not consider the solution space of any branch condition that may affect the \emph{runtime reachability} in the CFG. For example, in Fig.~\ref{subfig:dist1}, if we change the condition check ${i>0}$ to be ${i==0}$, the true branch will be executed only when the input value of $i$ is 0. It is tempting to assign a smaller distance to the code segments in the false branch. However, since the target program is usually nontrivial, it is impractical to statically formulate the exact constraint set of the preconditions before reaching function $f_a$ and predicate the branches's actual execution probabilities. One common scenario is that the branch condition \emph{i==0} is used for checking the return status code of an external function call, at runtime it may actually execute the true branch more often than the false branch.
 
 
 
@@ -369,7 +365,7 @@ Besides, we also compute the target function trace closure which will be used to
 d_f(n, \tgtfnset) =
 \begin{cases}
 \textbf{undefined.} & \text{if}~R(n, \tgtfnset)=\emptyset \\
-[\Sigma_{\tgtfn\in R(n, \tgtfnset)} \traceFnDist{n}{\tgtfn}^{-1}]^{-1} & otherwise \\
+[\Sigma_{\tgtfn\in R(n, \tgtfnset)} \traceFnDist{n}{\tgtfn}^{-1}]^{-1} & \textmd{otherwise} \\
 \end{cases}
 \label{eq:aflgo_func_dist}
 \end{equation}
@@ -402,7 +398,7 @@ Note that Equation \ref{eq:aflgo_func_dist} and \ref{eq:aflgo_bb_dist}, on their
 
 \subsection{Power Scheduling}  \label{subsec:powerSche}
 
-During dynamic fuzzing, we apply power scheduling on a selected seed based on two dynamically-computed metrics: basicblock trace distance and target function trace similarity.
+During fuzzing, we apply power scheduling on a selected seed based on two dynamically computed metrics: basicblock trace distance and target function trace similarity.
 
 \textbf{Basic Block Trace Distance.} The distance between the seed $s$ to the target basicblocks $\tgtbbset$ is defined as:
 \begin{equation}
@@ -503,8 +499,8 @@ In general, two categories of mutators are used in GBFs. Some are coarse-grained
 \end{enumerate}
 
 
-Algo.~\ref{algo:mutateStr} shows the workflow of our adaptive mutation, given a seed $s$. 
-The basic idea is to give less chance of coarse-grained mutations when the seed $s$ can reach the target functions (at line \ref{algo1:elsecheck} in Algo.~\ref{algo:mutateStr}). Once the seed reaches the target locations, the times of doing fine-grained mutations increase from  $ p * 	\gamma$ (line \ref{algo1:old_fine}) to $p *(	\gamma + \delta)$ (line \ref{algo1:new_fine}), but the times of doing coarse-grained mutation decrease from  $ p *(1- 	\gamma )$ (at line \ref{algo1:old_coarse}) to $p *(1- 	\gamma -\delta )$ (line \ref{algo1:new_coarse}). Here, $s.getScore()$ at line \ref{algo1:getscore} is to get the energy assigned to the seed according to the the power function value calculated in Equation~\ref{eq:aflgo_power}.
+Algorithm~\ref{algo:mutateStr} shows the workflow of our adaptive mutation, given a seed $s$. 
+The basic idea is to give less chance of coarse-grained mutations when the seed $s$ can reach the target functions (at line \ref{algo1:elsecheck} in Algorithm~\ref{algo:mutateStr}). Once the seed reaches the target locations, the times of doing fine-grained mutations increase from  $ p * 	\gamma$ (line \ref{algo1:old_fine}) to $p *(	\gamma + \delta)$ (line \ref{algo1:new_fine}), but the times of doing coarse-grained mutation decrease from  $ p *(1- 	\gamma )$ (at line \ref{algo1:old_coarse}) to $p *(1- 	\gamma -\delta )$ (line \ref{algo1:new_coarse}). Here, $s.getScore()$ at line \ref{algo1:getscore} is to get the energy assigned to the seed according to the the power function value calculated in Equation~\ref{eq:aflgo_power}.
 
 \begin{algorithm}[t]
 	\setstretch{0.9}
@@ -541,9 +537,8 @@ The basic idea is to give less chance of coarse-grained mutations when the seed 
 	\label{algo:coarseMutate}
 \end{algorithm}
  
-$fineMutate()$ in  Algo.~\ref{algo:mutateStr}  simply  applies a random fine-grained mutation (e.g., bit/byte flippings, arithmetics  on some bytes) for the seed. Algo.~\ref{algo:coarseMutate} shows the details for coarse-grained mutation strategy  $coarseMutate()$. Given a seed $s$ and the iteration times of mutations $i$, the basic idea is to apply semantic mutations (line \ref{algo2:checkSem}) only  when it is  necessary (line \ref{algo2:applySem}). The constraints $needSemMutation(s)$ returns true if the following conditions are satisfied: 1) our fuzzer detects that the input file is  a semantic-relevant input file such as javascript, xml, css, etc; 2) The previous semantic mutations have not failed. If not necessary (line \ref{algo2:checkSemElse}), mixed havoc mutations will get more times ($i * \zeta$, at line \ref{algo2:applyHavoc2}) than the necessary case ($i * (1-\sigma) * \zeta$, at line \ref{algo2:applyHavoc1}), and meanwhile splice mutations will also get more times ($ i * (1-\zeta)$ line \ref{algo2:applysplice2}) than necessary ($i * (1-\sigma) * (1-\zeta)$, at line \ref{algo2:applysplice1}).
-
- In practice, we assign the empirical values to the constants: $\gamma=0.1$, $\delta=0.4$, $\sigma=0.2$, $\zeta=0.8$.
+$fineMutate()$ in  Algorithm~\ref{algo:mutateStr}  simply  applies a random fine-grained mutation (e.g., bit/byte flippings, arithmetics  on some bytes) for the seed. Algorithm~\ref{algo:coarseMutate} shows the details for coarse-grained mutation strategy  $coarseMutate()$. Given a seed $s$ and the iteration times of mutations $i$, the basic idea is to apply semantic mutations (line \ref{algo2:checkSem}) only  when it is  necessary (line \ref{algo2:applySem}). The constraints $needSemMutation(s)$ returns true if the following conditions are satisfied: 1) our fuzzer detects that the input file is  a semantic-relevant input file such as javascript, xml, css, etc; 2) The previous semantic mutations have not failed. Otherwise (line \ref{algo2:checkSemElse}), mixed havoc mutations will get more times ($i * \zeta$, at line \ref{algo2:applyHavoc2}) than the necessary case ($i * (1-\sigma) * \zeta$, at line \ref{algo2:applyHavoc1}), meanwhile splice mutations will also get more times ($ i * (1-\zeta)$ line \ref{algo2:applysplice2}) than necessary ($i * (1-\sigma) * (1-\zeta)$, at line \ref{algo2:applysplice1}).
+In practice, we assign empirical values to: $\gamma=0.1$, $\delta=0.4$, $\sigma=0.2$, $\zeta=0.8$.
 
 
 
@@ -603,8 +598,8 @@ Note that all these new generated  seeds in $\mathcal{M}_s $, together with the 
  Not all the seeds have equal or similar priorities, ideally the queue that stores the seeds to be mutated should be a priority queue. However the scoring may be biased (due to the limitations of static analyses, etc.), and the insertion operations on priority queue take a complexity of $\Theta(\log n)$, which is costly since the queue can be quite long and the insertion operation can be frequent. Therefore it is not beneficial \emph{in practice}~\footnote{In fact, the well-known AFL fuzzer only maintains a linked list with some probabilistic to skip seeds that do not cover new edges; the complexity of the  insertion  is $\Theta(1)$.}. Instead, we provide a three-tiered queue which appends newly generated seeds into different categories according to their scores. Seeds in the top-tiered queue (tier 1) will be picked firstly, then the second-tiered (tier 2), and finally the lower-tiered (tier 3). This imitates a simplified priority queue with constant time complexity.
  
  
- Algo.~\ref{algo:seedprioritization} shows the seed prioritization strategy for a new seed mutated from the previous step of adaptive mutation. The basic idea is: we should prioritize the \emph{newly generated} seeds that 1) cover new traces 2) have bigger similarity values with the target seeds (i.e., power function values) 3) cover the target functions. We favor seeds that cover new traces since we still have to explore \emph{more execution paths} that have the potential to lead to the target locations; this is necessary when the initial seeds are quite far from the target locations. The other two prioritization strategies, i.e., comparing similarity values and checking whether the target function have been reached, are specific to directed fuzzing. Note that although these two strategies are relevant, neither of them can be deduced from the other. For the other newly generated seeds, they are put in the second-tiered queue. On the other hand, seeds that have (just) been mutated are assigned with the least priority.
-In practice, \dFOT also applies AFL's loop bucket approach (see ~\cite{afl_detail}) to filter out a large number of ``equivalent'' seeds that do not bring new coverage in terms of loop iterations. The prioritization strategies will be applied on the remaining seeds. Therefore, there will not be too many seeds filling up the top-tier queue.
+ Algorithm~\ref{algo:seedprioritization} shows the seed prioritization strategy for a new seed mutated from the previous step of adaptive mutation. The basic idea is: we should prioritize the \emph{newly generated} seeds that 1) cover new traces 2) have bigger similarity values with the target seeds (i.e., power function values) 3) cover the target functions. We favor seeds that cover new traces since we still have to explore \emph{more execution paths} that have the potential to lead to the target locations; this is necessary when the initial seeds are far from the target locations. The other two prioritization strategies, i.e., comparing similarity values and checking whether the target function have been reached, are specific to directed fuzzing. Note that although these two strategies are relevant, neither of them can be deduced from the other. For the other newly generated seeds, they are put in the second-tiered queue. On the other hand, seeds that have (just) been mutated are assigned with the least priority.
+In practice, \dFOT also applies AFL's loop bucket approach (see ~\cite{afl_detail}) to filter out a large number of ``equivalent'' seeds that bring no new coverage as to loop iterations. The prioritization strategies will be applied on the remaining seeds. Therefore, there will not be too many seeds filling up the top-tier queue.
 
 By combining all the static and dynamic techniques mentioned above, for the CVE exampled in \S\ref{subsec:motiv}, \dFOT successfully reproduced the crash with a time budget of 24 hours in 3 out of the 10 runs we conducted when fed with the same initial seeds, which is a significantly improvement on both AFL and AFLGo for this case.
  
@@ -613,7 +608,7 @@ By combining all the static and dynamic techniques mentioned above, for the CVE 
 
 \section{Evaluation}\label{sec:eval}
 
-We implemented our static instrumentation on top of FOT's static instrumentation mode (c.f.~\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
+We implemented our instrumentation on top of FOT's static instrumentation mode (c.f. \S\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
 
 For each program with the given target locations, the instrumentation of {\dFOT} consists of three parts: 1) basicblock IDs that track the execution traces 2) basicblock distance information that determines basicblock trace distance and 3) function IDs that track functions that have been covered. 
 
@@ -643,7 +638,7 @@ In the experiments, we aim to answer the following questions:
 
 \begin{enumerate}[\textbf{RQ}1]
     \item  Is it worth applying static analysis?
-    \item  What are {\dFOT}'s performance in reproducing the crashes on target locations?
+    \item  What are {\dFOT}'s performance in reproducing crashes on target locations?
     \item  How effective are the dynamic strategies in {\dFOT}?
     \item  What are {\dFOT}'s performance in reaching target locations?  
 \end{enumerate}
@@ -752,7 +747,7 @@ To summarize, {\dFOT} has the real potential to fulfill directed fuzzing tasks w
 In order to \emph{directly} compare the performance between {\dFOT} and {\aflgo}, we chose a project called \emph{MJS}, which contains a single source file and the results are in Table~\ref{tbl:cr_aflgo_mjs}.
 We used this project for direct comparison with \aflgo since \aflgo took too much time or failed to generate the distance information for other projects such as Oniguruma, libpng, etc. 
 On \emph{MJS}, \aflgo took an average of 13 minutes to generate the basicblock distance for different target locations.
-During experiments, the initial input seed files are all from the project's \emph{tests} directory. The target locations are selected from the crashes reported in the project's GitHub pages, which correspond to four categories of vulnerabilities, namely \emph{integer overflow} (\#1, \url{https://github.com/cesanta/mjs/issues/57}), \emph{invalid write} (\#2, \url{https://github.com/cesanta/mjs/issues/69}), \emph{heap buffer overflow} (\#3, \url{https://github.com/cesanta/mjs/issues/77}), and \emph{use after free} (\#4, \url{https://github.com/cesanta/mjs/issues/78}). We can observe the following facts : 
+During experiments, the initial input seed files are all from the project's \emph{tests} directory. The target locations are selected from the crashes reported in the project's GitHub pages, which correspond to four categories of vulnerabilities, namely \emph{integer-overflow} (\#1, \url{https://github.com/cesanta/mjs/issues/57}), \emph{invalid-write} (\#2, \url{https://github.com/cesanta/mjs/issues/69}), \emph{heap-buffer-overflow} (\#3, \url{https://github.com/cesanta/mjs/issues/77}), and \emph{use-after-free} (\#4, \url{https://github.com/cesanta/mjs/issues/78}). We can observe the following facts : 
 1) On \#1 and \#2,  \dFOT achieves the best results, with the most hitting rounds and the shortest {\utte} for both cases.  In terms of hitting rounds, {\dFOT} found \#1's bug in 5 runs and \#2's bug in 7 runs, while for the other two tools they only detected both crashes in 2 runs. Notably, this case is nontrivial and {\dFOT} reduces the {\utte} from about 3.5 hours to 0.5 hours.
 2) On \#3, for which all the tools reproduce the crash in 8 rounds. Still, \dFOT has the highly significant improvement on {\utte}, using less than one fourth {\utte} of other tools.
 3) On \#4, all the tools reproduce the crash in all rounds, and the {\utte} differences among them are not significant.
@@ -786,8 +781,8 @@ As to \alz, we can see that \dFOT exhibits really good results, for  example, th
 \subsubsection{Crash Reproduction against Oniguruma}
 
 Here we compare \dFOT with \dGO on Oniguruma to show the advantage of dynamic analysis strategies in \dFOT.
-Therefore, the major differences between {\dFOT} and {\dGO} is mainly the dynamic part.
-Due to the aforementioned performance issues of \aflgo~in static analysis on Oniguruma and other big projects, hereinafter, we will used \dGO as an alternative	to \aflgo in the subsequent experiments.
+Therefore, the major differences between {\dFOT} and {\dGO} is the dynamic part.
+Due to the aforementioned performance issues of \aflgo~in static analysis on Oniguruma and other big projects, hereinafter, we use \dGO as an alternative	to \aflgo in the subsequent experiments.
 We therefore compare {\dFOT} with {\dGO} to show the effectiveness of our dynamic strategies.
 
 In Table~\ref{tbl:exp_onig}, we compare \dFOT with \dGO and AFL against the Oniguruma regex library. The first three bugs come from the reported CVEs which occur on version 6.2.0, and Bug \#4 is an newly fixed vulnerability issue on its GitHub pages.
@@ -832,7 +827,7 @@ Therefore, this criterion is an important factor for measuring DGFs' capabilitie
 
 Google's fuzzing test suite contains three projects that specially focus on testing fuzzers' abilities of discovering hard to reach locations, namely \emph{libjpeg-turbo-07-2017} (\#1), \emph{libpng 1.2.56} (\#2, \#3) and \emph{freetype2-2017} (\#4). 
 In these benchmarks, the target locations are specified by file names with line numbers in the source files. 
-Here we manually added some additional ``sentinel'' code in the target locations (``exit(n)'', where the values of `n` distinguish these locations) to indicate that the specified locations are reached. 
+We manually added additional ``sentinel'' code in the target locations (``exit(n)'', where the values of ``n'' distinguish these locations) to indicate that the specified locations are reached. 
 
 
 Table~\ref{tbl:discover_src} shows the results on these benchmarks. 
@@ -886,8 +881,8 @@ In practice, \dFOT also demonstrates its power in exposing crashes with the help
 
 \subsection{Threats to Validity}
 
-The internal threats of validity are twofold:  1).  Several components of \dFOT (e.g., Algo.~\ref{algo:mutateStr} and \ref{algo:coarseMutate}) utilize  the predefined thresholds to make decision. Currently, these thresholds (e.g., $\gamma=0.1$, $\delta=0.4$, $\sigma=0.2$, $\zeta=0.8$) are configured according to our preliminary experiments and  previous experience in fuzzing. Systematic research will be planned to investigate the impact of these thresholds and figure out the best configurations. 
-2). As we rely on the lightweight program analysis tools like LLVM and SVF~\cite{Sui:2016:SVF} to calculate the distance, possible issues of these tools may affect the final results.  As \dFOT is well modularized and can easily integrate with other static analysis tools, enhancing \dFOT with other tools will be another alternative solution. 
+The internal threats of validity are twofold:  1).  Several components of \dFOT (e.g., Algorithm~\ref{algo:mutateStr} and \ref{algo:coarseMutate}) utilize  the predefined thresholds to make decisions. Currently, these thresholds (e.g., $\gamma=0.1$, $\delta=0.4$, $\sigma=0.2$, $\zeta=0.8$) are configured according to our preliminary experiments and  previous experience in fuzzing. Systematic research will be planned to investigate the impact of these thresholds and figure out the best configurations. 
+2). As we rely on the lightweight program analysis tools like LLVM and SVF~\cite{Sui:2016:SVF} to calculate the distance, issues of these tools may affect the final results.  To overcome this, enhancing \dFOT with other tools will be an alternative solution. 
 
 The external threats rise from the choice of evaluation dataset and the CVEs for crash reproduction. Despite we adopt the program Binutils that is used in \aflgo~\cite{Bohme:2017:DGF}, the evaluation results still need to be generalized with an empirical study on more projects in future. Besides, the tested CVEs in \emph{MJS} and  \emph{Oniguruma} are \emph{not selectively} chosen for the purpose to show the advance of \dFOT --- we pick them since they are reported within a recent period. 
 
@@ -922,7 +917,7 @@ Taint analysis is also widely used to facilitate directed white-box testing~\cit
 The key intuition of using taint analysis in fuzzing is to identify \emph{certain parts} of the input which should be mutated with priority.
 In such a way, the fuzzer can drastically reduce the search space for reaching certain desired locations.
 Taint based approaches are more scalable than the DSE techniques and can help the fuzzer to reach certain preferable locations such as rare branches in Fairfuzz~\cite{FairFuzz} or checksum related code in TaintScope~\cite{wangwgz:2010}.
-Different from \dFOT, these techniques are not fed with \emph{given target locations} (e.g., file name and line numbers in our scenario) but based on source-sink pairs.
+Different from \dFOT, these techniques are not fed with \emph{given target locations} (e.g., file name and line numbers) but based on source-sink pairs.
 Thus, such techniques do not have advantages in scenarios where the target locations are absolutely clear, such as patch testing and crash reproduction. 
 
 

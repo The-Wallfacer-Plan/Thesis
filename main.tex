@@ -49,6 +49,7 @@
 \usepackage{pifont}
 \usepackage{fixltx2e}
 \usepackage{tcolorbox}
+\usepackage[figurename=Figure]{caption}
 
 \makeatletter
 \newcommand{\thickhline}{\noalign {\ifnum 0=`}\fi \hrule height 1pt
@@ -56,16 +57,6 @@
 }
 \newcolumntype{"}{@{\hskip\tabcolsep\vrule width 1pt\hskip\tabcolsep}}
 \makeatother
-
-
-\DeclareFontFamily{OMX}{yhex}{}
-\DeclareFontShape{OMX}{yhex}{m}{n}{<->yhcmex10}{}
-\DeclareSymbolFont{yhlargesymbols}{OMX}{yhex}{m}{n}
-\DeclareMathAccent{\wideparen}{\mathord}{yhlargesymbols}{"F3}
-
-\DeclareMathOperator*{\argminA}{arg\,min}
-
-%item parameter: [leftmargin=*,topsep=0pt,partopsep=0pt]
 
 \newtheorem{corol}{Corollary}
 \newtheorem{thm}{Theorem}
@@ -81,7 +72,7 @@
 \newcommand{\s}{\bm{s}}
 \newcommand{\R}{\mathbb{R}^{n_0}}
 \newcommand{\myname}{{\bf Hongxu Chen}}
-\renewcommand{\figurename}{Fig.}
+%\renewcommand{\figurename}{Fig.}
 %\makeatletter\@addtoreset{chapter}{part}\makeatother
 
  \lstset{
@@ -91,7 +82,7 @@
         numbers=left,
 tabsize=2,
         commentstyle=\it,
-        basicstyle=\footnotesize,
+        basicstyle=\scriptsize,
 keywordstyle=\color[rgb]{0,0,1},
         commentstyle=\color[rgb]{0,0.6,0}
         language=C,

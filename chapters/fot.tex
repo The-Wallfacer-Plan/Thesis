@@ -100,25 +100,25 @@ This greatly reduces the manual efforts of crash triaging.
 Many other tools are also being added to complement the fuzzer.
 
 
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.6\columnwidth]{res/fot/mt_workflow}
-	\caption{Coordination among Different Fuzzing Instances}
-	\label{fig:mt_workflow}
-\end{figure}
+%\begin{figure}[t]
+%	\centering
+%	\includegraphics[width=0.56\columnwidth]{res/fot/mt_workflow}
+%	\caption{Coordination among Different Fuzzing Instances}
+%	\label{fig:mt_workflow}
+%\end{figure}
 
 
-\subsection{Trace Update and Synchronization}\label{sec:trace_sync}
-One of {\FOT}'s key features is the builtin coordination among different fuzzing instances (Fig.~\ref{fig:mt_workflow}). One important issue is the trace synchronization between fuzzing instances. For instrumentation, we made a slight change to the conventional instrumentation runtime to enable the target binaries to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated by different fuzzing instances. Each fuzzing instance allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
-
-The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing instances; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each seed in the queue, when customizable conditions are triggered.
-% (usually the conditions are about the executions and time since last synchronization).
-
-The actual synchronization of the trace information applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the seeds indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
+%\subsection{Trace Update and Synchronization}\label{sec:trace_sync}
+%One of {\FOT}'s key features is the builtin coordination among different fuzzing instances (Fig.~\ref{fig:mt_workflow}). One important issue is the trace synchronization between fuzzing instances. For instrumentation, we made a slight change to the conventional instrumentation runtime to enable the target binaries to distinguish different shared memory arenas and the file descriptors used for ``forkserver'' allocated by different fuzzing instances. Each fuzzing instance allocates the shared memory and the instrumented binary writes to specific multiple 8-byte areas when the corresponding ``execution edges'' have been reached. By auditing the byte fingerprints, the fuzzer knows about the edges and their approximate hit counts within this run. This information sits between between ``branch coverage'' and ``path coverage''. By comparing the shared memory fingerprint with the local trace information (checking whether the active shared memory byte has been marked ``traced'' locally), the fuzzer gets the knowledge whether current running seed increases the coverage. Updating of the local trace is majorly a ``bitwise and'' where each byte of the local trace is initialized with all ones (i.e., 255).
+%
+%The local trace is synchronized with the global trace state. There stands a tradeoff: if we use directly the global trace state, the synchronization will be too frequent and eventually decreases performance with the increase of more fuzzing instances; if the fuzzers are only aware of the local trace, it is no better than {\AFL}'s na\"ive approach that runs all instances separately. We thus choose to only apply the synchronization during the mutation of each seed in the queue, when customizable conditions are triggered.
+%% (usually the conditions are about the executions and time since last synchronization).
+%
+%The actual synchronization of the trace information applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the seeds indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
 
 
   \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
- The selection of mutation operators during fuzzing on one seed in the queue is determined by:
+ The selection of mutation operators on one seed in the queue is determined by:
  \begin{enumerate}[1.]
  	\item The whitelist mutation operators used for the targeted binaries. Some mutation operators are only effective on certain programs, but is almost a waste of time for the other programs (for example, bitflip operations are quite expensive and rarely useful for text-based parser programs running against large files). This can be specified by the experienced {\FOT} end-users.
  	\item The one-time mutation operators for \emph{this turn}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the seeds.
@@ -135,7 +135,7 @@ Some programs have variable behaviors for the same seed, due to randomness, mult
  \subsection{Trimming on Duplicated Cases}
 Due to the existence of the potential lag of the trace synchronization, there still exist some seeds that run with the same running trace. In other cases, certain seeds might not be in its ``simplest'' form: by removing some bytes, the seed can still result in the same running trace. {\FOT}'s approach in handling this is to trim the calibrated seeds immediately before being parceled as the message and sent to the message queue buffer managed by the conductor. And the conductor maintains a checksum set of all the generated seed files. Therefore when the newly generated seed has the same checksum as one of the existing ones, this seed will be discarded.
 
-Additionally, we provide an external minimizer program to prune the all the serialized seeds (which can be normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting seeds.
+We also provide an external minimizer to prune all the serialized seeds (including normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting seeds.
  
 
 \subsection{Implementation}\label{sec:fot-impl}
