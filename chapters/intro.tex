@@ -12,7 +12,7 @@ To avoid the damages brought by the software defects, it is favorable to \emph{d
 
 \begin{figure}[t]
 	\begin{center}
-		\includegraphics[width=0.92\textwidth]{res/contributions}
+		\includegraphics[width=0.96\textwidth]{res/contributions}
 		\caption{Main work of this thesis and the relations among its counterparts}
 		\label{fig:works}
 	\end{center}
@@ -35,8 +35,8 @@ With these applied approaches, we aim to provide a comprehensive solution, which
 \section{Contributions of the Thesis}
 The contributions of the thesis is as follows:
 \begin{enumerate}
-	\item We proposed a principled directed greybox fuzzing technique \dFOT to allow for fuzzing on specific program target locations and implemented it on top of \FOT. \dFOT innovatively provides the robust directedness mechanism, integrates with a static analysis to calculate the directedness utilities, optimizes the seed prioritization and scheduling, and applies adaptive mutation strategies across different distance states. This effectively improves the fuzzing effectiveness on the specified program target locations.
-	\item We proposed a thread-aware fuzzing technique, \mtfuzz, which significantly improved the effectiveness of fuzzing on multi-threaded programs. \mtfuzz utilizes the thread-aware analysis and applies three categories of instrumentation to explore thread-interleavings,  improve the thread-scheduling diversities across executions, as well as take account of threading context information; based on the feedback provided by the instrumentation, \mtfuzz generates more valuable seeds that can significantly help reveal multithreading relevant vulnerabilities and concurrency bugs.
+	\item We proposed a principled directed greybox fuzzing technique, \dFOT, to allow for fuzzing on specific program target locations. \dFOT provides the robust directedness mechanism, integrates with a static analysis to calculate the directedness utilities, optimizes seed prioritization and scheduling, and applies adaptive mutation strategies across different distance states. This significantly improves the fuzzing effectiveness on the specified program target locations.
+	\item We proposed a thread-aware fuzzing technique, \mtfuzz, which significantly improved the effectiveness of fuzzing on multi-threaded programs. \mtfuzz utilizes the thread-aware analysis and applies three categories of instrumentation to explore thread-interleavings,  improve the thread-scheduling diversities across executions, and consider threading context; based on the feedback provided by the instrumentations, \mtfuzz generates more valuable seeds that can significantly help reveal multithreading-relevant bugs.
 	\item We provided a greybox fuzzing framework, \FOT, which is versatile in its configurability and extensibility. Based on this, we have integrated several fuzzing techniques, including \dFOT and \mtfuzz, and successfully detected more than 200 vulnerabilities in real-world open source programs, among which 51 have been assigned CVE IDs.
 	\item We provided a permission-dependent type system that precisely enforces access control based on the permission authentication mechanism on Android and proved its soundness in term of the non-interference property. We also provided a series of decidable type inference rules to assist the type checking. Based on the type system, we implemented a prototype that stresses information leakage issues in Android system.
 \end{enumerate}

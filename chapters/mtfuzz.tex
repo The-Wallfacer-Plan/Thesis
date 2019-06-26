@@ -1,6 +1,6 @@
 % !TeX root =../../main.tex
 
-\chapter{\mtfuzz: Multi-threading Aware Fuzzing} \label{ch:mtfuzz}
+\chapter{\mtfuzz: Thread-aware Greybox Fuzzing} \label{ch:mtfuzz}
 
 \section{Introduction and Motivation}\label{sec:mtfuzz_intro}
 
@@ -10,13 +10,13 @@ Multithreading as a popular programming paradigm is an effective way of utilizin
 \begin{figure}[ht]
 \begin{center}
 	\includegraphics[width=0.75\columnwidth]{res/venn}
-	\caption{Venn Diagram of the Multithreading Relevant Vulnerabilities and Bugs}
+	\caption{Venn Diagram of the Multithreading Relevant Vulnerabilities and Bugs.}
 	\label{fig:venn_con_vul}
 \end{center}	
 \end{figure}
 
 
-{\noindent\textbf{ Categories of Multithreading-relevant Vulnerabilities and Bugs}\quad} Figure~\ref{fig:venn_con_vul} depicts the multithreading relevant vulnerabilities and bugs. The rectangle represents all the bugs. The left red circle denotes the vulnerabilities ($Vul$) and the right blue circles denotes the concurrency bugs (\textsf{C-Bug}). The intersection of $Vul$ and \textsf{C-Bug} is the concurrency bug induced vulnerabilities ($V_{cb}$). It may be surprising that there is another category of vulnerabilities $V_m$ which is a proper superset of $V_c$. In fact, there are several vulnerabilities that are tightly relevant with multithreading environment however is not caused by concurrency bugs (\textsf{C-Bug}).
+{\noindent\textbf{ Categories of Multithreading-relevant Vulnerabilities and Bugs}\quad} Figure~\ref{fig:venn_con_vul} depicts the multithreading relevant vulnerabilities and bugs. The rectangle denotes all categories of bugs. The left big circle denotes all categories of vulnerabilities ({\vuls}); the right circle denotes concurrency-bugs ({\cbugs}); the conjunction of {\vuls} and {\cbugs} is termed as \emph{concurrency-bug induced vulnerabilities} under the notation {\vulsCB}. {\vulsMT} denotes \emph{multithreading-relevant vulnerabilities} that may occur in executing multithreading segments of the program; it is the union of {\vulsCB} and the smaller circle inside \vuls. Consequently, \mbox{{\vulsST}={\vuls}-{\vulsMT}} denotes the vulnerabilities that do not occur in multithreading executions. It is worth noting not all {\vulsMT} vulnerabilities are \emph{concurrency-bug induced vulnerabilities} (\vulsCB). We group vulnerabilities like CVE-2015-6761 and CVE-2016-8438 into {\vulsMT} but not into {\vulsCB} since their root causes are not from thread-interleavings. {\vulsMT} also contains vulnerabilities that occur in multithreading execution but actually because of faults, e.g., \emph{out-of-bound-read} and \emph{integer-overflow}, in the individual thread. Since the root causes of real-world multithreading vulnerabilities are notoriously complicated~\cite{mtbugs_survey}, we do not differentiate whether they belong to {\vulsCB} or {\vulsMT-\vulsCB}, but generalize them with {\vulsMT} based on their occurrences. We will show later this treatment is more natural for fuzzing purpose.
 
 \begin{lstlisting}[language=C,float=ht,caption={An Example Illustrating the vulnerability lies in $V_m$ but not $V_c$.},label={lst:eg_vm}]
 int compute(void *s_var) {
@@ -233,19 +233,19 @@ We still need to instrument on the other parts of the program in case that the i
 
 \subsubsection{Instrumentation Probability Calculation}
 We first calculate a \emph{base instrumentation probability} according to cyclomatic complexity. We use this since it has been demonstrated that bugs or vulnerabilities usually come from functions that have higher cyclomatic complexity~\cite{macabecc,vul_metric,fuzz_vul_metric}. For each function $\aFUNC$, we firstly calculate the complexity value: $M_c(\aFUNC) = E(\aFUNC) - N(\aFUNC) + 2$ where $E(\aFUNC)$ is the basicblock edge number of the function, $N(f)$ is the number of basicblocks. Intuitively, this value indicates the complexity of the function across its basicblocks. As 10 is considered to the preferred upper bound~\cite{macabecc}, we determine the base probability as
-\begin{equation}
+{\myeqsize\begin{equation}
     \ccr{\aFUNC} = \min\big\{\frac{E(\aFUNC)-N(\aFUNC)+2}{10}, ~1.0\big\}
-\end{equation}
+\end{equation}}
 We use $\stpn$ as the probability to \emph{selectively} instrument on the first instruction of a basicblock that is \emph{totally} outside the scope of multithreading environment, i.e., \emph{none of} the instructions inside this basicblock belongs to \mtiscope.
-\begin{equation}
+{\myeqsize\begin{equation}
     \stp{\aFUNC} = \min\big\{\ccr{\aFUNC}, ~\stpnO\big\}
-\end{equation}
+\end{equation}}
 where $0<\stpnO<1$. Empirically, we set $\stpnO=0.5$.
 
 On the other hand, for each basicblock \aBB inside the given function~\aFUNC, we calculate the total number of instructions $N(\aBB)$, and the total number of memory operation instructions  $N_m(\aBB)$, e.g., load/store operations, or builtin memory function calls such as \func{memcpy}, \func{strncat}, \func{malloc}, \func{free}, etc. 
 Then for each of the instructions, we instrument based on the probability as:
-\begin{equation}
-    \mtp{\aFUNC}{\aBB} = \min\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}
+{\myeqsize\begin{equation}
+    \mtp{\aFUNC}{\aBB} = \min\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}}
 where $\mtpnO$ is a factor satisfying $0<\mtpnO<1$ and defaults to $0.33$.
 
 \subsubsection{Instrumentation Algorithm}
@@ -360,13 +360,13 @@ To implement $\func{cov\_new\_mt\_ctx(t)}$, we track the context of calling a mu
 Multithreaded programs introduce non-deterministic behaviors when different interleavings are involved.
 As seen in Algorithm~\ref{algo:gbf}, for a mutated seed, a GBF typically executes the target program with multiple times. 
 Owing to~\rtifunc, we are now able to tell whether the current non-deterministic behavior is relevant with a multithreading execution. In fact, since we focus on multithreading only, based on the times of the threading forking operations the fuzzer has observed, the fuzzer can distinguish the calibration on those seeds that have non-deterministic behaviors purely by checking whether the execution traces have touched the threading relevant regions. Further, if we know that a seed may have more distinct values of \tctxSign (the number of distinct values for seed $t$ is denoted as \Nmt(t)), there will be more interleavings. To determine the calibration times~\Ncal, we rely on \Nmt. In AFL, the calibration times is calculated by:
-\begin{equation}
+{\myeqsize\begin{equation}
     \Ncal(t) = \NcalO + \NcalV\cdot\NcalB \label{eq:afl_cal}
-\end{equation}
+\end{equation}}
 where \NcalO is the initial calibration times, \NcalV is a constant as the ``bonus'' calibration times for non-deterministic runs, and $\NcalB\in\{0,1\}$. \NcalB=0 if none of the \NcalO calibration runs show non-deterministic behaviors, otherwise \NcalB=1. We argue this to specially fit for multithreading setting. 
-\begin{equation}
+{\myeqsize\begin{equation}
     \Ncal(t) = \NcalO + \texttt{min}\big\{\NcalV, \NcalO\cdot\Nmt(t)\big\}
-\end{equation}
+\end{equation}}
 In both AFL and \mtfuzz, $\NcalO=8$, $\NcalV=32$.
 For all the \Ncal calibration runs, we track their execution traces and count how many different traces (\NcalTrace) it exhibits. 
 
@@ -409,10 +409,10 @@ This handles how to categorize the seeds after calibration execution. \mtfuzz st
 \label{tbl:eval_overall}
 \centering
 \footnotesize
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\begin{tabular}{c|c|c|c|c|c|c|c|c}
 \thickhline
-\multicolumn{2}{|c|}{\multirow{2}{*}{\textbf{ID}}} & \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{C-Bugs}} \\ \cline{3-8}
-\multicolumn{2}{|c|}{} & \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\textbf{\testsRatio}}  & \textbf{\vulsNUM} &  \textbf{\vulsMT} & \textbf{\vulsST} &  \\ \hline
+\multicolumn{2}{c|}{\multirow{2}{*}{\textbf{ID}}} & \multicolumn{3}{c|}{\textbf{Gen Tests}} & \multicolumn{3}{c|}{\textbf{Vuls}} & \multirow{2}{*}{\textbf{C-Bugs}} \\ \cline{3-8}
+\multicolumn{2}{c|}{} & \textbf{\testsALL} & \textbf{\testsMT} & \textbf{\textbf{\testsRatio}}  & \textbf{\vulsNUM} &  \textbf{\vulsMT} & \textbf{\vulsST} &  \\ \thickhline
 \multirow{12}{*}{\textbf{\mtfuzz}}  & \textbf{lbzip2-c} &  3350   & 753   &  22.5\%  &  0   & 0 & 0 & 1   \\ \cline{2-9} 
     & \textbf{pbzip2-c} &  175    & 50    &  28.6\%  &  0   & 0 & 0 & 0    \\ \cline{2-9} 
     & \textbf{pbzip2-d} &  926    & 7     &  0.8\%   &  0   & 0 & 0 & 0  \\ \cline{2-9} 
@@ -562,10 +562,8 @@ shows the percentage of \testsMT~against \testsALL.
     
 \textbf{Vulnerability Detection.} 
 We denote the total number of detected crashes as \vulsNUM. For each unique crash we manually 
-triage it to corresponding vulnerability type based on its root casuse. Further we group all 
-the found vulnerabilities into two categories: the vulnerabilities that happen in a multithreading 
-context whose number is denoted as \vulsMT; the vulnerabilities that happen in a single-threading 
-context and the number is denoted as \vulsST.
+triage it to corresponding vulnerability type based on its root causes. Further, we group 
+the detected vulnerabilities into two categories: the vulnerabilities triggered in multithreading, whose number is denoted as \vulsMT; the vulnerabilities triggered in single-threading, whose number is \vulsST.
 
 
 
@@ -624,11 +622,11 @@ detection capability. Our intention is to detect more concurrency relevant vulne
 crashes in all programs. In total, \mtfuzz detects 9 such vulnerabilities, while \mtfuzzc and AFL only detect 5 and 4 respectively.
 These vulnerabilities can be further divided into three groups.
 
-\textbf{MT-Vul1: Concurrency bug introduced vulnerabilities.} 
+\textbf{Concurrency-bug Induced Vulnerabilities ($V_{cb}$)}.
 The 4 vulnerabilities found in \emph{im-cnvt} all belong to this group. The root causes are the misuses of caches shared among threads, which causes the data races. The generated seeds  exhibit various symptoms such as use after free, double free, heap buffer overflow, and 
 invalid memory read. Subsequently, the execution traces of the crashes also differ.
 
-\textbf{MT-Vul2: Vulnerabilities that have no direct relation with concurrency bugs but can only be triggered in multithreading settings.}
+\textbf{\textbf{{\vulsMT} that are triggered with multi-thread only but not induced by concurrency-bugs}}.
 For instance, the crash in \emph{pbzip2-d} stems from a stack overflow error in the processing of decompressing a corrupted BZip2 file. The root cause is that the call to \emph{pthread\_attr\_setstacksize} constrains the 
 stack size of each thread. But certain corrupted BZip2 files may use up the stack in a short
 time. This crash can never happen when \emph{pbzip2-d} works in single-threaded mode since \emph{pbzip2-d} executes another \emph{separate function} when only one thread is specified.  In fact, the vulnerability can only be triggered when the carefully crafted input is fed to
@@ -640,14 +638,13 @@ fuzzers (AFL: 7; \mtfuzzc: 12). To support this conjecture, we feed both AFL and
 \mtfuzz seeds --- then both AFL and \mtfuzzc are able to trigger the crash in 40 minutes.
 
 
-\textbf{MT-Vul3: Vulnerabilities detected in multithreading execution but can still be triggered 
-in single-threaded setting.} This refers to the crashes in benchmarks \emph{vpxdec} and \emph{x264}. 
+\textbf{{\vulsMT} that can be triggered with single-thread}. This refers to the crashes in benchmarks \emph{vpxdec} and \emph{x264}. 
 \mtfuzz detects 2 vulnerabilities in \emph{vpxdec} while both AFL and \mtfuzzc find 1. And all three
 fuzzers report 1 vulnerability in \emph{x264}.
 
 Apart from multithreading relevant vulnerabilities (\vulsMT), we indeed find several vulnerabilities beyond the concurrency context of the benchmarks (named as \textbf{ST-Vul}). In column \vulsST, it is observable 
 that \emph{all} three fuzzers detect \emph{equal number} of such vulnerabilities. 
-This is because fuzzing is good at finding ``shallow bugs''~\cite{driller} even with less coverage 
+This also implicates that fuzzing is good at finding ``shallow bugs''~\cite{driller} even with less coverage 
 feedback.
 
 The developers have confirmed all the 10 newly discovered vulnerabilities in Table~\ref{tbl:eval_overall} (the vulnerabilities inside \emph{vpxdec} no longer exists in its latest version.), 
@@ -656,8 +653,7 @@ and 2 CVEs have been assigned.
 
 
 \begin{tcolorbox}[size=title]
-{\textbf{Answer to RQ2: } \mtfuzz can detect more vulnerabilities than state-of-the-art fuzzers. Specifically, 
-it demonstrates the \emph{superiority} in detecting \emph{multithreading} relevant vulnerabilities while retains \emph{equivalent capability} in detecting the \emph{single-threaded} mode vulnerabilities.}
+{\textbf{Answer to RQ2: } \mtfuzz can detect more vulnerabilities than state-of-the-art fuzzers. It demonstrates \emph{superiority} in detecting \emph{multithreading-relevant} vulnerabilities while retains \emph{equivalent capability} in detecting other vulnerabilities.}
 \end{tcolorbox}
 
 \subsection{Concurrency Bug Detection (RQ3)}
@@ -673,18 +669,14 @@ data races.
 
 
 \textbf{Case Study on \emph{gm-cnvt}.} 
-In this benchmark \ts detected 5, 4, and 3 data races by replaying \mtfuzz seeds, \mtfuzzc 
-seeds, and AFL seeds, respectively. The data race that only appears with \mtfuzz seeds is 
+In this benchmark \ts detected 5, 4, and 3 data races by replaying seeds generated by \mtfuzz, \mtfuzzc, and AFL, respectively. %The data race that only appears with \mtfuzz seeds is 
 from the parallel image converting --- read and write operations of a shared variable 
-\textsf{row\_count} can happen simultaneously. 
-
-
-
+\textsf{row\_count} can happen simultaneously.
 Compared with \mtfuzzc, the ``quality'' of \mtfuzz seeds tend to be better. To confirm that the 
 weight \NcalTrace indeed helps bug detection, we replay 2092 \mtfuzzc seeds with the two strategies 
 \ding{182} and \ding{183} (c.f. \S\ref{sec:eval_overall}). We repeat each replay 6 times. When a
-replay process has detected \emph{all} the 4 categories of ``ground truth'' concurrency bugs (C-Bug 
-\mtfuzzc on \emph{gm\_cnvt} in Table~\ref{tbl:eval_overall}), we record the used time in \emph{minutes}
+replay process has detected \emph{all} the 4 categories of ``ground truth'' concurrency bugs (\mtfuzzc detected C-Bug 
+ on \emph{gm\_cnvt} in Table~\ref{tbl:eval_overall}), we record the used time in \emph{minutes}
 in Table~\ref{tbl:cbugs-tte}. 
 
 
@@ -747,7 +739,7 @@ Dynamic detectors~\cite{pldi09_fasttrack,lockset_SavageABNS97,kcc:tsan,JinTLL10,
 causally unordered, and the latter considers a potential race if two threads access a shared memory location without locking. Modern detectors such as \ts~\cite{kcc:tsan}, Valgrind~\cite{helgrind} usually apply a hybrid strategy to combine these two models for accuracy and efficiency. Our work does not aim to improve the existing dynamic detection techniques. In fact, we rely on \ts to detect concurrency bugs.
 
 
-The other dynamic analyses focus on how to trigger the concurrency violation conditions. These include the random testings that mimic non-deterministic program executions~\cite{Sen07,Sen08,JoshiPSN09,ParkS08,CaiC12}, the regression testing methods~\cite{TerragniCZ15,YuHW18} that targets interleavings from code changes, the model checking~\cite{FlanaganG05,ZaksJ08,YangCGK07,yang2008inspect} and hybrid constraint solving~\cite{pldi14_maxmodel,Huang15,icse18_ufo} approaches that systematically checks or execute possible thread schedules, or heuristically avoid fruitless executions~\cite{GuoKWYG15,GuoKW16}. Our work differs from all these works in that our goal is to cover more execution paths in the programs by generating more valuable seeds. This has two benefits. On one hand, usually the provided seeds are not able to cover enough paths even when the target programs are executed with single thread, and \mtfuzz fills the gap. On the other hand, seeds that execute different parts of the code segments tend to require different execution time, memory, and other resources, which influences the actual interleavings intrinsically. Indeed, we also provide the schedule-intervention instrumention. However the main goal is to diversify the schedule introduced interleavings (i.e., transitions).
+The other dynamic analyses focus on how to trigger the concurrency violation conditions. These include the random testings that mimic non-deterministic program executions~\cite{Sen07,Sen08,JoshiPSN09,ParkS08,CaiC12}, the regression testing methods~\cite{TerragniCZ15,YuHW18} that targets interleavings from code changes, the model checking~\cite{FlanaganG05,ZaksJ08,YangCGK07,yang2008inspect} and hybrid constraint solving~\cite{pldi14_maxmodel,Huang15,icse18_ufo} approaches that systematically checks or execute possible thread schedules, or heuristically avoid fruitless executions~\cite{GuoKWYG15,GuoKW16}. Our work differs from all of them in that our goal is to cover more execution paths by generating different seeds that exercise different paths in multithreading-relevant settings. Indeed, we also provide the schedule-intervention instrumentation. However, the main goal is to diversify the schedule introduced interleavings (i.e., transitions).
 
 \subsection{Dynamic Fuzzing Techniques}
 Many techniques are proposed to improve effectiveness of exposing vulnerabilities.

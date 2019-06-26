@@ -1,24 +1,7 @@
- \lstset{
-   escapechar=\%,
-   captionpos=b,
-   aboveskip=12pt,
- %  numbers=left,
- %  xleftmargin=0em,
- %  framexleftmargin=0em,
-   frame=single,
-   tabsize=2,
-   commentstyle=\it,
-   basicstyle=\small,
-   keywordstyle=\bfseries,
-   language=C,
-   morekeywords={info, test, letv, in, init, ret},
-   showspaces=false,
-   showstringspaces=false
- }
-
 \newcommand*{\xzw}[1]{}
 \newcommand*{\why}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{#1} ???$\gg$}}}
 
+%\renewcommand{\qedsymbol}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*{\BN}{\textsf{BN}}
@@ -37,6 +20,8 @@
 \makeatletter
 \def\maketag@@@#1{\hbox{\m@th\normalfont\scriptsize#1}}
 \makeatother
+
+\newcommand*{\myeqsize}{\footnotesize}
 \newcommand*{\ruleTagMath}[1]{\scriptsize\text{(#1)}}
 \newcommand*{\ruleTagText}[1]{{\text{#1}}}
 
@@ -52,7 +37,7 @@
 \newcommand*{\lcWHILE}[2]{\ensuremath{\textbf{while}~{#1}~\textbf{do}~{#2}}}
 \newcommand*{\lcCALL}[3]{\ensuremath{{#1}:=\textbf{Icall}~{#2}({#3})}}
 \newcommand*{\lcCP}[3]{\ensuremath{{\textbf{test}({#1})~{#2} ~\textbf{else}~ {#3}}}}
-\newcommand*{\lcLETVAR}[3]{\ensuremath{{\textbf{letv}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
+\newcommand*{\lcLETV}[3]{\ensuremath{{\textbf{letv}~ {#1} = {#2} ~\textbf{in}~ {#3}}}}
 
 \newcommand*{\com}{\ensuremath{\mathit{Cmd}~}}
 \newcommand*{\FD}{\ensuremath{\mathcal{F}\mathit{d}}}

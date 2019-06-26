@@ -28,23 +28,22 @@ In this sense, we propose our fuzzing framework, \emph{Fuzzing Orchestration Too
 
 \section{Architecture}\label{sec:details}
 
-This section describes the architecture of {\FOT}. Supplementary technical details {\FOT} are available at ~\cite{fot-webpage}.
-
-
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.64\textwidth]{res/fot/FOT_overview}
+	\includegraphics[width=0.52\textwidth]{res/fot/FOT_overview}
 	\caption{Overview of the {\FOT} Fuzzing Framework}
 	\label{fig:fot_workflow}
 \end{figure}
 
+This section describes the architecture of {\FOT}.
+%Supplementary details {\FOT} are available at ~\cite{fot-webpage}.
 Figure~\ref{fig:fot_workflow} depicts the overview of {\FOT}.
 It has three parts (labeled in pink): the \emph{preprocessor}, the \emph{fuzzer}, and the \emph{complementary toolchains}.
-Components of the framework are represented with \emph{blue} rectangles while the inputs and outputs are in \emph{grey}.
+Components of the framework are represented with \emph{blue} rectangles while the inputs and inputs/outputs are in \emph{grey}.
 
 
 \subsection{Preprocessor}
-This contains a variety of tools to collect static calculated metrics which will be coded as instrumentation stubs inside the target programs.
+This contains a variety of tools to collect static calculated metrics which will be encoded as instrumentation stubs inside the target programs.
 
 
 \subsubsection{Static Analyzer}\label{sec:static_analysis}
@@ -91,7 +90,7 @@ It is \textit{configurable} as end-users are allowed to select from the default 
 For now, the feedback can be at basicblock level (same as {\AFL}) or function level (specific to \FOT).
 It is \textit{extensible} as end-users can specify their customized types of feedback for collection.
 
-\subsection{Complementary Toolchain}
+\subsection{Complementary Toolchains}
 {\FOT} contains various complementary tools which help to make the framework \textit{versatile}.
 For instance, we implemented a web-based frontend user interface to observe the overall results.
 It provides fruitful information to make the fuzzing process more transparent.
@@ -117,25 +116,25 @@ Many other tools are also being added to complement the fuzzer.
 %The actual synchronization of the trace information applies ``bitwise and'' on normal running traces from local trace information to global state, and an instant copy in the other direction. This is far more efficient than {\AFL}'s synchronization by 1) importing seeds from other directories and 2) running all the seeds indistinguishably. Note that {\FOT}'s synchronization does not lose precisions compared to {\AFL}'s, where both ``bitwise and'' operations erase the exact hit count information.
 
 
-  \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
- The selection of mutation operators on one seed in the queue is determined by:
- \begin{enumerate}[1.]
- 	\item The whitelist mutation operators used for the targeted binaries. Some mutation operators are only effective on certain programs, but is almost a waste of time for the other programs (for example, bitflip operations are quite expensive and rarely useful for text-based parser programs running against large files). This can be specified by the experienced {\FOT} end-users.
- 	\item The one-time mutation operators for \emph{this turn}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the seeds.
- \end{enumerate}
-
-%On the other hand, {\AFL} has rather limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well~\cite{junjie:2017sp:skyfire,mopt-fuzz}.
-
-
-\subsection{Refinement on Variable Behaviors}\label{sec:entry_var_behavior}
-
-Some programs have variable behaviors for the same seed, due to randomness, multi-threading, etc. {\AFL} handles this issue by running all the newly found interesting seed multiple times (known as \emph{calibration}); whenever it finds that the shared memory information (the active bytes and their hit count) differs from the first run, it will give more chances to the running seed entry, and then keeps track of the variable behavior rate. The problem is that it does not utilize the information further since variable behaviors may cause certain runs to exit normally at some time, however crash at other time, which is more serious. We separately track those seeds and give even more chances for them. Alternatively, we provide an intrinsic strategy to prioritize these cases and let those seeds to be more likely to run next time. On the other hand, {\AFL}'s tracing information for the variable behavior cases are imprecise since it only traces the last calibration shared memory; we refine this by (selective) ``bitwise or'' operations to the shared memory for subsequent procedures on the current seed.
-
-
- \subsection{Trimming on Duplicated Cases}
-Due to the existence of the potential lag of the trace synchronization, there still exist some seeds that run with the same running trace. In other cases, certain seeds might not be in its ``simplest'' form: by removing some bytes, the seed can still result in the same running trace. {\FOT}'s approach in handling this is to trim the calibrated seeds immediately before being parceled as the message and sent to the message queue buffer managed by the conductor. And the conductor maintains a checksum set of all the generated seed files. Therefore when the newly generated seed has the same checksum as one of the existing ones, this seed will be discarded.
-
-We also provide an external minimizer to prune all the serialized seeds (including normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting seeds.
+%  \subsection{Mutation Strategy Adaption}\label{sec:mutation_ops}
+% The selection of mutation operators on one seed in the queue is determined by:
+% \begin{enumerate}[1.]
+% 	\item The whitelist mutation operators used for the targeted binaries. Some mutation operators are only effective on certain programs, but is almost a waste of time for the other programs (for example, bitflip operations are quite expensive and rarely useful for text-based parser programs running against large files). This can be specified by the experienced {\FOT} end-users.
+% 	\item The one-time mutation operators for \emph{this turn}. This is automatically determined by the fuzzer according to statistics generated from the previous mutations and runs. It is calculated in an adaptive way and may finally help to determine the ``convergence'' of the seeds.
+% \end{enumerate}
+%
+%%On the other hand, {\AFL} has rather limited configurations for what mutation operators can be used and frequently runs blindly on the mutations that do not fit well~\cite{junjie:2017sp:skyfire,mopt-fuzz}.
+%
+%
+%\subsection{Refinement on Variable Behaviors}\label{sec:entry_var_behavior}
+%
+%Some programs have variable behaviors for the same seed, due to randomness, multi-threading, etc. {\AFL} handles this issue by running all the newly found interesting seed multiple times (known as \emph{calibration}); whenever it finds that the shared memory information (the active bytes and their hit count) differs from the first run, it will give more chances to the running seed entry, and then keeps track of the variable behavior rate. The problem is that it does not utilize the information further since variable behaviors may cause certain runs to exit normally at some time, however crash at other time, which is more serious. We separately track those seeds and give even more chances for them. Alternatively, we provide an intrinsic strategy to prioritize these cases and let those seeds to be more likely to run next time. On the other hand, {\AFL}'s tracing information for the variable behavior cases are imprecise since it only traces the last calibration shared memory; we refine this by (selective) ``bitwise or'' operations to the shared memory for subsequent procedures on the current seed.
+%
+%
+% \subsection{Trimming on Duplicated Cases}
+%Due to the existence of the potential lag of the trace synchronization, there still exist some seeds that run with the same running trace. In other cases, certain seeds might not be in its ``simplest'' form: by removing some bytes, the seed can still result in the same running trace. {\FOT}'s approach in handling this is to trim the calibrated seeds immediately before being parceled as the message and sent to the message queue buffer managed by the conductor. And the conductor maintains a checksum set of all the generated seed files. Therefore when the newly generated seed has the same checksum as one of the existing ones, this seed will be discarded.
+%
+%We also provide an external minimizer to prune all the serialized seeds (including normal runs, timeout runs, or crashes); it is more aggressive than the embedded procedure in the fuzzer and aims to provide a minimized version of all the interesting seeds.
  
 
 \subsection{Implementation}\label{sec:fot-impl}
@@ -143,7 +142,7 @@ We also provide an external minimizer to prune all the serialized seeds (includi
 The {\FOT} project started from June, 2017 and has been actively developed by two researchers. It is implemented with 16000 lines of Rust for core fuzzing modules, together with 4500 lines of C/C++ for the preprocessor, 4200 lines of Java for structure-aware mutation, and 2400 lines of Python for complementary toolchain.
   
 
-\section{Relations with Other Fuzzing Frameworks and Extensions}
+\section{Relations with Other Fuzzing Tools}
 
 
 %In this section, we first compare FOT with other fuzzing frameworks, and then discuss its relationship to current fuzzing extensions.

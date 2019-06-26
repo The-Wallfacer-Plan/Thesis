@@ -67,12 +67,12 @@ Particularly, {\dFOT} can expose certain crashes up to 7 times faster than the s
 In practice, \dFOT has been successfully discovering crashes with the suspicious target locations reported by other vulnerability detection tools and successfully found more than 41 previously unknown crashes in projects Oniguruma~\cite{oniguruma}, MJS\cite{mjs}, etc. All these vulnerabilities have been confirmed and fixed; among them, 15 vulnerabilities have been assigned unique CVE IDs.
 
 The main contributions of this chapter are summarized as follows:
-\begin{enumerate}[(1)] 
+\begin{enumerate}[1)] 
 \itemsep0em
 \item We analyzed the challenges in directed greybox fuzzing and summarized the four desired properties for DGFs.
 \item We provided a measure of power function that can guide the fuzzer towards the target locations effectively.
 \item We proposed a novel approach to boost the convergence speed to the target locations by utilizing power scheduling, adaptive mutation and seed prioritization.
-\item We implemented a novel fuzzing framework that organically combines these ideas and thoroughly evaluated our results in both crash reproduction and target location covering.
+\item We implemented \dFOT that organically combines these ideas and thoroughly evaluated our results in crash reproduction and target location covering.
 \end{enumerate} 
 
 \section{Desired Properties of DGF}\label{sec:mx}
@@ -98,7 +98,7 @@ From a patch testing perspective, we would like to target \texttt{concat\_filena
 
 \begin{figure}[t]
 	\centering
-	\small \begin{tabular}{lcc}
+	\myeqsize \begin{tabular}{lcc}
 		\hline
   \textbf{Functions in a Crashing Trace} &  	\textbf{File \& Line} & \textbf{Symbol} \\\hline
   	 \texttt{main}   &   \texttt{nm.c} :1794     & \textsf{$M$}\\
@@ -138,7 +138,7 @@ We observe that an ideal DGF should possess the following desired properties.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.15\columnwidth]{res/dfot/eg_callchain.pdf}
+	\includegraphics[width=0.11\columnwidth]{res/dfot/eg_callchain.pdf}
 	\vspace{-5pt}
 	\caption{Fuzzing traces for Figure~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$; $\langle a, e, f , Z\rangle$ does not pass $T$.}
 	\label{fig:call_chain}
@@ -327,7 +327,7 @@ void fa(int i) {
 \caption{}
 \label{subfig:dist2}      
 \end{subfigure}
-\caption{An example that illustrates different call patterns}
+\caption{An example that illustrates different call patterns.}
 \label{figure:dists}
 \end{figure}
 
@@ -339,9 +339,9 @@ Therefore, we propose two metrics to augment the distance that is defined by imm
 
 Note that both factor functions are monotone decreasing functions; also, $\Phi$ converges to 1 when $C_N\rightarrow\infty$ and $\Psi$ converges to 1 when $C_B\rightarrow 1$.
 Given a (direct or indirect) immediate function call pair $( f_1, f_2)$ where $f_1$ is the caller and $f_2$ is the callee, the original distance between $f_1$ and $f_2$ is 1 (see \aflgo~\cite{Bohme:2017:DGF}). Now, with the two metrics mentioned above, we can define the augmented distance between the function pairs that holds an immediate call relation. The final adjustment factor will be a multiplication of $\Phi$ and $\Psi$, and the \emph{augmented adjacent-function distance} is
-\begin{equation}
+{\myeqsize\begin{equation}
  \traceFnDistPrime{f_1}{f_2} =  \Psi(f_1, f_2)\cdot\Phi(f_1, f_2)
-\end{equation}
+\end{equation}}
 where $\traceFnDistPrime{f_1}{f_2}$ refers to the \emph{augmented} \emph{direct} function distance. 
 
 As an example, in Figure~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\csbbn{f_a}{f_b}=2$; and for $f_c$, $\csnumn{f_a}{f_c}=1$, $\csbbn{f_a}{f_c}=1$. Assume $\phi=2$ and $\psi=2$ and assume the original distance $\traceFnDist{f_a}{f_b}=\traceFnDist{f_a}{f_c}=1$, the augmented distances will be $\traceFnDistPrime{f_a}{f_c}=\frac{3}{2}\cdot\frac{3}{2}=2.25$, and $\traceFnDistPrime{f_a}{f_b}=\frac{5}{4}\cdot\frac{5}{4}=1.56$.
@@ -361,15 +361,14 @@ basicblock level distance.
 Besides, we also compute the target function trace closure which will be used to calculate the covered function similarity in \S\ref{subsec:powerSche}.
 
 \textbf{Function Level Distance.} This distance is calculated according to CG. It tells the (average) distance from the current function to target functions. Given a function $n$, its distance to the target function set \tgtfnset~is defined as:
-\begin{equation}
+{\myeqsize\begin{equation}
 d_f(n, \tgtfnset) =
 \begin{cases}
 \textbf{undefined.} & \text{if}~R(n, \tgtfnset)=\emptyset \\
 [\Sigma_{\tgtfn\in R(n, \tgtfnset)} \traceFnDist{n}{\tgtfn}^{-1}]^{-1} & \textmd{otherwise} \\
 \end{cases}
 \label{eq:aflgo_func_dist}
-\end{equation}
-
+\end{equation}}
 where $R(n, \tgtfnset) = \left\{\tgtfn | \textbf{reachable}(n, \tgtfn)\right\}$,
 which is the set of target functions that can be statically reached from $n$ in CG, and \traceFnDist{n}{\tgtfn} is the \emph{dijkstra shortest path based on augmented function distance} from $n$ to a given target function {\tgtfn} in CG.
 
@@ -378,7 +377,7 @@ The set of functions called inside basicblock $m$ is denoted as \BBCallees{m},
 then $\BBCalleesT{m}=\left\{n | R(n, \tgtfnset)\neq\emptyset, n\in\BBCallees{m} \right\}$, 
 and $\transitiveBB=\left\{m| \exists \cfg{n}, m\in \cfg{n}, n\in\fnset, \BBCalleesT{m}\neq\emptyset \right\}$, where $\fnset$ is the set of all functions.
 Given a basicblock $m$, its distance to the target basicblocks \tgtbbset~are defined as:
-\begin{equation}
+{\myeqsize\begin{equation}
 \traceBBDist{m}{\tgtbbset} = 
 \begin{cases}
 0 & \textbf{if}~m\in \tgtbbset \\
@@ -386,7 +385,7 @@ c\cdot \text{min}_{n\in \BBCalleesT{m}}(\traceFnDist{n}{\tgtfnset})& \textbf{if}
 \Large[\Sigma_{t\in\transitiveBB}\large(\simpleBBDist{m}{t} + \traceBBDist{t}{\tgtbbset}\large)^{-1}\Large]^{-1} & otherwise
 \end{cases}
 \label{eq:aflgo_bb_dist}
-\end{equation}
+\end{equation}}
 where $c$ is a constant that magnifies function level distance.
 
 Note that Equation \ref{eq:aflgo_func_dist} and \ref{eq:aflgo_bb_dist}, on their own, are the same as those in \aflgo \cite{Bohme:2017:DGF}. However, $\traceFnDist{n}{\tgtfn}$ for these equations in \aflgo is simply the Dijkstra shortest distance on a CG where the weight of edges (i.e., adjacent function distance) is 1.
@@ -400,31 +399,29 @@ Note that Equation \ref{eq:aflgo_func_dist} and \ref{eq:aflgo_bb_dist}, on their
 
 During fuzzing, we apply power scheduling on a selected seed based on two dynamically computed metrics: basicblock trace distance and target function trace similarity.
 
-\textbf{Basic Block Trace Distance.} The distance between the seed $s$ to the target basicblocks $\tgtbbset$ is defined as:
-\begin{equation}
+\textbf{Basic Block Trace Distance.} The distance between seed $s$ to the target basicblocks $\tgtbbset$ is defined as:
+{\myeqsize\begin{equation}
 \traceDist{s}{\tgtbbset} = \frac{\Sigma_{m\in\xi_b(s)}\traceBBDist{m}{\tgtbbset}}{|\bbtrace{s}|}
 \label{eq:aflgo_seed_dist}
-\end{equation}
+\end{equation}}
 where \bbtrace{s} is the execution trace of a seed $s$ and contains all the basicblocks that are executed. Hence, the basic idea of Equation  \ref{eq:aflgo_seed_dist} is that: for all the basicblocks in the  execution trace of $s$, we calculate the average basicblock level distance to the target basicblocks  $\tgtbbset$.  Note that Equation \ref{eq:aflgo_seed_dist} is also the same as the one in \aflgo \cite{Bohme:2017:DGF}.
 
 It then applies a feature scaling normalization to get the final distance $\traceDistFinal{s}{\tgtbbset}=\frac{\traceDist{s}{\tgtbbset}-minD}{maxD-minD}$ where $minD$ (or $maxD$) is the smallest (or largest) distances ever met.
 
 
-\textbf{Covered Function Similarity.} This metric measures the similarity between the execution trace of the seed and the target execution trace \emph{on the function level}. We do not track the basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the ``expected traces'' will have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the function \emph{sets} the current seed covered (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Figure~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
+\textbf{Covered Function Similarity.} This metric measures the similarity between a seed's execution trace and the target execution trace \emph{at function level}. We do not track basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the expected traces have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the seed's covered function \emph{sets} (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Figure~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
 
 The covered function similarity is then determined by the following formula:
-\begin{equation}
+{\myeqsize\begin{equation}
 \covDist{s}{\tgtfnset} = \frac{\Sigma_{f\in\fntrace{s}	\cap\fntrace{\tgtfnset}}\traceFnDist{f}{\tgtfnset}^{-1}}{|\fntrace{s}\cup\fntrace{\tgtfnset}|}
-\end{equation}
-
+\end{equation}}
 $\traceFnDist{f}{\tgtfnset}$ is the function level distance calculated with Equation~\ref{eq:aflgo_func_dist}. Similar to \traceDistn, a feature scaling normalization is also applied and the final similarity is denoted as \covDistnN. Note that this similarity metric is uniquely proposed in our approach.
 
 \textbf{Scheduling.}
 Scheduling deals with the problem how many mutation chances will be assigned to the given seed. The intuition is that if the trace that the current seed executes is ``closer'' to any of the expected traces that can reach the target location in the program, more mutations on that seed should be more beneficial for generating expected seeds. A scheduling purely based on \emph{trace distance} may favor certain patterns of traces. For \aflgo, as mentioned in \textbf{P2}, the shorter paths will be assigned more energy, which may starve longer paths that are still reachable to the target locations. To \emph{mitigate} this, we propose the \emph{power function} that considers both \emph{trace distance} (based on basicblock level distance) and \emph{trace similarities} (based on covered function similarity): 
-\begin{equation}\label{eq:aflgo_power}
+{\myeqsize\begin{equation}\label{eq:aflgo_power}
 p(s, \tgtbbset) = \covDistN{s}{\tgtfnset}\cdot(1 - \traceDistFinal{s}{\tgtbbset})
-\end{equation}
-
+\end{equation}}
 Obviously, the value of $p(s, \tgtbbset)$ fits into $[0,1]$ since both the multipliers are in $[0,1]$.
 
 Compared to AFLGo's approach, which only considers basicblock trace distance (\traceDistn, or \traceDistnFinal), our power function balances the effect of shorter paths and the longer paths that can reach the target. Logically, there are some differences between {\covDistn} and {\traceDistn}:
@@ -438,6 +435,7 @@ In this sense, $p(s, \tgtbbset)$ strives a balance between shorter traces and lo
 
 In {\dFOT}, the power function determines the number of mutation chances to be applied on the current seed (i.e., energy); it is also used during the seed prioritization to determine whether the \emph{mutated} seeds should be favored.
 
+\subsection{Adaptive Mutation} \label{subsec:mutationStr}
 
 \begin{algorithm}[t]
 	\setstretch{0.9}
@@ -486,16 +484,15 @@ $\mathcal{M}_s\leftarrow \mathcal{M}_s \cup  \{(s^{\prime\prime},s^{\prime\prime
 	\caption{$adaptiveMutate()$: Adaptive Mutation}
 	\label{algo:mutateStr}
 \end{algorithm}
- \subsection{Adaptive Mutation} \label{subsec:mutationStr}
 
 In \S\ref{subsec:powerSche}, for each seed, the output of power scheduling is the energy (a.k.a. the times of applied mutations), which will be the input of the step of our adaptive mutation. The problem is that, given the total energy available for a seed, we still need to assign the number of mutations for \emph{each type of mutators}. 
 
 
 In general, two categories of mutators are used in GBFs. Some are coarse-grained in the sense that they change a bulk of bytes during the mutations. Others are fine-grained since they only involve a few byte-level modifications, insertions or deletions. For coarse-grained mutations, we consider them to be:
 \begin{enumerate}[(1)] 
-	\item \textbf{Mixed havoc}. This includes several chunk mutations, namely deleting a bulk of bytes, overwriting the given chunk with other bytes in the buffer, deleting a certain lines, duplicating certain lines multiple times, etc. The actual mutation involves their combinations.
-	\item \textbf{Semantic mutation}. This is used when the target program is known to process semantic relevant input files such as javascript, xml, css, etc. In detail, this follows Skyfire~\cite{junjie:2017sp:skyfire}, which includes three meta mutations, inserting another subtree into a random AST position, deleting a given AST, and replacing the given position with another AST.
-	\item \textbf{Splice}. This includes a crossover between two seeds in the queue and subsequent mixed havocs.
+	\item \textbf{Mixed havoc}. It includes several chunk mutations, namely deleting a bulk of bytes, overwriting the given chunk with other bytes in the buffer, deleting a certain lines, duplicating certain lines multiple times, etc. The actual mutation involves their combinations.
+	\item \textbf{Semantic mutation}. It is used when the target program is known to process semantic relevant input files such as javascript, xml, css, etc. In detail, this follows Skyfire~\cite{junjie:2017sp:skyfire}, which includes three meta mutations, inserting another subtree into a random AST position, deleting a given AST, and replacing the given position with another AST.
+	\item \textbf{Splice}. It includes a crossover between two seeds in the queue and subsequent mixed havocs.
 \end{enumerate}
 
 
@@ -635,7 +632,6 @@ For each program with the given target locations, the instrumentation of {\dFOT}
 \subsection{Evalution Setup}\label{subsec:evalsetup}
 
 In the experiments, we aim to answer the following questions:
-
 \begin{enumerate}[\textbf{RQ}1]
     \item  Is it worth applying static analysis?
     \item  What are {\dFOT}'s performance in reproducing crashes on target locations?
@@ -804,16 +800,16 @@ From the results, we can conclude that the dynamic analysis strategies used in \
         \thickhline
         \textbf{Bug ID}                                                                                                                      & \textbf{Tool}  & \textbf{Runs} & \utte  (s) & \textbf{Factor} & \alz \\ \hline
         \multirow{3}{*}{\#1}  & Hawkeye &                      8                                &            139                                         &                     --                         & --                  \\ \cline{2-6} 
-        &               HE-Go  &   8                                                   &                     149                                &           1.07                     &          0.58                       \\ \cline{2-6} 
+        &               \dGO  &   8                                                   &                     149                                &           1.07                     &          0.58                       \\ \cline{2-6} 
         &        AFL   &   8                                                   &                            135                         &                          0.97                       &       0.54         \\ \hline
         \multirow{3}{*}{\#2} & Hawkeye &                       8                               &           186                                          &                       --                   & --                      \\ \cline{2-6} 
-        &          HE-Go  &       8                                              &                     228                                 &                  1.23                        &         0.88             \\ \cline{2-6} 
+        &          \dGO  &       8                                              &                     228                                 &                  1.23                        &         0.88             \\ \cline{2-6} 
         &    AFL   &         8                                             &                        372                             &                 2.00                        &        1.0               \\ \hline
         \multirow{3}{*}{\#3} &  Hawkeye &                               2                       &            13768                                         &                   --                     &        --                \\ \cline{2-6} 
-        &     HE-Go  &       1                                               &                              14163                       &                         1.03                 &        0.56              \\ \cline{2-6} 
+        &     \dGO  &       1                                               &                              14163                       &                         1.03                 &        0.56              \\ \cline{2-6} 
         &      AFL   &        1                                              &                              14341                       &                    1.04                       &        0.57             \\ \hline
         \multirow{3}{*}{\#4} &  Hawkeye &                  7                                    &                6969                                     &                  --                 & --                             \\ \cline{2-6} 
-        &      HE-Go  &       3                                               &                      12547                               &                 1.80                         &          0.82             \\ \cline{2-6} 
+        &      \dGO  &       3                                               &                      12547                               &                 1.80                         &          0.82             \\ \cline{2-6} 
         &       AFL   &              1                                       &                  14375                                &             2.06                            &           0.88            \\ \thickhline
         
     \end{tabular}
@@ -848,16 +844,16 @@ It is worth noting that the \utte~to cover the target locations (Table \ref{tbl:
 		\thickhline
 		ID                                                              & Project                                                                    & Tool  & Runs & \utte (s) & Factor &  \alz \\ \hline
 		\multirow{3}{*}{\#1} &\multirow{3}{*}{jdmarker.c:659}  & {\dFOT} &                     8                                 &           1955                                          &                               --                      & --           \\ \cline{3-7} 
-		&                                                                            & HE-Go  &           8                                           &                    2012                                 &             1.03                                                 &  0.53 \\ \cline{3-7} 
+		&                                                                            & \dGO  &           8                                           &                    2012                                 &             1.03                                                 &  0.53 \\ \cline{3-7} 
 		&                                                                            & AFL   &       8                                               &                 4839                                    &              2.48                                               &  0.95   \\ \hline
 		\multirow{3}{*}{\#2} & \multirow{3}{*}{pngread.c:738} & {\dFOT} &                            8                          &                            23                         &                               --                  & --               \\ \cline{3-7} 
-		&                                                                            & HE-Go  &              8                                        &                         16                            &                 0.70                                           &  0.43   \\ \cline{3-7} 
+		&                                                                            & \dGO  &              8                                        &                         16                            &                 0.70                                           &  0.43   \\ \cline{3-7} 
 		&                                                                            & AFL   &               8                                       &                              130                       &                   5.65                                      &    1.00   \\ \hline
 		\multirow{3}{*}{\#3} &\multirow{3}{*}{pngrutil.c:3182} & {\dFOT} &    8                                                  &                                   1                  &                               --                         & --        \\ \cline{3-7} 
-		&                                                                            & HE-Go  &                     8                                 &                           66                          &                               66.00                        &    0.56      \\ \cline{3-7} 
+		&                                                                            & \dGO  &                     8                                 &                           66                          &                               66.00                        &    0.56      \\ \cline{3-7} 
 		&                                                                            & AFL   &                     8                                 &                      3                               &                      3.00                             &     0.51        \\ \hline        
 		\multirow{3}{*}{\#4} & \multirow{3}{*}{ttgload.c:1710} &  {\dFOT} &                 7                                     &         4283                                            &                               --             & --                    \\ \cline{3-7} 
-		&                                                                            & HE-Go  &        7                                              &                         4443                            &                      1.04                                 &     0.55    \\ \cline{3-7} 
+		&                                                                            & \dGO  &        7                                              &                         4443                            &                      1.04                                 &     0.55    \\ \cline{3-7} 
 		&                                                                            & AFL   &         6                                             &                              5980                       &           1.40                                     &     0.60           \\ \thickhline
 		
 	\end{tabular}

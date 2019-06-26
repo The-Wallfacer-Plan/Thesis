@@ -55,10 +55,10 @@ and $P$ denotes a set of permissions that are disabled by the caller.
 The idea is that permissions are guards to sensitive values. Thus conservatively, one would type the return value of \textit{getContactNo} as $L$ only if
 one knows that the permission READ\_CONTACT is disabled.
 In {\BN} system, \textit{getContactNo} admits:% the following types:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \textit{getContactNo} : L~\xrightarrow{~P~}~L\qquad
 \textit{getContactNo} : L~\xrightarrow{~\emptyset~}~H
-\end{equation*}
+\end{equation*}}
 where $P = \{ \mathrm{READ\_CONTACT} \}.$
 When typing a call to \textit{getContactNo} by
 an app without permissions,
@@ -73,7 +73,7 @@ means that if the permissions in the set $P$ are \emph{all enabled}, then
 the command behaves like $c_1$; otherwise it behaves like $c_2$.
 The typing rules for the \textit{test} command (in a much
 simplified form) are:
-\[
+{\myeqsize\[
 \inference[(R1)~]{
 Q \cap P = \emptyset & Q |- c_1 : t & Q \vdash {c_2} : t
 }
@@ -88,7 +88,7 @@ Q \cap P \not = \emptyset & Q \vdash c_2 : t
 {
 Q \vdash \lcCP{P}{c_1}{c_2} : t
 }
-\]
+\]}
 where $Q$ is a set of permissions that are disabled.
 When $Q \cap P \not = \emptyset$, then
 at least one of the permissions in $P$ is disabled, thus
@@ -246,19 +246,19 @@ from this set. The powerset of $\PS$ is written as~$\PPS$.
 
 
 For simplicity, we consider only programs manipulating \emph{integers}, so the expressions in our language all have the integer type. Boolean values are encoded as 0 (false) and any non-zero values (true). The grammar for expressions is given below:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 e ::= n \mid \leVAR{x} \mid \leOP{e}{e}
-\end{equation*}
+\end{equation*}}
 where $n$ denotes an integer literal, $\leVAR{x}$ denotes a variable, and $\leOP{}{}$ denotes a binary operation.
 The commands of the language are given in the following grammar:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \begin{array}{l}
   c\;::=\; \lcASS{x}{e} \mid \lcIF{e}{c}{c} \mid  \lcWHILE{e}{c} \mid \lcSEQ{c}{c}  \\
-  \quad \mid \lcLETVAR{x}{e}{c} \mid \lcCALL{x}{A.f}{\overline{e}} \mid \lcCP{p}{c}{c}
+  \quad \mid \lcLETV{x}{e}{c} \mid \lcCALL{x}{A.f}{\overline{e}} \mid \lcCP{p}{c}{c}
 \end{array}
-\end{equation*}
+\end{equation*}}
 The first four constructs are assignment, conditional, while-loop and sequential composition, respectively.
-The statement ``\lcLETVAR{x}{e}{c}'' is a local variable declaration statement. Here $x$ is
+The statement ``\lcLETV{x}{e}{c}'' is a local variable declaration statement. Here $x$ is
 declared and initialized to $e$, and its scope is the command $c$. We require
 that $x$ does not occur in $e.$
 The statement ``\lcCALL{x}{A.f}{\overline{e}}''  denotes an assignment whose right hand side is
@@ -271,9 +271,9 @@ one permission at a time. This is a not real restriction since both versions of 
 
 
 A function declaration has the following syntax:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 F ::= \lpPROG{A.f}{\overline{x}}{c}{{\lpRES}}
-\end{equation*}
+\end{equation*}}
 where $A.f$ is the function name, $\bar x$ are function parameters,
 $c$ is a command, and {\lpRES} is a local variable
 that holds the return value of the function.
@@ -295,8 +295,8 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 \inference[E-OP]{\mu \vdash e_1 \leadsto v_1\quad \mu \vdash e_2 \leadsto v_2}
 {\mu \vdash \leOP{e_1}{e_2} \leadsto \leOP{v_1}{v_2}}
 \qquad
-\inference[E-LETVAR]{\mu \vdash e \leadsto v \quad \mu [ x \mapsto v ]; A ; P \vdash c \leadsto \mu'}
-{\mu; A; P \vdash \lcLETVAR{x}{e}{c} \leadsto \mu' - x}
+\inference[E-LETV]{\mu \vdash e \leadsto v \quad \mu [ x \mapsto v ]; A ; P \vdash c \leadsto \mu'}
+{\mu; A; P \vdash \lcLETV{x}{e}{c} \leadsto \mu' - x}
 \]
 
 \[
@@ -430,11 +430,10 @@ $s\leq_\Tcal t$ \text{iff} $\forall$ $P\in \PPS$, $s(P) \leq_{\SL} t(P)$.
 	\item[\textbf{Transitivity}] if $r\leq_\Tcal s$ and $s\leq_\Tcal t$, $\forall P, r(P) \leq_{\SL} s(P)$ and $s(P)\leq_{\SL} t(P)$ therefore $r(P) \leq_{\SL} t(P)$, which means that $r \leq_\Tcal t$.
 \end{ProofEnumDesc}
 \end{proof}
-
 As we shall see, if a variable is typed by a base type, the sensitivity of
 its content may depend on the app's permissions which writes to the variable.
 In contrast, in traditional information flow type systems,
-a variable annotated with a security labels has a fixed sensitivity level
+a variable annotated with a security label has a fixed sensitivity level
 regardless of the permissions of the app that writes to the variable.
 
 The set of base types with the order $\leq_{\Tcal}$ forms a lattice. The join and meet
@@ -442,10 +441,10 @@ of the lattice are defined as follows:
 
 \begin{definition}\label{def:type-cup-cap}
 For $s, t\in\Tcal$, $s\sqcup t$ and $s\sqcap t$ are defined as
-\begin{align*}
+{\myeqsize\begin{align*}
 (s\sqcup t)(P) =  s(P)\sqcup t(P), \forall P \in \PPS\\
 (s\sqcap t)(P) =  s(P)\sqcap t(P), \forall P \in \PPS
-\end{align*}
+\end{align*}}
 \end{definition}
 
 
@@ -479,7 +478,7 @@ Given a security label $l$, we define $\hat{l}$ as:
 for all $P \in \PPS$, we have $\hat{l}(P) = l$.
 \end{definition}
 
-Accordingly, a security labels $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
+Accordingly, a security label $l$ can be lifted to the base type $\hat{l}$ that maps all permission sets to level $l$ itself.
 
 
 
@@ -518,22 +517,23 @@ Such an adjustment is called a {\termEmph{promotion} or a {\termEmph{demotion}.
 
 \begin{definition}\label{def:updown}
 Given a permission $p$, the \termEmph{promotion} and \termEmph{demotion} of a base type $t$
-with respect to $p$ are: \begin{align*}
+with respect to $p$ are: 
+{\myeqsize\begin{align*}
 (t\uparrow_{p}) (P) = t(P\cup \{p\}), \forall P\in \PPS
 \tag{promotion}
 \\
 (t\downarrow_{p}) (P) = t(P\setminus\{p\}), \forall P\in \PPS
 \tag{demotion}
-\end{align*}
+\end{align*}}
 The \termEmph{promotion} and \termEmph{demotion} of $\overline{t}\rightarrow t$,
 where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
-\begin{align*}
+{\myeqsize\begin{align*}
 (\overline{t}\rightarrow t)\uparrow_{p} = \overline{t}\uparrow_{p} \rightarrow t\uparrow_{p},~
 \text{where}~\overline{t}\uparrow_{p} = (t_1\uparrow_{p},\ldots, t_m\uparrow_{p}),
 \\
 (\overline{t}\rightarrow t)\downarrow_{p} = \overline{t}\downarrow_{p}\rightarrow t\downarrow_{p},~
 \text{where}~\overline{t}\downarrow_{p} = (t_1\downarrow_{p},\ldots, t_m\downarrow_{p}).
-\end{align*}
+\end{align*}}
 \end{definition}
 
 
@@ -570,10 +570,10 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 {\Psi \vdash e : \Psi(x)}
 {\Psi ;A \vdash \lcASS{x}{e} : \Psi(x)}
 \qquad
-\inference[T-LETVAR]
+\inference[T-LETV]
 {\Psi \vdash e : s &
 \Psi[x:s]; A \vdash c : t }
-{\Psi; A\vdash \lcLETVAR{x}{e}{c} :  t}
+{\Psi; A\vdash \lcLETV{x}{e}{c} :  t}
 \qquad
 \inference[T-IF]
 {\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
@@ -623,24 +623,23 @@ Given $t\in\Tcal$ and $P\in\PPS$, the \termEmph{projection} of $t$ on a permissi
 \end{equation*}
 Type projection of a list of types
 on $P$ is then written as
-\[
+{\myeqsize\[
 \app{(t_1,\dots,t_n)}{P} = (\app{t_1}{P}, \dots, \app{t_n}{P}).
-\]
+\]}
 \end{definition}
 
 \begin{definition}\label{def:merge}
 Given a permission $p$ and two types $t_1$ and $t_2$, the {\termEmph{merging}} of
 $t_1$ and $t_2$ along $p$, denoted as $\omerge {p} {t_1} {t_2}$, is:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 (\omerge p {t_1} {t_2}) (P) =
 \begin{cases}
 t_1(P) & p\in P \\
 t_2(P) & p\not\in P\\
 \end{cases}
 \quad\forall P\in{\PPS}
-\end{equation*}
+\end{equation*}}
 \end{definition}
-
 A {\em typing environment} is a finite mapping from variables to base types.
 We use the notation  $[x_1 : t_1, \dots, x_n : t_n]$
 to enumerate a typing environment with domain $\{x_1,\dots,x_n\}.$
@@ -671,7 +670,11 @@ It means that the command $c$ writes to variables with type at least $t$, when
 executed by app $A$, under the typing environment $\Psi.$
 
 \item Function typing:
-The typing judgment takes the form: $$\vdash \lpFUN{B.f}{\overline{x}}{c} :  \overline{t} \xrightarrow{} t'$$
+The typing judgment takes the form: 
+{\myeqsize\begin{equation*}
+\vdash \lpFUN{B.f}{\overline{x}}{c} :  \overline{t} \xrightarrow{} t'	
+\end{equation*}}
+
 where $\overline{x} = (x_1,\dots,x_n)$ and
 $\overline{t} = (t_1,\dots,t_n)$ for some $n \geq 0.$
 Functions are
@@ -725,7 +728,7 @@ by the type of $x$, i.e., $\app{t'}{\Theta(A)} \leq \Psi(x)$.
 
 \textbf{Parameter laundering}~It is essential that in Rule \ruleTagText{T-ICALL}, the arguments $\overline{e}$ and the return value of
 the function call are typed according to the projection of $\overline{t}$ and $t'$ on $\Theta(A)$. If they are instead typed with $\overline{t}$, then there is a potential implicit flow via a ``parameter laundering'' attack. To see why, consider the following alternative to \ruleTagText{T-ICALL}:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \inference[T-ICALL']
 {
  \FT(B.f) = \overline{t} \rightarrow t' &
@@ -733,8 +736,8 @@ the function call are typed according to the projection of $\overline{t}$ and $t
  t'  \leq \Psi(x)}
 {\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
   \Psi(x)}
-\end{equation*}
-Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially what is adopted in {\BN} system for method calls~\cite{Banerjee:2005ht}.
+\end{equation*}}
+Notice that the type of the argument $\overline{e}$ must match the type of the formal parameter of the function $B.f$.  This is essentially adopted by {\BN} system for method calls~\cite{Banerjee:2005ht}.
 
 Let us consider the example in Listing~\ref{lst:laundery}.
 \begin{lstlisting}[float=tp, label={lst:laundery}, caption={An example illustrating the parameter laundering issue.}]
@@ -772,7 +775,7 @@ Suppose the permissions assigned to the apps are given by:  $\Theta(A) =  \Theta
 
 If we were to adopt the modified \ruleTagText{T-ICALL'} instead of \ruleTagText{T-ICALL}, then we can assign the following
 types to the above functions:
-\[
+{\myeqsize\begin{equation*}
 FT := \left\{
 \begin{array}{lcl}
 A.f & \mapsto & t \rightarrow \hat{L} \\
@@ -780,8 +783,8 @@ B.g & \mapsto & t \rightarrow \hat{L}\\
 C.getsecret & \mapsto & () \rightarrow t\\
 M.main & \mapsto  & () \rightarrow \hat{L}
 \end{array}
-\right.
-\]
+\right.	
+\end{equation*}}
 Notice that the return type of $M.main$ is $\hat{L}$ despite having a
 return value that contains sensitive value \textit{P\_INFO}.
 If we were to use \ruleTagText{T-ICALL'} in place of \ruleTagText{T-ICALL}, the above functions can
@@ -810,7 +813,7 @@ to another function if the app itself is authorized to access the content of the
 as formalized in the rule \ruleTagText{T-ICALL}.
 
 \begin{figure*}[ht]
-\begin{scriptsize}
+{\myeqsize
 \begin{prooftree}
 \AxiomC{$FT(B.g) = t \rightarrow \hat{L}$}
 \AxiomC{$x : t, r : \hat{L} \vdash x : t$}
@@ -847,28 +850,28 @@ Note that $t\uparrow_p = \hat{H}$, $t\downarrow_p = \hat{L} = \hat{L}\downarrow 
 		{\lpRES} : () \rightarrow t$}
 \end{prooftree}
 Note that $\omerge{p}{\hat{H}}{\hat{L}} = t.$
-\end{scriptsize}
+}
 \caption{Typing derivations for A.f, B.g and C.getsecret}
 \label{fig:type1}
 \end{figure*}
 
 
 \begin{figure*}[ht]
-\begin{scriptsize}
+{\myeqsize
 \begin{prooftree}
 \AxiomC{$r : \hat{L} \vdash 0 : t$}
 	\AxiomC{$\Psi ; M \vdash \lcCALL{x_H}{C.getsecret}{~} : \hat{L}$}
 	\AxiomC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \LeftLabel{T-SEQ}
 \BinaryInfC{$r : \hat{L}, x_H : t ; M \vdash \lcSEQ {\lcCALL{x_H}{C.getsecret}{~} } {\lcCALL{r}{A.f}{x_H} }  :  \hat{L}$}
-\LeftLabel{T-LETVAR}
-\BinaryInfC{$r : \hat{L} ~; M \vdash \lcLETVAR{x_H}{0}
+\LeftLabel{T-LETV}
+\BinaryInfC{$r : \hat{L} ~; M \vdash \lcLETV{x_H}{0}
 		{\lcSEQ {\lcCALL{x_H}{C.getsecret}{~} } {\lcCALL{r}{A.f}{x_H} } } : \hat{L} $}
 \LeftLabel{T-FUN}
 \UnaryInfC{$
 \begin{array}{l}
 \vdash M.main(~)~ \{ \textbf{init} ~ r = 0 ~ \textbf{in} \\
-\quad \textbf{letvar} ~ x_H = 0 ~ \textbf{in}~ \{ \\
+\quad \textbf{letv} ~ x_H = 0 ~ \textbf{in}~ \{ \\
 \qquad \lcCALL{x_H}{C.getsecret}{~}; \\
 \qquad \lcCALL{r}{A.f}{x_H} \\
 \quad \} \\
@@ -902,7 +905,7 @@ where $\Psi = \{ r : \hat{L}, x_H : t\}$ and the second and the third leaves are
 \LeftLabel{T-ICALL'}
 \TrinaryInfC{$\Psi ; M \vdash \lcCALL{r}{A.f}{x_H} : \hat{L}$ }
 \end{prooftree}
-\end{scriptsize}
+}
 \caption{A typing derivation for M.main}
 \label{fig:type2}
 \end{figure*}
@@ -950,12 +953,13 @@ which this upper bound is derived.
 
 
 \begin{definition}\label{def:envequ}
-Given two evaluation environments $\mu, \mu'$,
-a typing environment $\Psi$, a security labels $l_O \in \SL$ of the observer,
-the {\termEmph{indistinguishability relation}}  $=_{\Psi}^{l_O}$ is defined as: \begin{equation*}
+Given evaluation environments $\mu, \mu'$,
+a typing environment $\Psi$, a security label $l_O\!\in\!\SL$ of the observer,
+the {\termEmph{indistinguishability relation}}  $=_{\Psi}^{l_O}$ is defined as:
+{\myeqsize\begin{equation*}
 \mu =_{\Psi}^{l_{O}} \mu' \text{ iff}
 \forall x\in dom(\Psi) .\; \big(\Psi(x) \leq \hat{l_{O}} \Rightarrow \mu(x) = \mu'(x) \big)
-\end{equation*}
+\end{equation*}}
 where
 $\mu(x) = \mu'(x)$ holds iff both sides of the equation are defined and equal,
 or both sides are undefined.
@@ -988,7 +992,6 @@ $=_{\Psi}^{l_{O}}$ is an equivalence relation on $EEnv$.
 	Therefore $\mu_1(x)=\mu_3(x)$.
 \end{ProofEnumDesc}
  \end{proof}
-
  \begin{lemma}\label{lem:proj}
 If $\mu =_{\Psi}^{l_{O}} \mu'$
 then for each $P\in\PPS$,
@@ -1020,13 +1023,14 @@ chain in a well-typed system is finite; this is formalized via the rank function
 as a measure in our soundness proof (Lemma~\ref{lem:comni}).
 %\begin{figure}[h]
 \begin{equation*}
+\myeqsize
 \arraycolsep=1.0pt\def\arraystretch{1}
 \begin{array}{lcl}
 \rank{\lcASS{x}{e}} & = &0\\
 \rank{\lcIF{e}{c_1}{c_2}} & = &max(\rank{c_1}, \rank{c_2)}\\
 \rank{\lcSEQ{c_1}{c_2}} & = &max(\rank{c_1}, \rank{c_2})\\
 \rank{\lcWHILE{e}{c}} & = &\rank{c} \\
-\rank{\lcLETVAR{x}{e}{c}} & = &\rank{c} \\
+\rank{\lcLETV{x}{e}{c}} & = &\rank{c} \\
 \rank{\lcCALL{x}{A.f}{\overline{e}}} & = &
    \rank{\FD(A.f)} + 1\\
 \rank{\lcCP{p}{c_1}{c_2}} & = & max(\rank{c_1}, \rank{c_2})\\
@@ -1036,7 +1040,7 @@ as a measure in our soundness proof (Lemma~\ref{lem:comni}).
 
 
 The next two lemmas relate projection, promotion/demotion
-and the indistinguishability relation.
+and indistinguishability relation.
 
 \begin{lemma}\label{lem:up}
 If $p \in P$, then $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Psi\uparrow_{p}}{P}}^{l_{O}} \mu'$.
@@ -1048,7 +1052,7 @@ If $p \in P$, then $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Psi\up
   lemma follows immediately.
   Given any $x \in dom(\app{\Psi\uparrow_{p}}{P})$,
   for any $Q \in \PPS$, we have
-  $$
+  {\myeqsize$$
   \begin{array}{ll}
     \app{\Psi\uparrow_p}{P}(x)(Q) & \\
     = (\app{\Psi\uparrow_p(x)}{P})(Q) & \mbox{ by Def.\ref{def:tenv-pd} }\\
@@ -1058,7 +1062,7 @@ If $p \in P$, then $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$ iff $\mu =_{\app{\Psi\up
     = (\app{\Psi(x)}{P})(Q) & \mbox{ by Def. \ref{def:projection} }\\
     = \app{\Psi}{P}(x)(Q) & \mbox{ by Def. \ref{def:tenv-pd} }
   \end{array}
-  $$
+  $$}
   Since this holds for arbitrary $Q$,it follows that $\app{\Psi\uparrow_p}{P} = \app{\Psi}{P}.$
 \end{proof}
 
@@ -1088,20 +1092,20 @@ Since $t(P) \leq l_{O}$ and $\mu =_{\app{\Psi}{P}}^{l_{O}} \mu'$,
 it is deducible that $v = \mu(x) = \mu'(x) = v'$.
 %%%%%%%%%%%%%%%%%%
 \item[T-OP] We have
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \inference
 {\Psi \vdash e_1 : t & \Psi \vdash e_2 : t}
 {\Psi \vdash \leOP{e_1}{e_2} : t}
-\end{equation*}
+\end{equation*}}
 and
-\begin{equation*}
+\begin{equation*}\myeqsize
 \inference{\mu \vdash e_i \leadsto v_i}{\mu\vdash \leOP{e_1}{e_2}\leadsto  \leOP{v_1}{v_2}} ~
 \inference{\mu' \vdash e_i \leadsto v'_i}{\mu'\vdash \leOP{e_1}{e_2}\leadsto \leOP{v'_1}{v'_2}}
 \end{equation*}
 By induction on $e_i$, we can get $v_i = v'_i$. Therefore $v = v'$.
 %%%%%%%%%%%%%%%%%%
 \item[T-SUB$_e$] we have
-\begin{equation*}
+\begin{equation*}\myeqsize
 \inference
 {\Psi\vdash e : s & s \leq t}
 {\Psi\vdash e : t}
@@ -1127,13 +1131,13 @@ on the derivation of $\mu;A; P \vdash c \leadsto \mu'.$
 \item[T-ASS]
 In this case $t = \Psi(x)$ and
 the typing derivation has the form:
-\begin{equation*}
+\begin{equation*}\myeqsize
 \inference
 {\Psi \vdash e : \Psi(x)}
 {\Psi; A  \vdash \lcASS{x}{e} : \Psi(x)}
 \end{equation*}
 and the evaluation under $\mu$ takes the form:
-$$
+$$\myeqsize
 \inference
 {\mu \vdash v}
 {\mu; A; P \vdash \lcASS{x}{e} \leadsto \mu[x \mapsto v] }
@@ -1153,9 +1157,9 @@ the command $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$
 and the typing derivation
 takes the form:
-$$
-\setpremisesspace{7pt}
-\setpremisesend{3pt}
+$$\myeqsize
+%\setpremisesspace{7pt}
+%\setpremisesend{3pt}
 \inference
 {
 \FT(B.f) = \overline{s} \rightarrow {s'} &
@@ -1166,7 +1170,7 @@ $$
 and we have that
 $t = \Psi(x).$
 The evaluation under $\mu$ is derived as follows:
-$$
+$$\myeqsize
 \inference{
 \FD(B.f) = \lpFUN{B.f}{\overline{y}}{c_1} \\
 \mu\vdash\overline{e} \leadsto \overline{v} \quad
@@ -1180,7 +1184,7 @@ Since $t(P) \not \leq l_O$ and $\Psi(x) = t$, we have
 $\Psi(x)(P) \not \leq l_O$
 and therefore $\Psi(x) \not \leq l_O$
 and
-$$\mu =^{l_O}_{\app{\Psi}{P}} \mu[x \mapsto v'] = \mu'.$$
+$$\myeqsize\mu =^{l_O}_{\app{\Psi}{P}} \mu[x \mapsto v'] = \mu'.$$
 
 \item[T-IF]
 This follows straightforwardly from the induction hypothesis.
@@ -1189,13 +1193,13 @@ This follows straightforwardly from the induction hypothesis.
 We look at the case where the condition of the while loop
 evaluates to true, otherwise it is trivial.
 In this case the typing derivation is
-$$
+$$\myeqsize
 \inference
 {\Psi \vdash e : t & \Psi ; A\vdash c : t  }
 {\Psi; A \vdash \lcWHILE{e}{c} : t }
 $$
 and the evaluation derivation is
-$$
+$$\myeqsize
 \inference{
 \mu \vdash e \leadsto v\quad v\neq 0\quad
 \mu;A; P \vdash c \leadsto \mu_1\\
@@ -1210,14 +1214,14 @@ we get $\mu =^{l_O}_{\app{\Psi}{P}} \mu_1$ and $\mu_1 =^{l_O}_{\app{\Psi}{P}} \m
 \item[T-SEQ] This case follows from the induction hypothesis
 and transitivity of the indistinguishability relation.
 
-\item[T-LETVAR] This follows from the induction hypothesis
+\item[T-LETV] This follows from the induction hypothesis
 and the fact that we can choose fresh variables for local
 variables, and that the local variables are not visible
 outside the scope of letv.
 
 \item[T-CP]
 We have:
-$$
+$$\myeqsize
 \inference
 {\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
 \Psi\downarrow_{p} ; A\vdash c_2 : t_2 &
@@ -1226,7 +1230,7 @@ t = \omerge{p}{t_1}{t_2}}
 $$
 There are two possible derivations for the evaluation.
 In one case, we have
-$$
+$$\myeqsize
 \inference{p\in P \quad \mu; A; P \vdash c_1 \leadsto \mu'}
 {\mu; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu'}
 $$
@@ -1269,18 +1273,18 @@ $=^{l_O}_{\app{\Psi}{P}}$ to simplify presentation.
 \begin{ProofEnumDesc}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \item[T-ASS] In this case, $c \equiv x := e$ and the typing derivation takes the form:
-$$
+$$\myeqsize
 \inference
 {\Psi \vdash e : \Psi(x)}
 {\Psi ; A \vdash \lcASS{x}{e} : \Psi(x)}
 $$
 where $t = \Psi(x)$, and suppose the two executions
 of $c$ are derived as follows:
-$$
+$$\myeqsize
 \inference{\mu_1 \vdash e \leadsto v}
 {\mu_1; A; P \vdash \lcASS{x}{e} \leadsto \mu_1 [ x \mapsto v_1 ]}
 $$
-$$
+$$\myeqsize
 \inference{\mu_2 \vdash e \leadsto v'}
 {\mu_1'; A; P \vdash \lcASS{x}{e} \leadsto \mu_1' [ x \mapsto v_2 ]}
 $$
@@ -1296,7 +1300,7 @@ and $\mu_1' \vdash e \leadsto v'$
 we get
 $v = v'$, so it then follows that  $\mu_2 =_{\app{\Psi}{P}} \mu_2'.$
 \item[T-IF] In this case $c \equiv \lcIF{e}{c_1}{c_2}$ and we have
-$$
+$$\myeqsize
 \inference
 {\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
 {\Psi; A \vdash \lcIF{e}{c_1}{c_2} : t}
@@ -1306,11 +1310,11 @@ Lemma~\ref{lem:comsafe}. So we assume $t(P) \leq l_O.$
 
 The evaluation derivation under $\mu_1$
 takes either one of the following forms:
-$$
+$$\myeqsize
 \inference{\mu_1 \vdash e \leadsto v\quad v\neq 0\quad \mu_1; A; P \vdash c_1 \leadsto \mu_2}
 {\mu_1; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2}
 $$
-$$
+$$\myeqsize
 \inference{\mu_1 \vdash e \leadsto v\quad v = 0\quad \mu_1;A; P \vdash c_2 \leadsto \mu_2}
 {\mu;A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2}
 $$
@@ -1321,14 +1325,14 @@ would take the same if-branch. That is, suppose $\mu_1' \vdash e \leadsto v'$.
 Since $t(P) \leq l_O$, we can apply Lemma~\ref{lem:expsafe} to conclude
 that $v=v' \not = 0$, hence the evaluation of $c$ under $\mu_1'$ takes the
 form:
-$$
+$$\myeqsize
 \inference{\mu_1' \vdash e \leadsto v'\quad v'\neq 0\quad \mu_1'; A; P \vdash c_1 \leadsto \mu_2'}
 {\mu_1'; A; P \vdash \lcIF{e}{c_1}{c_2} \leadsto \mu_2'}
 $$
 The lemma then follows straightforwardly from the induction hypothesis.
 
 \item[T-WHILE] $c\equiv\lcWHILE{e}{c_b}$ and we have
-$$
+$$\myeqsize
 \inference
 {\Psi \vdash e : t & \Psi ; A\vdash c : t  }
 {\Psi; A \vdash \lcWHILE{e}{c} : t }
@@ -1341,7 +1345,7 @@ $\mu_1 \vdash e \leadsto v$ and $\mu_1' \vdash e \leadsto v'$
 then $v=v'$.
 If both are $0$ then the conclusion holds according to
 (\ruleTagText{E-WHILE-F}). Otherwise, we have
-$$
+$$\myeqsize
 \inference{
 \mu_1 \vdash e \leadsto v\quad v\neq 0\quad
 \mu_1;A; P \vdash c_b \leadsto \mu_3\\
@@ -1350,7 +1354,7 @@ $$
 {\mu;A; P \vdash \lcWHILE{e}{c_b} \leadsto \mu_2}
 $$
 
-$$
+$$\myeqsize
 \inference{
 \mu_1' \vdash e \leadsto v\quad v'\neq 0\quad
 \mu_1';A; P \vdash c_b \leadsto \mu_3'\\
@@ -1369,8 +1373,8 @@ we obtain $\mu_2 =_{\app{\Psi} P} \mu_2'.$
 \item[T-SEQ] In this case we have
   $c\equiv\lcSEQ{c_1}{c_2}$ and $\Psi;A\vdash c:t$. If $t(P)\not\leq l_{O}$, it is a direct conclusion from Lemma \ref{lem:comsafe}; otherwise it holds by induction on $c_1$ and $c_2$.
 
-\item[T-LETVAR]
-  In this case we have $c\equiv\lcLETVAR{x}{e}{c_b}.$
+\item[T-LETV]
+  In this case we have $c\equiv\lcLETV{x}{e}{c_b}.$
   If $t(P) \nleq l_O$ then the lemma follows from Lemma \ref{lem:comsafe}.
   Otherwise, this case follows from the induction hypothesis and the fact
   that the mapping for the local variable $x$ is removed
@@ -1380,7 +1384,7 @@ In this case, $c$ has the form
 $\lcCALL{x}{B.f}{\overline{e}}$. Suppose the typing
 derivation is the following (where we label the premises
 for ease of reference later):
-$$
+$$\myeqsize
 \inference
 {
 \FT(B.f) = \overline{s} \rightarrow s' \\
@@ -1392,7 +1396,7 @@ $$
 where $t = \Psi(x)$,
 and the executions under $\mu_1$ and $\mu_1'$ are
 derived, respectively, as follows:
-$$
+$$\myeqsize
 \inference{
 (\mathbf{E_1}) ~ \mu_1\vdash\overline{e} \leadsto \overline{v_1} \\
 (\mathbf{E_2}) ~ [\overline{y} \mapsto \overline{v_1}, r \mapsto 0] ; B;
@@ -1402,7 +1406,7 @@ $$
               \mu_1 [x \mapsto \mu_3(r) ]}
 $$
 and
-$$
+$$\myeqsize
 \inference{
 (\mathbf{E_1'}) ~ \mu_1'\vdash\overline{e} \leadsto \overline{v_2}
 \\
@@ -1418,7 +1422,7 @@ and $\mu_2' = \mu_1'[x \mapsto \mu_3'(r)].$
 
 Moreover, since we consider only well-typed systems,
 the function $\FD(B.f)$ is also typeable:
-$$
+$$\myeqsize
 \inference
     {
       (\mathbf{T_3}) ~ [\overline{y}:\overline{s}, r : s']; B\vdash c_1 : s
@@ -1463,7 +1467,7 @@ we get $v_u = v_u'$.
 \item Claim 2: $\mu_3 =_{\Psi'} \mu_3'.$
 
 Proof: From Claim 1, we know that
-$$[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
+$$\myeqsize[\overline{y} \mapsto \overline{v_1}, r \mapsto 0]
 =_{\Psi'} [\overline{y} \mapsto \overline{v_2}, r \mapsto 0].$$
 Since $\rank{c_1}<\rank{c}$, we can apply the outer induction
 hypothesis to $(\mathbf{E_2})$, $(\mathbf{E_2'})$
@@ -1487,7 +1491,7 @@ $\mu_3(r) = \mu_3'(r).$
 The statement we are trying to prove, i.e., $\mu_2 =_{\app{\Psi}{P}} \mu_2'$,
 follows immediately from Claim 3 above.
 \item[T-CP] $c\equiv\lcCP{p}{c_1}{c_2}$ and we have
-$$
+$$\myeqsize
 \inference
 {\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
 \Psi\downarrow_{p} ; A\vdash c_2 : t_2 &
@@ -1500,12 +1504,12 @@ and the other where $p \not \in P$.
 Assume that $p \in P.$
 Then the evaluation of $c$ under $\mu_1$ and $\mu_1'$
 are respectively:
-$$
+$$\myeqsize
 \inference{p\in P \quad \mu_1; A; P \vdash c_1 \leadsto \mu_2}
 {\mu_1; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu_2}
 $$
 and
-$$
+$$\myeqsize
 \inference
     {p\in P \quad \mu_1'; A; P \vdash c_1 \leadsto \mu_2'}
     {\mu_1'; A ; P \vdash \lcCP{p}{c_1}{c_2} \leadsto \mu_2'}
@@ -1528,18 +1532,19 @@ but using Lemma~\ref{lem:down} in place of Lemma~\ref{lem:up}.
 \begin{definition}\label{def:sys-ni}
 Let $\mathcal{S}$ be a system.
 A function
-$$\lpFUN{A.f}{\overline{x}}{c}$$
+{\myeqsize$$\lpFUN{A.f}{\overline{x}}{c}$$}
 in $\mathcal{S}$
 with $FT(A.f) = \overline{t} \rightarrow t'$
 is {\termEmph{non-interferent}}
 if for all $\mu_1, \mu'_1, P, v, l_{O}$,
-if the following hold:
+if the followings hold:
+{\myeqsize
 \begin{itemize}
 \item $t'(P) \leq l_{O}$,
 \item $\mu_1 =_{\app{\Psi}{P}}^{l_{O}} \mu'_1$, where
 $\Psi = [\overline{x} : \overline{t}, r : t']$,
 \item $\mu_1;A ; P\vdash c \leadsto \mu_2 $, and $\mu'_1; A; P\vdash c\leadsto \mu'_2 $,
-\end{itemize}
+\end{itemize}}
 then $\mu_2(r) = \mu_2'(r).$
 The system $\mathcal{S}$ is \termEmph{non-interferent} iff all functions
 in $\mathcal{S}$ are non-interferent.
@@ -1553,13 +1558,12 @@ Well-typed systems are non-interferent.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  \section{Type Inference}\label{sec:constraint_gen}
-This section describes a decidable inference algorithm for the language  in ~\S\ref{sec:language}.
+This section describes a decidable inference algorithm for the language  in ~\S\ref{sec:language}\footnote{Some of the definitions and proofs are excluded from this thesis since they are conducted by one collaborator; a complete technical report can be found in~\cite{Chen17arxiv}.}.
 ~\S\ref{sec:constraint-gen-rules} firstly rewrites the typing
 rules (Figure~\ref{fig:typing-rules}) in the form of permission trace
 rules (Figure~\ref{fig:infer-rules}), then reduces the type inference
 into a constraint solving problem; \S\ref{sec:constraint_solve}
-provides procedures to solve the generated constraints. Detailed
-definitions and proofs can be found in~\cite{Chen17arxiv}.
+provides procedures to solve the generated constraints.
 
 
 \subsection{Constraint Generation}\label{sec:constraint-gen-rules}
@@ -1572,32 +1576,29 @@ In other words, we treat them as a \emph{sequence} of promotions $\uparrow_{p}$ 
 For example, $(\Psi\!\uparrow_{p})\downarrow_{q}$ can be viewed as
 an \emph{application} of the sequence $\uparrow_{p}\downarrow_{q}$ on $\Psi$.
 The sequence of promotions and demotions is called a \emph{permission trace} and denoted by {\trace}. The grammar of {\trace} is:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \trace~::=~\tplus{p} ::\trace~|~ \tminus{p} :: \trace~|~ \epsilon
 \quad p\in \PS
-\end{equation*}
+\end{equation*}}
 and its length, denoted by $\tlength{\trace}$, is defined as:
-\begin{align*}
+{\myeqsize\begin{align*}
 	\tlength{\trace}=
 	\begin{cases}
 	    0 & \text{if}~ \trace=\epsilon\\
 		1+\tlength{\trace'} & \text{if}~ \trace=\tplusminus{p} :: \trace', \tplusminus{} \in\{\tplus{}, \tminus{}\}
 	\end{cases}
-\end{align*}
-
+\end{align*}}
 \begin{definition}\label{def:app-pt-t}
 Given a base type $t$ and a permission trace $\trace$, the \termEmph{application} of $\trace$ to $t$, denoted by $t\cdot\trace$,  is defined as:
-
-\begin{equation*}
+{\myeqsize\begin{equation*}
 {t\cdot \trace =}
 \begin{cases}
 t & {\normalfont\text{if}}~\trace = \epsilon\\
 (t\uparrow_{p})\cdot \trace' & {\normalfont\text{if}}~\exists p, \trace', s.t.~\trace = \tplus{p} :: \trace'\\
 (t\downarrow_{p})\cdot \trace' & {\normalfont\text{if}}~\exists p, \trace', s.t.~\trace = \tminus{p} :: \trace'
 \end{cases}
-\end{equation*}
+\end{equation*}}
 \end{definition}
-
 We also extend the application of a permission trace $\trace$ to a typing environment $\Psi$ (denoted by $\Psi\cdot\trace$), such that $\forall x.\; (\Psi\cdot{\trace})(x) = \Psi(x)\cdot \trace$.
 Based on permission traces, we give the definition of \termEmph{partial subtyping relation}.
 \begin{definition}\label{def:partial-subtype}
@@ -1609,7 +1610,8 @@ The application of permission traces to types preserves the subtyping relation.
 $\forall s, t \in \Tcal$, $s\leq t \implies s\leq_{\trace} t$ for all $\trace$.
 \end{lemma}
 \begin{proof}
-By induction on $\tlength{\trace}$.\\
+By induction on $\tlength{\trace}$.
+{\myeqsize
 \begin{itemize}
 \item $\trace=\epsilon$.
 %When $\tlength{\trace}=0$, i.e., $\trace=\epsilon$,
@@ -1619,9 +1621,8 @@ $\trace=\tplus{p} :: \trace'$ or $\trace=\tminus{p} :: \trace'$. Assume it is th
 By the hypothesis and Lemma \ref{lem:pd-order}, $s\uparrow_{p}\leq t\uparrow_{p}$.
 Then by induction, $s\uparrow_{p}\cdot\trace'\leq t\uparrow_{p}\cdot\trace'$,
 that is, $s\cdot\trace\leq t\cdot\trace$.
-\end{itemize}
+\end{itemize}}
 \end{proof}
-
 
 The following four lemmas discuss the impact of permission checking order on the same or different permissions.
 
@@ -1631,7 +1632,7 @@ $\forall t\in\Tcal$, $p,q\in\PS$ s.t. $ p\neq q$ , $t \cdot (\tplusminus{p} \tpl
 \begin{proof}
 We only prove $t\cdot(\tminus{p} \tplus{ q})=t\cdot (\tplus{ q} \tminus{ p})$, the other cases are similar.
 Consider any $P\in\PPS$,
-\begin{equation*}
+\begin{equation*}\myeqsize
 \begin{array}{lcl}
 	 t\cdot(\tminus{p} \tplus{ q})(P)
 	 &=&((t\downarrow_{p})\uparrow_{q})(P)\\
@@ -1640,7 +1641,7 @@ Consider any $P\in\PPS$,
 \end{array}
 \end{equation*}
 and
-\begin{equation*}
+\begin{equation*}\myeqsize
 \begin{array}{lcl}
 t\cdot(\tplus{ q} \tminus{ p})(P)
 	&=&((t\uparrow_{q})\downarrow_{p})(P)\\
@@ -1657,7 +1658,7 @@ $\forall t\in\Tcal$,$(t\cdot \tplusminus{p} )\cdot \trace = (t\cdot\trace)\cdot 
 \end{lemma}
 \begin{proof}
 By induction on $\tlength{\trace}$. The conclusion holds when $\tlength{\trace}=0$ and $\tlength{\trace}=1$ by Lemma~\ref{lem:traceorder}. Suppose $\tlength{\trace}>1$, there exists $\trace'$ and $q$ such that $\trace=\tplusminuss{q} :: \trace'$ where $\tplusminuss{}\in\{\tplus{}, \tminus{}\}$.
-\begin{equation*}
+\begin{equation*}\myeqsize
 \begin{array}{lcll}
 &&(t\cdot\tplusminus{p})\cdot \trace &\\
 &=& ((t\cdot \tplusminus{ p})  \cdot \tplusminuss{ q}) \cdot \trace'&\text{(by Definition~\ref{def:app-pt-t})}\\
@@ -1676,12 +1677,14 @@ $\forall t\in\Tcal$, $p\in\PS$,$(t \cdot \tplusminus{ p})\cdot\tplusminuss{ p} =
 \end{lemma}
 \begin{proof}
 By case analysis.
+{\myeqsize
 \begin{itemize}
 \item $((t\cdot \tplus{ p})\cdot \tplus{ p})(P)=t(P\cup\{p\}\cup\{p\})  = t(P\cup\{p\}) =t\cdot(\tplus{ p})$ for each $P\in\PPS$.
 \item $((t\cdot \tplus{ p})\cdot \tminus{ p})(P)=t((P\setminus\{p\})\cup\{p\})  = t(P\cup\{p\}) =t\cdot(\tplus{ p})$ for each $P\in\PPS$.
 \item $((t\cdot \tminus{ p})\cdot \tplus{ p})(P) = t((P\cup\{p\})\setminus\{p\})=t(P\setminus\{p\})=t\cdot(\tminus{ p})$ for each $P\in\PPS$.
 \item $((t\cdot \tminus{ p})\cdot \tminus{ p})(P) = t((P\setminus\{p\})\setminus\{p\})=t(P\setminus\{p\})=t\cdot(\tminus{ p})$ for each $P\in\PPS$.
 \end{itemize}
+}
 \end{proof}
 
 \begin{lemma}\label{lem:tracesame}
@@ -1689,7 +1692,7 @@ $\forall t\in\Tcal$, $(t \cdot \trace)\cdot \trace =  t \cdot \trace $.
 \end{lemma}
 \begin{proof}
 By induction on $\tlength{\trace}$. The conclusion holds trivially for $\tlength{\trace}=0$ and for $\tlength{\trace} = 1$ by Lemma \ref{lem:tracepsame} . When $\tlength{\trace}>1$, without loss of generality, assume $\trace=\tplus {p} :: \trace'$.
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \begin{array}{lcll}
 &&t\cdot\trace\cdot\trace&\\
 &=&(t\cdot (\tplus{ p} \cdot \trace')) \cdot (\tplus{ p}::\trace') &\\
@@ -1701,7 +1704,7 @@ By induction on $\tlength{\trace}$. The conclusion holds trivially for $\tlength
 &=&t\cdot (\tplus{ p}::\trace') & \text{(by Definition~\ref{def:app-pt-t})}\\
 &=&t\cdot\trace
 \end{array}
-\end{equation*}
+\end{equation*}}
 \end{proof}
 
 Lemmas \ref{lem:traceorder} and \ref{lem:traceorder-whole} state that the order of applications of promotions and demotions on \emph{different} permissions does not affect the result. Lemmas \ref{lem:tracepsame} and \ref{lem:tracesame} indicate that only the first application takes effect if there exist several (consecutive) applications of promotions and demotions on the \emph{same} permission $p$. Therefore, we can safely keep only the first application, by removing the other applications on the same permission.
@@ -1712,7 +1715,6 @@ In the remaining, we assume that all permission traces are consistent.
 Moreover, to ensure that the traces collected from the derivations of commands are
 consistent, we assume that in nested permission checks of a function definition, each permission is checked at most once.
 
-\iftrue
 \begin{lemma}\label{lem:tracemerge}
 $\forall s,t\in\Tcal.\; \forall p\in\PS.  (\omerge{p}{s}{t})\cdot \trace = \omerge{p}{(s\cdot\trace)}{(t\cdot\trace)} $, where $p\notin \trace$.
 \end{lemma}
@@ -1721,8 +1723,8 @@ By induction on $\tlength{\trace}$.
 \begin{ProofEnumDesc}
 \item[$\tlength{\trace} = 0$:] Trivially.
 \item[$\tlength{\trace} > 0$:] In this case we have $\trace = \trace'::\tplus{q}$ or $\trace'::\tminus{q}$, where $\tlength{\trace'} \geq 0$, $p\notin \trace' $, $q\neq p$. We only prove $\trace'::\tplus{q}$, the other case is similar. Consider any $P$, we have
-$$
-\begin{array}{rlll}
+$$\myeqsize
+\begin{array}{rlll}\myeqsize
 &&((\omerge{p}{s}{t})\cdot (\trace'::\tplus{q}))(P)&\\
 &= & ((\omerge{p}{s}{t})\cdot\trace')(P\cup\{q\}) & \\
  &= & (\omerge{p}{(s\cdot\trace')}{(t\cdot\trace')})(P\cup\{q\})~~~~~(\textrm{By induction}) & \\
@@ -1747,7 +1749,6 @@ $\forall s,t\in\Tcal.\; \forall p\in\PS.$ $s\leq t\Leftrightarrow  s\cdot\tplus{
 \end{enumerate}
 This indicates that $s\leq t$.
 \end{proof}
-\fi
 
 
 \subsubsection{\textbf{Permission Trace Rules}}
@@ -1756,7 +1757,7 @@ This yields the syntax-directed  typing rules, which we call the {\em permission
 The judgments of the trace rules are similar to those of typing rules, except that each trace rule is guarded by the permission trace $\trace$ collected from the context, which keeps track of the adjustments of variables depending on the permission checks,
 and that the subtyping relation in the trace rules is the partial subtyping one $\leq_{\trace}$.
 
-\begin{figure*}[t]
+\begin{figure*}[ht]
 \begin{tiny}
 \[
 \inference[TT-VAR]{}
@@ -1788,10 +1789,10 @@ t \leq_{\trace} t_1\sqcap t_2
 \]
 
 \[
-\inference[TT-LETVAR]
+\inference[TT-LETV]
 {\Psi;\trace \vdash_{t} e : s &
 \Psi[x:s']; \trace; A \vdash_{t} c : t & s \leq_{\trace} s' }
-{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c} :  t}
+{\Psi;\trace; A\vdash_{t} \lcLETV{x}{e}{c} :  t}
 \qquad
 \inference[TT-WHILE]
 {
@@ -1829,569 +1830,26 @@ t \leq_{\trace} t_1\sqcap t_2
 
  
 
-The next two lemmas show the trace rules are sound and complete with respect to the typing rules, i.e., an expression (command, function, resp.)  is typeable under the trace rules, if and only if it is typeable under the typing rules.
+The next two lemmas show the trace rules are \emph{sound} and \emph{complete} with respect to the typing rules, i.e., an expression (command, function, resp.)  is typeable under the trace rules, if and only if it is typeable under the typing rules.
 
 \begin{lemma}\label{lem:ptrsound}
+{\myeqsize
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
-\item\label{lem:ptrsound-1} If $\Psi;\trace\vdash_{t} e : t$, then $\Psi\cdot\trace\vdash e : (t\cdot\trace)$.\\
-\item\label{lem:ptrsound-2} If $\Psi;\trace; A \vdash_{t} c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace)$.\\
+\item\label{lem:ptrsound-1} If $\Psi;\trace\vdash_{t} e : t$, then $\Psi\cdot\trace\vdash e : (t\cdot\trace)$.
+\item\label{lem:ptrsound-2} If $\Psi;\trace; A \vdash_{t} c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace)$.
 \item\label{lem:ptrsound-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$, then $ \vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} t'$.
-\end{enumerate}
+\end{enumerate}}
 \end{lemma}
-\begin{proof}
-The proof of {\ref{lem:ptrsound-1}}, by induction on $\Psi;\trace \vdash_{t} e: t$.
-\begin{ProofEnumDesc}
-\item[TT-VAR] Trivially.
-\item[TT-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{t} e_1: t_1 & \Psi;\trace\vdash_{t} e_2: t_2}
-{\Psi;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
-\end{equation*}
-By induction on $e_i$, we can get $\Psi\cdot\trace \vdash e_i : (t_i\cdot\trace)$.
-By Lemma \ref{lem:monotrace} and  $t_i \leq t_1\sqcup t_2$, we have $t_i\cdot \trace \leq (t_1\sqcup t_2)\cdot\trace $.
-By subsumption, we have $\Psi\cdot\trace \vdash e_i : ((t_1\sqcup t_2)\cdot\trace) $.
-Finally, by applying Rule {(T-OP)}, we get $\Psi\cdot\trace \vdash  \leOP{e_1}{e_2} :((t_1\sqcup t_2)\cdot\trace)  $.
-\end{ProofEnumDesc}
-The proof of {\ref{lem:ptrsound-2}}:
-\begin{ProofEnumDesc}
-
-\item[TT-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T_1}) ~ \Psi;\trace \vdash_{t} e : t & (\mathbf{T_2}) ~ t \leq_{\trace} \Psi(x)}
-{\Psi;\trace; A \vdash_{t} \lcASS{x}{e} : \Psi(x)}
-\end{equation*}
-By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Psi\cdot\trace \vdash e : (t\cdot \trace)$.
-From $(\mathbf{T_2})$, we get $ t\cdot \trace \leq (\Psi\cdot\trace)(x)$.
-So by subsumption, $\Psi\cdot\trace \vdash e : (\Psi\cdot\trace)(x)$.
-Finally, by Rule {(T-ASS)}, the result follows.
-
-\item[TT-LETVAR] %by induction and Rules {(T-SUB$_{c}$)}, {(T-LETVAR)}.
-In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T_1}) ~\Psi;\trace \vdash_{t} e : s &
-(\mathbf{T_2}) ~s \leq_{\trace} s'  \\
-(\mathbf{T_3}) ~\Psi[x:s']; \trace; A \vdash_{t} c' : t }
-{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
-\end{equation*}
-By \ref{lem:ptrsound-1} on $(\mathbf{T_1})$,  $\Psi\cdot\trace \vdash e : (s\cdot \trace)$.
-From $(\mathbf{T_2})$, we get $ s\cdot \trace \leq s'\cdot\trace$.
-So by subsumption, $\Psi\cdot\trace \vdash e : s'\cdot\trace$.
-By induction on $(\mathbf{T_3})$,  we have $(\Psi[x:s']\cdot \trace); A \vdash c' : t \cdot \trace$, that is $(\Psi\cdot \trace)[x:s'\cdot \trace]; A \vdash c' : t\cdot \trace $.
-Finally, by Rule {(T-LETVAR)}, the result follows.
-
-\item[TT-IF] By induction and Rules {(T-SUB$_{c}$)}, {(T-IF)}.
-\item[TT-WHILE] By induction and Rules {(T-SUB$_{c}$)}, {(T-WHILE)}.
-\item[TT-SEQ] By induction and Rules {(T-SUB$_{c}$)}, {(T-SEQ)}.
-
-\item[TT-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
-\begin{equation*}
-\inference
-{
-(\mathbf{T_1})~\FT(B.f) = \overline{t} \xrightarrow{} t'  &
-(\mathbf{T_2})~\Psi;\trace \vdash_{t} \overline{e} : \overline{s}\\
-(\mathbf{T_3})~\overline{s}\leq_{\trace} \overline{\app{t}{\Theta(A)}} &
-(\mathbf{T_4})~\app{t'}{\Theta(A)}\leq_{\trace} \Psi(x)
-}
-{\Psi;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
-\end{equation*}
-By \ref{lem:ptrsound-3} on $(\mathbf{T_1})$, $\vdash B.f : \overline{t} \xrightarrow{} t'$.
-By \ref{lem:ptrsound-1} on $(\mathbf{T_2})$ , $\Psi\cdot\trace \vdash \overline{e} : \overline{s\cdot\trace}$.
-From $(\mathbf{T_3})$, we get
-$\overline{s\cdot \trace}\leq_{} \overline{(app(t,\Theta(A))\cdot \trace)} = \overline{app(t,\Theta(A))} $.
-So by subsumption, $\Psi\cdot\trace \vdash \overline{e} : \overline{app(t,\Theta(A))}$.
-Similarly, from $(\mathbf{T_4})$, we get $app(t', \Theta(A))\leq_{} (\Psi\cdot\trace)(x) $. Then by Rule {(T-ASS)}, $(\Psi\cdot\trace); A \vdash_{} \lcCALL{x}{B.f}{\overline{e}} : (\Psi\cdot\trace)(x) $.
-
-\item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace::\tplus p;  A \vdash_{t} c_1 : t_1 &
-\Psi;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
-{\Psi;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
-\end{equation*}
-By induction on $c_i$, we have
-\begin{gather*}
-(\Psi\cdot(\trace :: \tplus {p}));  A \vdash c_1 : (t_1\cdot(\trace::\tplus{p}) )\\
-(\Psi\cdot (\trace:: \tminus {p})); A \vdash c_2 : (t_2\cdot(\trace::\tminus{ p}))
-\end{gather*}
-which is equivalent to
-\begin{gather*}
-(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : (t_1\cdot\trace)\uparrow_{p}\\
-(\Psi\cdot \trace)\downarrow_{p}; A \vdash c_2 : (t_2\cdot \trace)\downarrow_{p}
-\end{gather*}
-Let $t'$ be $\omerge{p}{(t_1\cdot\trace)\uparrow_{p}}{(t_2\cdot\trace)\downarrow_{p}}$.
-By Rule {(T-CP)}, we have
-$$
-(\Psi\cdot\trace);  A \vdash \lcCP{p}{c_1}{c_2} : t'.
-$$
-Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p\notin \trace$.
-Let's consider any $P$.
-If $p \in P$, then
-$$
-\begin{array}{rlll}
-t'(P) &=&  (t_1\cdot\trace)\uparrow_{p}(P) & (p\in P)\\
-&=& (t_1\cdot\trace)(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
-&=&(\omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)})(P) &(p\in P)\\
-&=&((\omerge{p}{t_1}{t_2})\cdot \trace)(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
-\end{array}
-$$
-Similarly, if $p \notin P$, $t'(P) =((\omerge{p}{t_1}{t_2})\cdot \trace)(P)$.
-Therefore,  $t' = (\omerge{p}{t_1}{t_2})\cdot \trace$ and thus the result follows.
-
-\end{ProofEnumDesc}
-%%%%%%%%%%%
-The proof of \ref{lem:ptrsound-3} :\\
-Clearly, we have
-\begin{equation*}
-\inference
-{
-[\overline{x}: \overline{t},\lpRES:t'];\epsilon; B \vdash_{t} c : s &
-%s \leq t_b
-}
-{\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
-\end{equation*}
-Applying \ref{lem:ptrsound-2} on $c$, $[\overline{x}: \overline{t}, \lpRES:t'] ; B \vdash c : s$.
-Finally, by Rule {(T-FUN)}, the result follows.
-\end{proof}
-
-
-
-To prove the completeness, we need to prove some auxiliary lemmas.
-\begin{lemma}\label{lem:typingtrace}
-Let $\trace$ be the permission trace collected from the context of $e$ or $c$.
-\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
-\item\label{lem:typingtrace-1} If $\Psi \vdash e : t$, then $(\Psi\cdot\trace) \vdash e : (t\cdot\trace) $
-\item\label{lem:typingtrace-2} If $\Psi;A \vdash c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace) $.
-\end{enumerate}
-\end{lemma}
-
-\begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi \vdash e : t$.
-\begin{ProofEnumDesc}
-\item[T-VAR] Trivially.
-
-\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi \vdash e_1 : t & \Psi \vdash e_2 : t}
-{\Psi \vdash \leOP{e_1}{e_2} : t}
-\end{equation*}
-By induction on $e_i$, $(\Psi\cdot\trace) \vdash e_i : (t\cdot\trace)$.
-By Rule {(T-OP)}, we have $(\Psi\cdot\trace)\vdash_{t} \leOP{e_1}{e_2} : (t\cdot\trace)$.
-
-\item[T-SUB$_e$] In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi \vdash e : s & (\mathbf{T2})~s \leq t}
-{\Psi \vdash e : t}
-\end{equation*}
-By induction on $(\mathbf{T1})$, $(\Psi\cdot\trace) \vdash_{t} e : (s\cdot\trace)$.
-From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, we get $s\cdot\trace\leq t\cdot\trace $. So by subsumption, the result follows.
-\end{ProofEnumDesc}
-
-%%%%%%%%%%
-The proof of \ref{lem:typingtrace-2}: by induction on $\Psi; A \vdash c: t$.
-\begin{ProofEnumDesc}
-\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi \vdash e : \Psi(x)}
-{\Psi; A \vdash \lcASS{x}{e} : \Psi(x)}
-\end{equation*}
-By \ref{lem:typingtrace-1} on $e$,  $(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)$.
-Then by Rule {(T-ASS)},  the result follows.
-
-\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
-In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi \vdash e : s &
-\Psi[x:s]; A \vdash c' : t }
-{\Psi; A\vdash \lcLETVAR{x}{e}{c'} :  t}
-\end{equation*}
-By \ref{lem:typingtrace-1} on $e$, $(\Psi\cdot\trace) \vdash e :  (s\cdot\trace)$.
-By induction on $c$, $((\Psi[x:s])\cdot\trace);A \vdash c' :  (t\cdot\trace)$,
-that is $(\Psi\cdot\trace)[x:s\cdot\trace];A \vdash c' :  (t\cdot\trace)$.
-Then by Rule {(T-LETVAR)}, the result follows.
-
-\item[T-IF] By induction and Rule {(T-IF)}.
-\item[T-WHILE] By induction and Rule {(T-WHILE)}.
-\item[T-SEQ] By induction and Rule {(T-SEQ)}.
-
-\item[T-ICALL] in this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
-\begin{equation*}
-\inference
-{
-\FT(B.f) = \overline{t} \xrightarrow{} t'  \\
-(\mathbf{T1})~\Psi \vdash \overline{e} : \overline{\app{t}{\Theta(A)}} &
-(\mathbf{T2})~\app{t'}{\Theta(A)}\leq \Psi(x)
-}
-{\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
-\end{equation*}
-By \ref{lem:typingtrace-1} on $(\mathbf{T1})$, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}\cdot\trace}$, that is, $(\Psi\cdot\trace)\vdash \overline{e} : \overline{\app{t}{\Theta(A)}}$.
-From $(\mathbf{T2})$ and Lemma \ref{lem:monotrace}, $\app{t'}{\Theta(A)}\cdot\trace \leq (\Psi\cdot\trace)(x)$, that is, $\app{t'}{\Theta(A)} \leq (\Psi\cdot\trace)(x)$.
-Then by Rule {(T-ICALL)}, $(\Psi\cdot\trace);A\vdash \lcCALL{x}{B.f}{\overline{e}}  : (\Psi\cdot\trace)(x)$.
-
-
-\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi\uparrow_{p};  A \vdash c_1 : t_1 &
-\Psi\downarrow_{p}; A \vdash c_2 : t_2}
-{\Psi; A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
-\end{equation*}
-By induction on $c_1$ and $c_2$, we have
-\begin{equation*}
-((\Psi\uparrow_{p})\cdot \trace); A \vdash c_1 : t_1\cdot\trace
-\quad
-((\Psi\downarrow_{p})\cdot \trace); A \vdash c_2 : t_2\cdot\trace
-\end{equation*}
-Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
-By Lemma \ref{lem:traceorder-whole},
-$(\Psi\uparrow_{p})\cdot \trace= (\Psi\cdot \trace)\uparrow_{p}$
-and $(\Psi\downarrow_{p})\cdot \trace= (\Psi\cdot \trace)\downarrow_{p}$.
-Then by Rule {(T-CP)}, we have
-$$
-(\Psi\cdot \trace); A \vdash \lcCP{p}{c_1}{c_2} : \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)}.
-$$
-Finally, by Lemma \ref{lem:tracemerge}, $(\omerge{p}{t_1}{t_2})\cdot \trace = \omerge{p}{(t_1\cdot \trace)}{(t_2\cdot \trace)} $, and thus the result follows.
-
-\item[T-SUB$_c$] %by induction and Lemma \ref{lem:monotrace}.
-In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi;A \vdash c : s & (\mathbf{T2})~t \leq s}
-{\Psi;A  \vdash c : t}
-\end{equation*}
-By induction on $(\mathbf{T1})$,  $(\Psi\cdot\trace);A \vdash c : (s\cdot\trace)$.
-From $(\mathbf{T2})$ and by Lemma \ref{lem:monotrace}, $t\cdot\trace\leq  s\cdot\trace$.
-Then by subsumption, the result follows.
-\end{ProofEnumDesc}
-\end{proof}
-
-
-
-\begin{lemma}\label{lem:typingtrace1}
-\begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
-\item\label{lem:typingtrace1-1} If $\Psi\cdot\trace \vdash e : t$, then $(\Psi\cdot\trace) \vdash e : (t\cdot\trace) $
-\item\label{lem:typingtrace1-2} If $(\Psi\cdot\trace);A \vdash c : t$, then $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace) $.
-\end{enumerate}
-\end{lemma}
-\begin{proof}
-By Lemma \ref{lem:typingtrace} and Lemma \ref{lem:tracesame}.
-\end{proof}
-
-\begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi\cdot\trace \vdash e : t\cdot \trace $.
-\begin{ProofEnumDesc}
-\item[T-VAR] Trivially with $s = \Psi(x)$.
-
-
-\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi\cdot\trace\vdash e_1 : t\cdot\trace & \Psi\cdot\trace \vdash e_2 : t\cdot\trace}
-{\Psi\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
-\end{equation*}
-By induction on $e_i$, there exists $s_i$ such that $\Psi; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
-By Rule {(TT-OP)}, we have $\Psi; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
-Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
-
-\item[T-SUB$_e$] In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
-{\Psi\cdot\trace \vdash e : t\cdot\trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace \vdash e : s\cdot \trace$.
-Then by induction, there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
-\end{ProofEnumDesc}
-
-The proof of \ref{lem:ptrcomplete-2}: by induction on $\Psi\cdot\trace; A \vdash c : t\cdot \trace $. %\\
-\begin{ProofEnumDesc}
-\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)}
-{(\Psi\cdot\trace);A \vdash \lcASS{x}{e} : (\Psi\cdot\trace)(x)}
-\end{equation*}
-By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
-$\Psi; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-ASS)},  $\Psi;\trace; A \vdash_{t} \lcASS{x}{e} :\Psi(x)$.
-
-\item[T-LETVAR] %by induction and Rule {(TT-LETVAR)}.
-In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T_1}) ~(\Psi\cdot\trace) \vdash e : s &
-(\mathbf{T_2}) ~(\Psi\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
-{(\Psi\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Psi\cdot\trace) \vdash e : s\cdot\trace$.
-Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Psi\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
-And by Lemma \ref{lem:tracesame}, we have $(\Psi[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
-Then by induction, there exists $t'$ such that $\Psi[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
-Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
-
-\item[T-IF] By induction and Rule {(TT-IF)}.
-\item[T-WHILE] By induction and Rule {(TT-WHILE)}.
-\item[T-SEQ] By induction and Rule {(TT-SEQ)}.
-
-\item[T-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
-\begin{equation*}
-\inference
-{
-\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-(\mathbf{T1})~\Psi\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
-(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Psi\cdot\trace)(x)
-}
-{\Psi\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\cdot \trace}
-\end{equation*}
-From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
-Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
-From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-ICALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
-
-\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
-\begin{equation*}
-\inference
-{(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
-(\Psi\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
-{(\Psi\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
-\end{equation*}
-where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
-
-Clearly,
-$(\Psi\cdot \trace)\uparrow_{p}= \Psi\cdot (\trace::\tplus{p})$
-and $(\Psi\cdot \trace)\downarrow_{p}= \Psi\cdot (\trace::\tminus{p})$.
-Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
-\begin{equation*}
-\begin{array}{l}
-(\Psi\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
-(\Psi\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
-\end{array}
-\end{equation*}
-By induction, there exist $s_1$ and $s_2$ such that
-\begin{equation*}
-\begin{array}{l}
-\Psi; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
-t_1 \leq_{\trace::\tplus p} s_1 \\
-\Psi; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
-t_2 \leq_{\trace::\tminus p} s_2
-\end{array}
-\end{equation*}
-Then by Rule {(TT-CP)}, we have
-$$
-\Psi;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
-$$
-The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
-Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
-Consider any $P$. If $p \in P$, then
-$$
-\begin{array}{rlll}
-&&((\omerge{p}{s_1}{s_2})\cdot\trace)(P) &\\
-&=&(\omerge{p}{(s_1\cdot\trace)}{(s_2\cdot\trace)})(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
-&=&(s_1\cdot\trace)(P) & (p\in P)\\
-&=&(s_1\cdot(\trace::\tplus{p}))(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
-&\geq&(t_1\cdot(\trace::\tplus{p}))(P) & (t_1 \leq_{\trace::\tplus{p}} s_1)\\
-& = & (t_1\cdot\trace)(P) &(\textrm{Lemma \ref{lem:promote-demote}})\\
-& = & (\omerge{p}{(t_1\cdot\trace)}{(t_2\cdot\trace)})(P)&(p\in P)\\
-& = & ((\omerge{p}{t_1}{t_2})\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracemerge}})\\
-& = & ((t\cdot\trace)\cdot\trace)(P)&\\
-& = & (t\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracesame}})\\
-\end{array}
-$$
-Similarly, if $p\notin P$, we also have $(t \cdot \trace)(P)\leq ((\omerge{p}{s_1}{s_2})\cdot\trace)(P)$.
-Therefore, the result follows.
-
-\item[T-SUB$_c$] In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
-{\Psi\cdot\trace; A\vdash c : t\cdot \trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace; A\vdash c : s\cdot\trace$.
-Then by induction, there exists $s'$ such that $\Psi;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
-From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
-
-\end{ProofEnumDesc}
-The proof of \ref{lem:ptrcomplete-3}: \\
-Clearly, we have
-\begin{equation*}
-\inference
-{
-[\overline{x}: \overline{t}, \lpRES: t']; B \vdash c : s
-}
-{\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
-\end{equation*}
-By \ref{lem:ptrcomplete-2} on $c$, there exists $t_b$ such that $[\overline{x}: \overline{t}, \lpRES: t']; B \vdash_{t} c : t_b$ and $s \leq_{} t_b $.
-By Rule {(TT-FUN)},
-$$\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'$$
-\end{proof}
-
 
 
 \begin{lemma}\label{lem:ptrcomplete}
+{\myeqsize
 \begin{enumerate}[label=(\alph*),topsep=1pt,itemsep=-1ex,partopsep=1ex,parsep=0ex]
-\item\label{lem:ptrcomplete-1} If $\Psi\cdot\trace \vdash e : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace \vdash_{t} e : s$ and $s \leq_{\trace} t$.\\
-\item\label{lem:ptrcomplete-2} If $(\Psi\cdot\trace); A \vdash c : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace;A \vdash_{t} c : s$ and $t \leq_{\trace} s$.\\
+\item\label{lem:ptrcomplete-1} If $\Psi\cdot\trace \vdash e : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace \vdash_{t} e : s$ and $s \leq_{\trace} t$.
+\item\label{lem:ptrcomplete-2} If $(\Psi\cdot\trace); A \vdash c : t\cdot \trace$, then there exists $s$ such that $\Psi;\trace;A \vdash_{t} c : s$ and $t \leq_{\trace} s$.
 \item\label{lem:ptrcomplete-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES}  : \overline{t}\xrightarrow{} s$, then $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{t}\xrightarrow{} s$.
-\end{enumerate}
+\end{enumerate}}
 \end{lemma}
-
-\begin{proof}
-The proof of \ref{lem:ptrcomplete-1} : by induction on $\Psi\cdot\trace \vdash e : t\cdot \trace $.
-\begin{ProofEnumDesc}
-\item[T-VAR] Trivially with $s = \Psi(x)$.
-
-
-\item[T-OP]  In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi\cdot\trace\vdash e_1 : t\cdot\trace & \Psi\cdot\trace \vdash e_2 : t\cdot\trace}
-{\Psi\cdot\trace\vdash \leOP{e_1}{e_2} : t\cdot\trace}
-\end{equation*}
-By induction on $e_i$, there exists $s_i$ such that $\Psi; \trace \vdash_{t} e_i : s_i$ and $s_i \leq_{\trace} t$.
-By Rule {(TT-OP)}, we have $\Psi; \trace\vdash_{t} \leOP{e_1}{e_2} : s_1 \sqcup s_2$.
-Moreover, it is clear that $s_1 \sqcup s_2 \leq_{\trace} t$. Therefore, the result follows.
-
-\item[T-SUB$_e$] In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi\cdot\trace \vdash e : s & (\mathbf{T2})~s \leq t\cdot\trace}
-{\Psi\cdot\trace \vdash e : t\cdot\trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace \vdash e : s\cdot \trace$.
-Then by induction, there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-From $(\mathbf{T2})$ and Lemma \ref{lem:tracesame}, we can get $s'\leq_{\trace} t\cdot\trace \leq_{\trace} t $. Thus the result follows.
-\end{ProofEnumDesc}
-The proof of \ref{lem:ptrcomplete-2}: by induction on $\Psi\cdot\trace; A \vdash c : t\cdot \trace $. %\\
-\begin{ProofEnumDesc}
-\item[T-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{(\Psi\cdot\trace) \vdash e : (\Psi\cdot\trace)(x)}
-{(\Psi\cdot\trace);A \vdash \lcASS{x}{e} : (\Psi\cdot\trace)(x)}
-\end{equation*}
-By \ref{lem:ptrcomplete-1} on $e$,  there exists $s$ such that
-$\Psi; \trace \vdash_{t} e : s$ and $s \leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-ASS)},  $\Psi;\trace; A \vdash_{t} \lcASS{x}{e} :\Psi(x)$.
-
-\item[T-LETVAR]
-In this case we have $c \cong \lcLETVAR{x}{e}{c'}$ and the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T_1}) ~(\Psi\cdot\trace) \vdash e : s &
-(\mathbf{T_2}) ~(\Psi\cdot\trace)[x:s]; A \vdash c' : t\cdot\trace }
-{(\Psi\cdot\trace); A\vdash \lcLETVAR{x}{e}{c'} :  t\cdot\trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T_1})$, $(\Psi\cdot\trace) \vdash e : s\cdot\trace$.
-Then by \ref{lem:ptrcomplete-1},  there exists $s'$ such that $\Psi;\trace \vdash_{t} e : s'$ and $s' \leq_{\trace} s$.
-Applying Lemma \ref{lem:typingtrace} on $(\mathbf{T_2})$, $((\Psi\cdot\trace)[x:s])\cdot\trace; A \vdash c' : (t\cdot\trace)\cdot\trace$.
-And by Lemma \ref{lem:tracesame}, we have $(\Psi[x:s]\cdot\trace); A \vdash c' : (t\cdot\trace)$.
-Then by induction, there exists $t'$ such that $\Psi[x:s]; \trace; A \vdash_{t} c' : t' $ and $t \leq_{\trace} t'$.
-Finally, by Rule {(TT-LETVAR)}, we have $\Psi; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c'} : t' $.
-
-\item[T-IF] By induction and Rule {(TT-IF)}.
-\item[T-WHILE] By induction and Rule {(TT-WHILE)}.
-\item[T-SEQ] By induction and Rule {(TT-SEQ)}.
-
-\item[T-ICALL] In this case we have $c \cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
-\begin{equation*}
-\inference
-{
-\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-(\mathbf{T1})~\Psi\cdot \trace \vdash \overline{e} : \overline{\app{t_p}{\Theta(A)}} \\
-(\mathbf{T2})~\app{t_r}{\Theta(A)}\leq (\Psi\cdot\trace)(x)
-}
-{\Psi\cdot \trace; A \vdash \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\cdot \trace}
-\end{equation*}
-From $(\mathbf{T1})$, we have $\Psi\cdot \trace \vdash_{t} \overline{e} : \overline{(\app{t_p}{\Theta(A)}\cdot\trace)}$.
-Then by \ref{lem:ptrcomplete-1}, there exists $\overline{t_e}$ such that $\Psi;\trace \vdash_{t} \overline{e} : \overline{t_e}$ and $\overline{t_e}\leq_{\trace}  \overline{\app{t_p}{\Theta(A)}}$.
-From $(\mathbf{T2})$, we have $\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)$.
-Then by Rule {(TT-ICALL)}, $\Psi;\trace; A \vdash \lcCALL{x}{B.f}{\overline{e}}: \Psi(x)$.
-
-\item[T-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivatioin
-\begin{equation*}
-\inference
-{(\Psi\cdot\trace)\uparrow_{p};  A \vdash c_1 : t_1 &
-(\Psi\cdot\trace)\downarrow_{p}; A \vdash c_2 : t_2}
-{(\Psi\cdot\trace);A\vdash \lcCP{p}{c_1}{c_2} : t\cdot \trace}
-\end{equation*}
-where $t\cdot \trace = \omerge{p}{t_1}{t_2}$.\\
-
-Clearly,
-$(\Psi\cdot \trace)\uparrow_{p}= \Psi\cdot (\trace::\tplus{p})$
-and $(\Psi\cdot \trace)\downarrow_{p}= \Psi\cdot (\trace::\tminus{p})$.
-Applying Lemma \ref{lem:typingtrace1} on $c_1$ and $c_2$ with $\trace::\tplus  {p}$ and $ \trace::\tminus{p}$ respectively, we have
-\begin{equation*}
-\begin{array}{l}
-(\Psi\cdot(\trace::\tplus  {p})); A \vdash c_1 : t_1\cdot(\trace::\tplus  {p})\\
-(\Psi\cdot (\trace::\tminus {p})); A \vdash c_2 : t_2\cdot(\trace::\tminus  {p})
-\end{array}
-\end{equation*}
-By induction, there exist $s_1$ and $s_2$ such that
-\begin{equation*}
-\begin{array}{l}
-\Psi; (\trace :: \tplus {p});  A \vdash_{t} c_1 : s_1\quad
-t_1 \leq_{\trace::\tplus p} s_1 \\
-\Psi; (\trace:: \tminus {p});  A \vdash_{t} c_2 : s_2\quad
-t_2 \leq_{\trace::\tminus p} s_2
-\end{array}
-\end{equation*}
-Then by Rule {(TT-CP)}, we have
-$$
-\Psi;\trace;A\vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}.
-$$
-The remaining is to prove $t\cdot\trace \leq (\omerge{p}{s_1}{s_2})\cdot\trace$.
-Since $\trace$ is collected from the context of $c$ and there are no nested checks of $p$, we have $p \notin \trace$.
-Consider any $P$. If $p \in P$, then
-$$
-\begin{array}{rlll}
-&&((\omerge{p}{s_1}{s_2})\cdot\trace)(P) &\\
-&=&(\omerge{p}{(s_1\cdot\trace)}{(s_2\cdot\trace)})(P) &(\textrm{Lemma \ref{lem:tracemerge}})\\
-&=&(s_1\cdot\trace)(P) & (p\in P)\\
-&=&(s_1\cdot(\trace::\tplus{p}))(P) & (\textrm{Lemma \ref{lem:promote-demote}})\\
-&\geq&(t_1\cdot(\trace::\tplus{p}))(P) & (t_1 \leq_{\trace::\tplus{p}} s_1)\\
-& = & (t_1\cdot\trace)(P) &(\textrm{Lemma \ref{lem:promote-demote}})\\
-& = & (\omerge{p}{(t_1\cdot\trace)}{(t_2\cdot\trace)})(P)&(p\in P)\\
-& = & ((\omerge{p}{t_1}{t_2})\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracemerge}})\\
-& = & ((t\cdot\trace)\cdot\trace)(P)&\\
-& = & (t\cdot\trace)(P)& (\textrm{Lemma \ref{lem:tracesame}})\\
-\end{array}
-$$
-Similarly, if $p\notin P$, we also have $(t \cdot \trace)(P)\leq ((\omerge{p}{s_1}{s_2})\cdot\trace)(P)$.
-Therefore, the result follows.
-
-\item[T-SUB$_c$] In this case we have the following derivation
-\begin{equation*}
-\inference
-{(\mathbf{T1})~\Psi\cdot\trace; A\vdash c : s & (\mathbf{T2})~ t\cdot\trace \leq s}
-{\Psi\cdot\trace; A\vdash c : t\cdot \trace}
-\end{equation*}
-Applying Lemma \ref{lem:typingtrace1} on $(\mathbf{T1})$, $\Psi\cdot\trace; A\vdash c : s\cdot\trace$.
-Then by induction, there exists $s'$ such that $\Psi;\trace; A\vdash_{t} c : s'$ and $s \leq_{\trace} s' $.
-From ($\mathbf{T2}$) and by Lemma \ref{lem:monotrace}, we can get $t\leq_{\trace} s\leq_{\trace} s'$.  Thus the result follows.
-
-\end{ProofEnumDesc}
-The proof of \ref{lem:ptrcomplete-3}: \\
-Clearly, we have
-\begin{equation*}
-\inference
-{
-[\overline{x}: \overline{t}, \lpRES: t']; B \vdash c : s
-}
-{\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
-\end{equation*}
-By \ref{lem:ptrcomplete-2} on $c$, there exists $t_b$ such that $[\overline{x}: \overline{t}, \lpRES: t']; B \vdash_{t} c : t_b$ and $s \leq_{} t_b $.
-By Rule {(TT-FUN)},
-$$\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'$$
-\end{proof}
-
 
 
 \subsubsection{\textbf{Constraint Generation Rules}}
@@ -2400,13 +1858,13 @@ Then according to permission trace rules, we try to build a derivation for each 
 If the side conditions hold under a context, then $\FD(A.f)$ is typed by $\FT(A.f)$ under the same context for each function $A.f$ in $\mathcal{S}$.
 
 To describe the side conditions (\emph{i.e.},  $\leq_{\trace}$), we define the permission guarded constraints as follows:
-\begin{equation*}
+{\myeqsize\begin{equation*}
 \begin{array}{lll}
 c &::=& (\trace, t_l \leq t_r)\\
 t_l &::=& \alpha~|~t_{g} ~ |~ t_l~\sqcup~t_l ~|~\app{t_l}{P}\\
 t_r &::=&\alpha~|~t_{g} ~|~t_r~\sqcap~t_r ~|~\omerge{p}{t_r}{t_r}~|~\app{t_r}{P}\\
 \end{array}
-\end{equation*}
+\end{equation*}}
 where $\trace$ is a permission trace, $\alpha$ is a fresh type variable and $t_{g}$ is a ground type.
 
 A \termEmph{type substitution} is a finite mapping from type variables to security types:
@@ -2419,12 +1877,6 @@ $
 \begin{definition}
 Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \termEmph{solution} to $C$, denoted by $\theta \vDash C $, iff. for each $(\trace, t_l \leq t_r) \in C$, $t_l\theta \leq_{\trace} t_r\theta $ holds.
 \end{definition}
-
-The constraint generation rules are presented in Figure \ref{fig:constraint-rules}, where
-$\FT_{C}$ is the extended function type table such that $\FT_{C}$ maps all function names to function types and their corresponding constraint sets.
-The judgments of the constraint rules are similar to those of trace rules, except that
-each rule generates a constraint set $C$, which consists of the side conditions needed by the typing derivation of $\mathcal{S}$.
-In addition,  as the function call chains starting from a command are finite, the constraint generation will terminate.
 
 \begin{figure*}[ht]
 \begin{tiny}
@@ -2446,12 +1898,12 @@ In addition,  as the function call chains starting from a command are finite, th
 {}
 {\Psi;\trace \vdash_{g} \leVAR{x} : \Psi(x)\leadsto \emptyset}
 \quad
-\inference[TG-LETVAR]
+\inference[TG-LETV]
 {\Psi;\trace \vdash_{g} e : s \leadsto C_1 \\
 \Psi[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \\
 C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 }
-{\Psi;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
+{\Psi;\trace; A\vdash_{g} \lcLETV{x}{e}{c} :  t\leadsto C}
 \]
 
 
@@ -2511,13 +1963,18 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 \label{fig:constraint-rules}
 \end{figure*}
 
-
+The constraint generation rules are presented in Figure \ref{fig:constraint-rules}, where
+$\FT_{C}$ is the extended function type table such that $\FT_{C}$ maps all function names to function types and their corresponding constraint sets.
+The judgments of the constraint rules are similar to those of trace rules, except that
+each rule generates a constraint set $C$, which consists of the side conditions needed by the typing derivation of $\mathcal{S}$.
+In addition,  as the function call chains starting from a command are finite, the constraint generation will terminate.
 
  
 The next two lemmas show the constraint rules are \emph{sound} and \emph{complete} with respect to permission trace rules, i.e., the constraint set generated by the derivation of an expression (command, function, resp.) under the constraint rules is solvable, if and only if an expression (command, function, resp.) is typeable under trace rules.
 
 \begin{lemma}\label{lem:cgrsound}
 The following statements hold:
+{\myeqsize
 \begin{enumerate}[label={(\alph*)}]
 \item\label{lem:cgrsound-1} If $\Psi;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $\Psi\theta;\trace \vdash_{t} e : t\theta $.
 
@@ -2525,383 +1982,33 @@ The following statements hold:
 then  $\Psi\theta;\trace;A \vdash_{t} c : t\theta.$
 
 \item\label{lem:cgrsound-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
-\[
-\vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta).
-\]
+%{\myeqsize\[
+$
+\vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta)
+$.
+%\]}
 
 \end{enumerate}
+}
 \end{lemma}
-
-\begin{proof}
-The proof of \ref{lem:cgrsound-1}: by induction on the derivation of $\Psi;\trace \vdash_{g} e : t\leadsto C$. %\\
-\begin{ProofEnumDesc}
-\item[TG-VAR:] In this case we have the following derivation
-\begin{equation*}
-\inference{}
-{\Psi;\trace\vdash_{g} x : \Psi(x)\leadsto \emptyset}
-\end{equation*}
-Clearly, for any $\theta$, $\theta \vDash \emptyset$.
-By Rule {(TT-VAR)}, we have
-\begin{equation*}
-\inference{}
-{\Psi\theta;\trace; A \vdash_{t} \leVAR{x} : \Psi\theta(x)}
-\end{equation*}
-
-\item[TG-OP] In this case we have $e \cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
- \Psi;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
-{\Psi;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
-\end{equation*}
-Since $\theta \vDash C_1\cup C_2$, $\theta\vDash C_1$ and $\theta\vDash C_2$.
-Then by induction on $e_i$, $\Psi\theta;\trace \vdash_{t} e_i: t_i\theta$.
-So by Rule {(TT-OP)}, we have $\Psi\theta;\trace \vdash_{t} \leOP{e_1}{e_2}: t_1\theta\sqcup t_2\theta $.
-Clearly, $t_1\theta\sqcup t_2\theta = (t_1\sqcup t_2)\theta$.
-\end{ProofEnumDesc}
-
-The proof of \ref{lem:cgrsound-2}:%\\
-\begin{ProofEnumDesc}
-\item[TG-ASS] In this case we have $c \cong \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{g} e : t \leadsto C_{e} }
-{\Psi;\trace; A \vdash_{g} \lcASS{x}{e} : \Psi(x)\leadsto C_{e}\cup \{ (\trace, t \leq_{} \Psi(x))\} }
-\end{equation*}
-Since $\theta\vDash C_{e}\cup \{ (\trace, t \leq_{} \Psi(x))\}$,
-$\theta\vDash C_{e}$ and $t\theta \leq_{\trace} \Psi(x)\theta $.
-By \ref{lem:cgrsound-1} on $e$, $\Psi\theta;\trace \vdash_{t} e : t \theta$.
-By Rule {(TT-ASS)}, $\Psi\theta;\trace; A \vdash_{t} x := e : \Psi\theta(x)$.
-
-\item[TG-LETVAR] In this case we have $c \cong  \lcLETVAR{x}{e}{c'} $ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{g} e : s \leadsto C_1&
-\Psi[x:\alpha]; \trace; A \vdash_{g} c' : t \leadsto C_2 \\
-C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
-}
-{\Psi;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t\leadsto C}
-\end{equation*}
-Since $\theta \vDash C$, $\theta \vDash C_1$, $\theta\vDash C_2$, and $s\theta \leq_{\trace} \theta(\alpha)$.
-By \ref{lem:cgrsound-1} on $e$, $\Psi\theta;\trace \vdash_{t} e : s \theta $.
-By induction on $c'$,  $\Psi\theta[x:\theta(\alpha)]; \trace; A \vdash_{t} c' : t\theta$.
-Finally, by Rule {(TT-LETVAR)}, $\Psi\theta; \trace; A \vdash_{t} \lcLETVAR{x}{e}{c}: t\theta $.
-
-\item[TG-CALL] In this case we have $c \cong  \lcCALL{x}{B.f}{\overline{e}} $ and the following derivation
-\begin{equation*}
-\inference
-{
-\FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
-\Psi;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
-C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Psi(x))\} \\
-C = C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
-}
-{
-\Psi;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\leadsto C
-}
-\end{equation*}
-Since $\theta \vDash C$, then $\theta \vDash C_{f}$, $\theta\vDash \overline{C_{e}}$,
-$\overline{s\theta}\leq_{\trace} \overline{\app{t\theta}{\Theta(A)}}$,
-and $\app{t'\theta}{\Theta(A)}\leq_{\trace} \Psi\theta(x))$.
-By \ref{lem:cgrsound-3} on $B.f$,  we have
-$$
-\vdash_{t} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{t\theta}\xrightarrow{} t'\theta
-$$
-that is, $\FT(B.f) =  \overline{t\theta}\xrightarrow{} t'\theta$.
-By \ref{lem:cgrsound-1} on $\overline{e}$,
-$$\Psi\theta;\trace; A \vdash_{t} \overline{e} : \overline{s\theta}.$$
-Finally, by Rule  {(TT-ICALL)},
-$$
-\Psi\theta;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi\theta(x)
-$$
-
-\item[TG-CP] In this case we have $c \cong \lcCP{p}{c_1}{c_2}$ and the following derivation
-\begin{equation*}
-\inference
-{
-\Psi;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
- \Psi;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
- }
-{\Psi;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
-\end{equation*}
-Since $\theta \vDash C_1 \cup C_2$, then $\theta\vDash C_1$ and $\theta \vDash C_2$.
-By induction on $c_1$ and $c_2$, we get
-$$
-\begin{array}{l}
-\Psi\theta;(\trace::\tplus p);  A \vdash_{t} c_1 : t_1\theta\\
-\Psi\theta;(\trace::\tminus p); A \vdash_{t} c_2 : t_2\theta
-\end{array}
-$$
-By Rule {(TT-CP)}, we have
-$$
-\Psi\theta;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1\theta}{t_2\theta}
-$$
-Moreover, it is clear that $(\omerge{p}{t_1}{t_2})\theta = \omerge{p}{(t_1\theta)}{(t_2\theta)}$.
-
-\item[others] By induction.
-\end{ProofEnumDesc}
-The proof of \ref{lem:cgrsound-3}:\\
-\begin{equation*}
-\inference
-{
-[\overline{x}: \overline{\alpha},\lpRES:\beta]; \epsilon; B \vdash_{g} c : s  \leadsto C \\
-}
-{
-\vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
-}
-\end{equation*}
-Since $\theta \vDash C$,
-by \ref{lem:cgrsound-2} on $c$, we have
-$$
-[\overline{ x}: \overline{\theta(\alpha)},\lpRES:\theta(\beta)];\epsilon; B \vdash_{t} c : s\theta
-$$
-Finally, by Rule {(TT-FUN)}, we get
-$$
-\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{} \theta(\beta)
-$$
-\end{proof}
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{lemma}\label{lem:cgrcomplete}
 The following statements hold:
+{\myeqsize
 \begin{enumerate}[label={(\alph*)}]
 
 \item\label{lem:cgrcomplete-1} If $\Psi;\trace \vdash_{t} e : t$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta = t$.
-
 \item\label{lem:cgrcomplete-2} If $\Psi;\trace; A \vdash_{t} c : t$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta = t$.
-
 \item\label{lem:cgrcomplete-3} If $\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
-$$
+$
 \vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{\alpha}\xrightarrow{} \beta \leadsto C,
-$$
+$
 $\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
-\end{enumerate}
+\end{enumerate}}
 \end{lemma}
-\begin{proof}
-The proof of \ref{lem:cgrcomplete-1}:
-Let $\Psi_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Psi) \} $
-and $\theta_{0} = \{\alpha_{x}\mapsto \Psi(x)~|~x\in dom(\Psi)\} $, where $\alpha_x$s are fresh type variables.
-Clearly,  we have $\Psi_{0}\theta_{0} = \Psi$.
-The remaining is to prove that
-\begin{equation*}
-\exists C, t'.~\Psi_{0};\trace \vdash_{g} e : t' \leadsto C,~ \theta_{0}\vDash C  \textrm{ and } t'\theta_{0} = t \tag{1'}
-\end{equation*}
-%%%%%%%%
-\begin{ProofEnumDesc}
-\item[TT-VAR] In this case we have $e\cong \leVAR{x}$ and the following derivation
-\begin{equation*}
-\inference{}
-{\Psi;\trace \vdash_{t} \leVAR{x} : \Psi(x)}
-\end{equation*}
-By Rule {(TG-VAR)}, we have
-\begin{equation*}
-\inference{}
-{\Psi_{0};\trace \vdash_{g} \leVAR{x} : \Psi_{0}(x)\leadsto \emptyset}
-\end{equation*}
-Clearly, $\theta_{0} \vDash \emptyset$ and $\Psi_{0}\theta_{0}(x) = \Psi(x)$.
-
-\item[TT-OP] In this case we have $e\cong \leOP{e_1}{e_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{t} e_1: t_1 & \Psi;\trace \vdash_{t} e_2: t_2}
-{\Psi;\trace \vdash_{t} \leOP{e_1}{e_2} : t_1\sqcup t_2}
-\end{equation*}
-By induction on $e_i$, there exist $C_i, t'_i$ such that
-\begin{equation*}
-\Psi_{0};\trace \vdash_{g} e_i: t'_i\leadsto C_i\quad\theta_{0} \vDash C_i\quad t'_i\theta_{0} = t_i.
-\end{equation*}
-By Rule {(TG-OP)}, we have
-\begin{equation*}
-\Psi_{0};\trace \vdash_{g} \leOP{e_1}{e_2} : t'_1\sqcup t'_2 \leadsto C_1\cup C_2.
-\end{equation*}
-Moreover, it is clear that $\theta_{0} \vDash C_1\cup C_2$ and $(t'_1\sqcup t'_2)\theta_{0} = t_1\sqcup t_2 $.
-\end{ProofEnumDesc}
-%%%%%%%%%%%%%%%%%%%%
-The proof of \ref{lem:cgrcomplete-2}.
-Let $\Psi_{0} = \{x \mapsto \alpha_{x} ~|~ x \in dom(\Psi) \} $
-and $\theta_{0} = \{\alpha_{x}\mapsto \Psi(x)~|~x\in dom(\Psi)\} $, where $\alpha_x$s are fresh type variables.
-Clearly,  we have $\Psi_{0}\theta_{0} = \Psi$.
-Assume that different parameters of different functions have different names.
-Let $V_1 ~\sharp~ V_2 $ denote $V_1\cap V_2 = \emptyset$.
-In the remaining we prove the following statement:
-\begin{gather*}
-\exists C, t',\theta.~\Psi_{0};\trace; A \vdash_{g} c : t' \leadsto C,~ dom(\theta_{0})~\sharp~ dom(\theta),\\
-\theta_{0}\cup\theta \vDash C,  \textrm{ and } t'(\theta_{0}\cup\theta) = t \tag{2'}
-\end{gather*}
-%%%%%%%
-\begin{ProofEnumDesc}
-\item[TT-ASS] In this case we have $c\cong  \lcASS{x}{e}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{t} e : t \quad   t \leq_{\trace} \Psi(x) }
-{\Psi;\trace; A \vdash_{t} \lcASS{x}{e} : \Psi(x)}
-\end{equation*}
-By $(1')$ on $e$, there exist $C, t'$ such that $\Psi_{0};\trace \vdash_{g} e : t' \leadsto C$,
-$\theta_{0} \vDash C$ and $t'\theta_{0} = t$.
-By Rule {(TG-ASS)}, we get
-\begin{equation*}
-\Psi_{0};\trace; A \vdash_{g} \lcASS{x}{e} : \Psi_{0}(x) \leadsto C \cup \{(\trace, t'\leq \Psi_{0}(x)) \}.
-\end{equation*}
-Take $\theta = \emptyset $.
-Since $t'\theta_{0} = t \leq_{\trace} \Psi(x) = \Psi_{0}\theta_{0}(x)$,
-then $\theta_{0} \vDash \{ (\trace, t' \leq_{} \Psi_{0}(x)) \} $,
-and thus $\theta_{0} \vDash C \cup  \{ (\trace, t' \leq_{} \Psi_{0}(x)) \} $.
-
-
-\item[TT-LETVAR] In this case we have $c\cong \lcLETVAR{x}{e}{c'}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace \vdash_{t} e : s &
-\Psi[x:s']; \trace; A \vdash_{t} c' : t & s \leq_{\trace} s' }
-{\Psi;\trace; A\vdash_{t} \lcLETVAR{x}{e}{c'} :  t}
-\end{equation*}
-By $(1')$ on $e$, there exist $C_{e}, s_{e}$ such that $\Psi_{0};\trace \vdash_{g} e : s_{e} \leadsto C_{e}$,
-$\theta_{0} \vDash C_{e}$ and $s_{e}\theta_{0} = s$.\\
-Let $\Psi'_{0} = \Psi_{0}[x:\alpha_x]$ and $\theta'_{0} = \theta_0\cup\{\alpha_x \mapsto s'\}$, where $\alpha_x$ is fresh.
-By induction on $c'$, there exist $C', t',\theta$ such that $\Psi'_{0};\trace; A \vdash_{g} c' : t' \leadsto C'$,  $dom(\theta'_{0})~\sharp~ dom(\theta)$,  $\theta'_{0}\cup\theta \vDash C'$,  and $t'(\theta'_{0}\cup\theta) = t$. \\
-By Rule (TG-LETVAR), we have
-$$
-\Psi_0;\trace; A\vdash_{g} \lcLETVAR{x}{e}{c} :  t'\leadsto C
-$$
-where $C = C_{e} \cup C' \cup \{ (\trace, s_{e} \leq_{} \alpha_x)\}$.
-Let $\theta' = \theta\cup \{\alpha_x\mapsto s'\}$. It is clear that $dom(\theta_{0})~\sharp~ dom(\theta')$
-and $\theta_{0}\cup\theta' = \theta'_{0}\cup\theta$.
-From the construction of $\theta'$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta')$ are collected from the types of the functions and (local) variables, which are fresh.
-So we also have $\theta_{0}\cup\theta'\vDash C_{e}$ and $\Psi_{0}(\theta_{0}\cup\theta') =\Psi_{0}\theta_{0}=\Psi $.
-Moreover,  $s_{e}(\theta_{0}\cup\theta')=s_{e}\theta_{0}=s\leq_{\trace} s' = \alpha_x(\theta_{0}\cup\theta')$.
-Therefore, $\theta_{0}\cup\theta'\vDash C$.
-
-\item[TT-ICALL] In this case we have $c\cong \lcCALL{x}{B.f}{\overline{e}}$ and the following derivation
-\begin{equation*}
-\inference
-{
-\FT(B.f) = \overline{t_p} \xrightarrow{} t_r  &
-\Psi;\trace \vdash_{t} \overline{e} : \overline{s}\\
-\overline{s}\leq_{\trace} \overline{\app{t_p}{\Theta(A)}} &
-\app{t_r}{\Theta(A)}\leq_{\trace} \Psi(x)
-}
-{\Psi;\trace; A \vdash_{t} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)}
-\end{equation*}
-By \ref{lem:cgrcomplete-3} on B.f, there exist $\alpha,\beta, C_{f}, \theta_{f}$ such that
-$$
-\vdash_{g}\lpPROG{B.f}{\overline{x}}{c}{\lpRES}:  \overline{\alpha}\xrightarrow{} \beta \leadsto C_{f},
-$$
-$\theta_f \vDash C_f $ and $(\overline{\alpha}\xrightarrow{} \beta)\theta_{f} = \overline{t_p}\xrightarrow{} t_r$. So we have $\FT_{C}(B.f) =(\overline{\alpha}\xrightarrow{} \beta, C_{f}) $.
-Since $\alpha_{x}$s are fresh, we can safely get $dom(\theta_{0}) ~\sharp~ dom(\theta_f)$.
-Therefore, $\theta_{0}\cup\theta_f \vDash C_{f}$ and $(\overline{\alpha}\xrightarrow{} \beta)(\theta_{0}\cup\theta_{f}) = \overline{t_p}\xrightarrow{} t_r$.\\
-By $(1')$ on $\overline{e}$, there exist $\overline{s'}, \overline{C_{e}}$ such that
-$\Psi_{0};\trace; A \vdash_{g} \overline{e} : \overline{s'}\leadsto \overline{C_e}$, $\theta_{0} \vDash \overline{C_e} $, and $\overline{s'(\theta_{0})} = \overline{s}$.\\
-From the construction of $\theta_f$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_f)$ are collected from the types of functions and (local) variables, which are fresh.
-So we also have $\theta_{0}\cup \theta_f \vDash \overline{C}$,  $\overline{s'(\theta_{0}\cup\theta_f)} = \overline{s}$ and $\Psi_{0}(\theta_{0}\cup \theta_f) = \Psi$. \\
-By Rule {(TG-CALL)}, we have
-\begin{equation*}
-\Psi_{0};\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi_{0}(x) \leadsto C
-\end{equation*}
-where $C'= \{(\trace, \overline{s'}\leq \overline{\app{\alpha}{\Theta(A)}}), (\trace, \app{\beta}{\Theta(A)}) \leq \Psi_{0}(x)) \}$ and $C = C_{f} \cup \bigcup\overline{C} \cup C'$.
-Since $dom(\theta_f)$ are fresh, we have
-\begin{equation*}
-\overline{s'(\theta_{0}\cup \theta_f)} = \overline{s} \leq_{\trace} \overline{\app{t_p}{\Theta(A)}} = \overline{\app{\alpha(\theta_{0}\cup \theta_f)}{\Theta(A)}}
-\end{equation*}
-and
-\begin{equation*}
-\app{\beta(\theta_{0}\cup \theta_f)}{\Theta(A)} =  \app{t_r}{\Theta(A)}
-\leq_{\trace} \Psi(x) = \Psi_{0}(\theta_{0}\cup \theta_f)(x)
-\end{equation*}
-So $(\theta_{0}\cup \theta_f) \vDash C'$, and thus $(\theta_{0}\cup \theta_f)\vDash C$.
-Moreover, we also have
-$(\Psi_{0}(x))(\theta_0\cup\theta_f)
-= \Psi(x)$.
-Thus the result follows.
-
-\item[TT-CP] In this case we have $c\cong \lcCP{p}{c_1}{c_2}$ and the following derivation
-\begin{equation*}
-\inference
-{\Psi;\trace::\tplus p; A \vdash_{t} c_1 : t_1  &
-\Psi;\trace::\tminus p; A \vdash_{t} c_2 : t_2}
-{\Psi;\trace; A \vdash_{t} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2}}
-\end{equation*}
-By induction on $c_i$, we have
-\begin{equation*}
-\begin{array}{l}
-\exists C_1, s_1,\theta_1.~\Psi_{0};\trace::\tplus p; A \vdash_{g} c_1 : s_1 \leadsto C_1,~ \theta_{0}\cup\theta_1 \vDash C_1,\\
-\quad\quad dom(\theta_{0})\sharp dom(\theta_1)  \textrm{ and } s_1(\theta_{0}\cup\theta_{1}) = t_1\\
-\exists C_2, s_2,\theta_2.~\Psi_{0};\trace::\tminus p; A \vdash_{g} c_2 : s_2 \leadsto C_2,~ \theta_{0}\cup\theta_2 \vDash C_2, \\
-\quad\quad dom(\theta_{0})\sharp dom(\theta_2)  \textrm{ and } s_2(\theta_{0}\cup\theta_{2}) = t_2\\
-\end{array}
-\end{equation*}
-By Rule {(TG-CP)}, we get
-\begin{equation*}
-\Psi_{0};\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{s_1}{s_2}\leadsto C_1\cup C_2
-\end{equation*}
-From the construction of $\theta_1$ and $\theta_2$ (\emph{i.e.}, the proof of $(2')$ and $(3')$), the type variables in $dom(\theta_1)$ and $dom(\theta_2)$ are collected from the types of functions and (local) variables, which are fresh. Moreover, if $\theta_1 \cap \theta_2 \neq \emptyset$, that is, they share some functions, then $\theta_1(\alpha_x) = \theta_2(\alpha_x) $ for all $\alpha_x \in dom(\theta_1) \cap dom(\theta_2)$.
-So we can safely get $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_i$ and  $s_i(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = t_i$, and $\Psi_{0}(\theta_{0}\cup\theta_{1}\cup\theta_{2}) =\Psi$.
-Therefore, $(\theta_{0}\cup\theta_1\cup\theta_2) \vDash C_1\cup C_2$ and
-$(\omerge{p}{s_1}{s_2})(\theta_{0}\cup\theta_{1}\cup\theta_{2}) = \omerge{p}{t_1}{t_2}$.
-
-\item[others] By induction.
-
-\end{ProofEnumDesc}
-
-The proof of \ref{lem:cgrcomplete-3}: \\
-\begin{equation*}
-\inference
-{[\overline{x}: \overline{t_p},\lpRES:t_r];\epsilon; B \vdash_{t} c : s }
-{\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t_p}\xrightarrow{} t_r}
-\end{equation*}
-Let $\Psi_{0} = \{\overline{x} \mapsto \overline{\alpha}, r\mapsto \beta \} $
-and $\theta_{0} = \{\overline{\alpha}\mapsto \overline{t_p}, \beta\mapsto t_r\} $,
-where $\overline{\alpha},\beta$ are fresh.
-By $(2')$ on $c$, we have
-\begin{equation*}
-\begin{array}{l}
-\exists t, C_f, \theta .~ \Psi_{0};\epsilon; B \vdash_{g} c : t\leadsto C_f,~ (\theta_{0}\cup\theta')\vDash C_f,\\
-\quad\quad dom(\theta_{0}) ~\sharp~ dom(\theta) \textrm{ and } t(\theta_{0}\cup\theta') = s.
-\end{array}
-\end{equation*}
-By Rule {(TG-FUN)}, we have
-\begin{gather*}
-\vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta\leadsto C_f
-\end{gather*}
-Finally, it is clear that $(\overline{\alpha}\xrightarrow{} \beta) (\theta_{0}\cup\theta' ) = \overline{t_p}\xrightarrow{} t_r$.
-\end{proof}
-
-\begin{lemma}\label{lem:cgrsound0}
-The following statements hold:
-\begin{enumerate}[label={(\alph*)}]
-\item\label{lem:cgrsound0-1} If $\Psi;\trace \vdash_{g} e : t\leadsto C$ and $\theta \vDash C$, then $(\Psi\theta\cdot\trace) \vdash e : (t\theta\cdot\trace) $.
-
-\item\label{lem:cgrsound0-2} If $\Psi;\trace; A \vdash_{g} c : t\leadsto C$ and $\theta \vDash C$,
-then  $(\Psi\theta\cdot\trace);~A \vdash c : (t\theta\cdot\trace).$
-
-\item\label{lem:cgrsound0-3} If $ \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\rightarrow \beta\leadsto C$ and $\theta \vDash C$, then
-$\vdash \lpPROG{B.f}{x}{c}{\lpRES} : \overline{\theta(\alpha)}\xrightarrow{}\theta(\beta)$.
-
-\end{enumerate}
-\end{lemma}
-\begin{proof}
-By Lemma \ref{lem:ptrsound} and Lemma\ref{lem:cgrsound}.
-\end{proof}
-
-\begin{lemma}\label{lem:cgrcomplete0}
-The following statements hold:
-\begin{enumerate}[label={(\alph*)}]
-\item\label{lem:cgrcomplete0-1} If $(\Psi\cdot\trace) \vdash e : (t\cdot\trace)$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace \vdash_{g} e : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t'\theta \leq_{\trace} t$.
-
-\item\label{lem:cgrcomplete0-2} If $(\Psi\cdot\trace); A \vdash c : (t\cdot\trace)$, then there exist $\Psi',t',C,\theta$ s.t. $\Psi';\trace; A \vdash_{g} c : t' \leadsto C$,  $\theta \vDash C$, $\Psi'\theta =\Psi$ and $t \leq_{\trace} t'\theta $.
-
-\item\label{lem:cgrcomplete0-3} If $\vdash \lpPROG{B.f}{\overline{x}}{c}{\lpRES} : \overline{t_p}\xrightarrow{} t_r$, then there exist $\alpha,\beta,C,\theta$ s.t.
-$$
-\vdash_{g} \lpPROG{B.f}{\overline{x}}{c}{\lpRES}: \overline{\alpha}\xrightarrow{} \beta \leadsto C,
-$$
-$\theta \vDash C$, and $(\overline{\alpha}\xrightarrow{} \beta)\theta = \overline{t_p}\xrightarrow{} t_r$, where $\alpha,\beta$ are fresh type variables.
-\end{enumerate}
-\end{lemma}
-\begin{proof}
-By Lemma \ref{lem:ptrcomplete} and Lemma\ref{lem:cgrcomplete}.
-\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2935,14 +2042,14 @@ B.fun() { %// $B$ has permission $q$%
 
 
 Let us apply the constraint generation rules in Figure~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
-\[
+{\myeqsize\[
 \begin{array}{lcl}
 C_A & =  &\{(\oplus p\oplus q, l_1 \leq \alpha),(\oplus p\ominus q, L \leq \alpha), \\
  & & (\ominus p\oplus q, H \leq \alpha), (\ominus p\ominus q, L \leq \alpha) \}\\
 C_B & =  & \{(\epsilon, L\leq\gamma), (\oplus p, L\leq\beta) ,(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma), \\
 & & (\epsilon, L\leq\beta),(\epsilon, \gamma\leq\beta)  \}
 \end{array}
-\]
+\]}
 and the types $t_A =()\rightarrow \alpha$  and $t_B=()\rightarrow \beta$ for the functions  \textit{getInfo} and  \textit{fun}\footnote{Indeed, the constraint set for \textit{fun} is $C_A \cup C_B $, but here we focus on the constraints generated by the function itself.} respectively. Thus, the constraint set $C_{eg}$ for the whole program is $C_A \cup C_B$.
 
  \subsection{Constraint Solving}\label{sec:constraint_solve}
@@ -2952,9 +2059,7 @@ guarded by the \emph{same} permission trace. But during the process of solving t
 Take the constraint \cRawCond{\trace}{\app{t_l}{P}}{\app{\alpha}{Q}} for example,
 $t_l$ is indeed guarded by $P$ while $\alpha$ is guarded by $Q$, where $P$ and $Q$ are different permission sets.
 So for constraint solving, we use a generalized version of the permission guarded constraints, allowing types on the two sides to be guarded by different permission traces:
-$
-\cCond{\trace_l}{t_l}{\trace_r}{t_r}
-$
+$\cCond{\trace_l}{t_l}{\trace_r}{t_r}$
 where $t_l \not = t_r.$
 Likewise, a \emph{solution} to a generalized constraint set $C$ is a substitution $\theta$, denoted by $\theta \vDash C$,  such that for each $\cCond{\trace_l}{t_l}{\trace_r}{t_r} \in C$, $(t_l\theta\cdot \trace_l) \leq_{} (t_r\theta \cdot \trace_r)$ holds.
 
@@ -2963,7 +2068,7 @@ generalized constraint set $C'$: by rewriting each \cRawCond{\trace}{t_l}{t_r} a
 Moreover, it is trivial that $\theta \vDash C \Longleftrightarrow \theta \vDash C'$.
 Therefore, we focus on solving generalized constraints in the following.
 For example, the constraint set $C_{eg}$ can be rewritten as
-{\small
+{\myeqsize
 \begin{align*}
 &C_{eg} = \{\cCond{\epsilon}{L}{\epsilon}{\gamma},
 \cCond{\ominus p}{\app{\alpha}{\Theta(B)}}{\ominus p}{\gamma},\\
@@ -2976,7 +2081,6 @@ For example, the constraint set $C_{eg}$ can be rewritten as
 \cCond{\ominus p\ominus q}{L}{\ominus p\ominus q}{\alpha}\}
 \end{align*}
 }
-
 Given a permission set $P$ and a permission trace $\trace$, we say $P$ \termEmph{entails} $\trace$, denoted by $P \vDash \trace$, iff. $\forall \oplus p \in \trace. \; p\in P$ and $\forall \ominus p\in\trace.\; p\notin P$.
 A permission trace $\trace$ is \termEmph{satisfiable}, denoted by $\issatisfied{\trace}$, iff. there exists a permission set $P$ such that $P\vDash \trace$.
 We write $\trace_{P}$ for the permission trace that only $P$ can entail.
@@ -2992,7 +2096,7 @@ The constraint solving consists of three steps: 1) \emph{decompose} types in con
 The first step \iffalse to solve the guarded constraints \fi is to decompose the types into the simpler ones, i.e., type variables and ground types, according to their structures.
 This decomposition is defined via the function $dec$ that takes a constraint (\cCondst{\trace_l}{t_l}{\trace_r}{t_r} for short) as input and generates a constraint set or $\bot$ (denoting unsastifiable):
 
-\begin{algorithmic}
+{\myeqsize\begin{algorithmic}
 \STATE $dec(\cCondst{\trace_l}{t_l}{\trace_r}{t_r})=$
 \STATE \quad \textbf{if} $t_l \cong t_l^1 \sqcup t_l^2$,  \textbf{then return} $dec(\cCondst{\trace_l}{t_l^1}{\trace_r}{t_r}) \cup dec(\cCondst{\trace_l}{t_l^2}{\trace_r}{t_r})$
 \STATE \quad \textbf{if} $t_l \cong \app{t}{P}$, \textbf{then return} $dec(\cCondst{\trace_{P}}{t}{\trace_r}{t_r})$
@@ -3002,31 +2106,32 @@ This decomposition is defined via the function $dec$ that takes a constraint (\c
 \STATE $\cup ~dec(\cCondst{\trace_l::\ominus p}{t_l}{\trace_r::\ominus p}{t_r^2})$
 \STATE \quad \textbf{if} both $t_l$ and $t_r$ are ground, \textbf{return} $\emptyset$ if $t_l\cdot\trace_l \leq t_r\cdot\trace_r$ or $\bot$ otherwise
 \STATE  \quad \textbf{return} $\{\cCondst{\trace_l}{t_l}{\trace_r}{t_r}\}$
-\end{algorithmic}
+\end{algorithmic}}
 
 After decomposition, constraints have one of the forms:
-
-\begin{align*}
+{\myeqsize\begin{align*}
 \cCond{\trace_l}{\alpha}{\trace_r}{t_g}, ~\cCond{\trace_l}{t_g}{\trace_r}{\beta}, ~\cCond{\trace_l}{\alpha}{\trace_r}{\beta}
-\end{align*}
+\end{align*}}
 Considering the constraint set $C_{eg}$, only the constraint
-\begin{equation*}
+%{\myeqsize\begin{equation*}
+$
 \cCond{\ominus p}{\app{\alpha}{\Theta(B)}}{\ominus p}{\gamma}
-\end{equation*}
+$
+%\end{equation*}}
 needs to be decomposed, yielding \cCond{\ominus p\oplus q}{\alpha}{\ominus p}{\gamma}.
 
 
 \subsubsection{\textbf{Saturation}}
 Considering a variable $\alpha$, to ensure any lower bound (e.g., \cCond{\trace_l}{t_l}{\trace_1}{\alpha}) is ``smaller'' than any of its upper bound (e.g., \cCond{\trace_2}{\alpha}{\trace_r}{t_r}, we need to saturate the constraint set by adding these conditions.
 However, since our constraints are guarded by permission traces, we need to consider lower-upper bound relations only when the traces of the variable $\alpha$ can be entailed by the same permission set, i.e., their intersection is satisfiable. \iffalse (i.e., $\issatisfied{\trace_1 \land \trace_2} $)\fi In that case, we extend the traces of both the lower and upper bound constraints such that the traces of $\alpha$ are the same (\emph{i.e.}, $\trace_1 \land \trace_2$), by adding the missing traces (\emph{i.e.}, $\trace_1 \land \trace_2 - \trace_1$ for lower bound constraint while $\trace_1 \land \trace_2 - \trace_2$ for the upper one, where $-$ denotes set difference).
-This is done by the function $sat$ defined as follows:
+This is done by the function $sat$ defined as:
 
-\begin{algorithmic}
+{\myeqsize\begin{algorithmic}
 \STATE $sat(\cCondst{\trace_l}{t_l}{\trace_1}{\alpha},\cCondst{\trace_2}{\alpha}{\trace_r}{t_r})=$
 \STATE \quad \textbf{if} $\trace_1 \land \trace_2$ is satisfiable,
 \textbf{then} let $\trace'_l = \trace_l\land (\trace_1 \land \trace_2-\trace_1)$ and $\trace'_r=\trace_r\land (\trace_1 \land \trace_2-\trace_2)$ \textbf{in} $dec(\cCondst{\trace'_l }{t_l}{ \trace'_r}{t_r}))$
 \STATE  \quad \textbf{return} $\emptyset$
-\end{algorithmic}
+\end{algorithmic}}
 
 
 
@@ -3041,9 +2146,8 @@ So we saturate the set with the constraint $\cCond{\ominus p\oplus q}{H}{\ominus
 Likewise, there are two lower bounds (one of which is newly generated) and one upper bound for $\gamma$. Each lower bound has a satisfiable intersected trace with the upper bound, which yields the following constraints $\cCond{\epsilon}{L}{\epsilon}{\beta}$ and $\cCond{\ominus p\oplus q}{H}{\ominus p}{\beta}$ (extended by $\ominus p$).
 While there are no upper bounds for $\beta$, so no constraints are generated.
 After saturation, the example set $C_{eg}$ is
-
 \[
-{\small
+{\myeqsize
 \begin{array}{l}
 \{\cCond{\oplus p\oplus q}{l_1}{\oplus p\oplus q}{\alpha}, \cCond{\oplus p\ominus q}{L}{\oplus p\ominus q}{\alpha}, \\
 \cCond{\ominus p\oplus q}{H}{\ominus p\oplus q}{\alpha},
@@ -3059,7 +2163,6 @@ After saturation, the example set $C_{eg}$ is
 \end{array}
 }
 \]
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -3067,64 +2170,12 @@ After saturation, the example set $C_{eg}$ is
 Given two types $s,t$ and a permission trace $\trace$, then
 $s\leq t\Longleftrightarrow s\cdot\trace \leq t\cdot\trace$ and $\forall \trace' \in dnf(\neg\trace).\; s\cdot \trace' \leq t\cdot\trace'$.
 \end{lemma}
-\begin{proof}
-Generalized from Lemma \ref{lem:tracesub}.
-\end{proof}
 
 
 \begin{lemma}\label{lem:consolcorrect}
 If $C\leadsto_{r} C'$, then $C\vDash C'$ and $C' \vDash C$, where $r\in \{d,s,m\}$.
 \end{lemma}
 
-\begin{proof} By case analysis.
-\begin{ProofEnumDesc}
-\item[CD-CUP,~CD-CAP] Trivial.
-\item[CD-MERGE]
-By Lemma \ref{lem:tracesub}.
-\item[CD-LAPP,~CD-RAPP] By definition of projection.
-\item[CD-SVAR,~CD-SUB$_0$,~CD-SUB$_1$] Trivial.
-\item[CS-LU]
-It is clear that $C\cup C' \vDash C$.
-For the other direction, we only need to prove
-$\{(\trace_1, t_1 \leq \trace_r, \alpha ),(\trace_l, \alpha \leq \trace_2, t_2)\} \vDash
-\{(\trace_1\land\trace'_r, t_1\leq \trace_2\land\trace'_l, t_2) \}$, where $\trace'_l = (\trace_l\land \trace_r)  - \trace_r$, $\trace'_r =(\trace_l\land \trace_r) - \trace_l$ and $\issatisfied{\trace_l\land\trace_r}$.
-Assume that $\theta \vDash  \{(\trace_1, t_1 \leq \trace_r, \alpha ),(\trace_l, \alpha \leq \trace_2, t_2)\} $, that is,
-\begin{equation*}
- (t_1\theta)\cdot\trace_{1} \leq \theta(\alpha)\cdot\trace_{l}
-\quad\quad
- \theta(\alpha)\cdot\trace_{r} \leq (t_2\theta)\cdot\trace_{2}
-\end{equation*}
-Since $\issatisfied{\trace_l\land\trace_r}$, by Lemmas \ref{lem:monotrace} and \ref{lem:traceorder}, we have
-\begin{equation*}
- (t_1\theta)\cdot\trace_{1} \land\trace'_r \leq \theta(\alpha)\cdot\trace_{l}\land\trace_r
-\quad
- \theta(\alpha)\cdot\trace_{l}\land\trace_r \leq (t_2\theta)\cdot\trace_{2} \land\trace'_l
-\end{equation*}
-which deduces
-\begin{equation*}
-(t_1\theta)\cdot\trace_{1} \land\trace'_r \leq (t_2\theta)\cdot\trace_{2} \land\trace'_l
-\end{equation*}
-that is, $\theta \vDash \{(\trace_1\land\trace'_r, t_1\leq \trace_2\land\trace'_l, t_2) \}$.
-
-\item[CM-LU]
-\begin{align*}
-&\theta \vDash \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J} \\
-\Longleftrightarrow & \forall i \in I.\;  (~ (t_i^l\theta)\cdot \trace_i^l \leq \theta(\alpha) \cdot \trace_{i}  ~)  \text{ and }  \\
-&\forall j \in J.\;  (~ \theta(\alpha) \cdot \trace_{j}  \leq (t_j^r\theta)\cdot \trace_j^r ~) \\
-\Longleftrightarrow & \forall I' \subseteq I.\; \forall J' \subseteq J.\; \forall \trace \in \phi(I', J'). \; (~\\
-& \quad \forall i \in I'.\; ((t_i^l\theta)\cdot(\trace_i^l \land (\trace -\trace_{i})) \leq \theta(\alpha)\cdot \trace )\text{ and }\\
-& \quad\forall j \in J'.\; (\theta(\alpha)\cdot \trace \leq  (t_j^r\theta)\cdot(\trace_j^r \land (\trace -\trace_{j})))~\\
-&~)~\text{(Lemma \ref{lem:tracesub1})} \\
-\Longleftrightarrow & \forall I' \subseteq I.\; \forall J' \subseteq J.\; \forall \trace \in \phi(I', J'). \; (~\\
-& \quad ( \bigsqcup_{i\in I'} (t_i^l\theta)\cdot(\trace_i^l \land (\trace -\trace_{i})) \leq \theta(\alpha)\cdot \trace )\text{ and}\\
-& \quad (\theta(\alpha)\cdot \trace \leq  \bigsqcap_{j\in J'}(t_j^r\theta)\cdot(\trace_j^r \land (\trace -\trace_{j})))~)\\
-\Longleftrightarrow & \theta \vDash \{\cCond{\epsilon}{t_{I',\trace}^{\sqcup}}{\trace}{\alpha}, \cCond{\trace}{\alpha}{\epsilon}{t_{J',\trace}^{\sqcap}}\}_{I'\subseteq I, J'\subseteq J, \trace \in \phi(I', J') }
-\end{align*}
-%\item[CM-LUB] Similar to (CM-GLP).
-%\item[CM-BDS] Similar to (CM-GLP).
-%\item[CM-SBD] Trivial.
-\end{ProofEnumDesc}
-\end{proof}
 
 \subsubsection{\textbf{Unification}}
 Since our constraints are guarded by permission traces, we need to consider the satisfiability of (any subset of) the permission traces of a variable $\alpha$ under any permission set when constructing a type for it.
@@ -3136,7 +2187,7 @@ Consequently, $t$ should be bigger than the union $\bigsqcup_{i\in I'} t_i^l\cdo
 In other words, $\alpha$ can take any type ranging from $\bigsqcup_{i\in I'} t_i^l\cdot(\trace_i^l\wedge \trace'_i)$ to $\bigsqcap_{j\in J'} t_j^r\cdot(\trace_j^r\wedge\trace'_j)$ if only the intersection trace $\bigwedge_{i \in I'} \trace_i \wedge \bigwedge_{j\in J'}\trace_j$ is satisfiable, which indicates that $\alpha$ is equivalent to $(\bigsqcup_{i\in I'} t_i^l\cdot(\trace_i^l\wedge \trace'_i) \sqcup \alpha' )\sqcap \bigsqcap_{j\in J'} t_j^r\cdot(\trace_j^r\wedge \trace'_j)$, where $\trace'_i$ and $\trace'_j$ are the missing traces to extend  $\trace_i$ and $\trace_j$ to the intersection trace respectively, and $\alpha'$ is a fresh variable.
 The type above is exactly what we want.
 We define the construction of the type above via the function $merge$:
-{
+{\myeqsize
 \begin{algorithmic}
 \STATE $merge(\{\cCondst{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I},\{\cCondst{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J})=$
 \STATE \quad \textbf{let} $\phi(I',J') = \{\trace\in dnf(\bigwedge_{i \in I'} \trace_i \wedge \bigwedge_{j\in J'}\trace_j\wedge \bigwedge_{i \in I\setminus I'} \neg \trace_i \wedge \bigwedge_{j\in J\setminus J'}\neg \trace_j) ~|~ \issatisfied{\trace}\}$ \textbf{in}
@@ -3148,7 +2199,7 @@ We define the construction of the type above via the function $merge$:
 }
 
 Moreover, due to the absence of  loops in constraints and that the variables are in order, we can solve the constraints in reverse order on variables by unification. The unification algorithm $unify$ is presented as follows.
-{
+{\myeqsize
 \begin{algorithmic}
 \STATE $unify(C)$ =
 \STATE \quad \textbf{let} $subst ~\theta~(\cCondst{\trace_l}{t_l}{\trace_r}{t_r})~ = (\cCondst{\trace_l}{t_l\theta}{\trace_r}{t_r\theta})$ \textbf{in}
@@ -3161,7 +2212,7 @@ Moreover, due to the absence of  loops in constraints and that the variables are
 }
 
 Let us consider the constraint set $C_{eg}$ again and take the constraints on the maximum variable $\beta$, which are the following set without any upper bounds
-{\small
+{\myeqsize
 $$
 \{\cCond{\oplus p}{L}{\oplus p}{\beta},
 \cCond{\epsilon}{L}{\epsilon}{\beta},
@@ -3179,69 +2230,22 @@ Therefore, the types we infer for \textit{A.getInfo} and \textit{B.fun} are $()\
 \begin{lemma}\label{lem:unifysound}
 If $unify(C) = \theta$, then $\theta \vDash C$.
 \end{lemma}
-\begin{proof}
-By induction on $|C|$.
-\begin{ProofEnumDesc}
-\item[$|C| = 0$] Trivial.
-\item[$|C| > 0$] In this case we have $C = \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}\cup C'$, where $O(\alpha)$ is the greatest. Let $t_\alpha$ be the type constructed from the constraints on $\alpha$ (denoted as $C_{\alpha}$)  and $C''$ be the constraint set obtained by replacing in $C'$ every occurrence of $\alpha$ by $t_{\alpha}$.
-Assume assume $unify(C'') = \theta'$. Thus $\theta = \theta'\cup\{\alpha\mapsto t_\alpha\}$.
-First, by Lemma \ref{lem:consolcorrect}, we have $\{\alpha \mapsto t_\alpha\} \vDash C_{\alpha}$, and thus $\theta \vDash C_{\alpha}$.
-Next, by induction, we have $\theta' \vDash C''$.
-Let's consider the constraints $\{\cCond{\trace_i^l}{s_i^l}{\trace_i}{\beta}\}_{i\in I} \cup \{\cCond{\trace_j}{\beta}{\trace_j^r}{s_j^r}\}_{j\in J}\subseteq C'$ of any other variable $\beta$. Then we have $\{\cCond{\trace_i^l}{s_i^l\{\alpha\mapsto t_\alpha\}}{\trace_i}{\beta}\}_{i\in I} \cup \{\cCond{\trace_j}{\beta}{\trace_j^r}{s_j^r\{\alpha\mapsto t_\alpha\}}\}_{j\in J}\subseteq C''$.
-$$
-\begin{array}{rlll}
-\theta(\beta)\cdot\trace_i &=&\theta'(\beta)\cdot\trace_i &(\text{Apply } \theta) \\
-&\geq&((s_i^l\{\alpha\mapsto t_\alpha\})\theta')\cdot\trace_i^l & (\theta'\vDash C'')\\
-& = &(s_i^l(\theta' \cup \{\alpha\mapsto t_\alpha\}))\cdot\trace_i^l& \\
-\end{array}
-$$
-and
-$$
-\begin{array}{rlll}
-\theta(\beta)\cdot\trace_j &=&\theta'(\beta)\cdot\trace_j &(\text{Apply } \theta) \\
-&\leq&((s_j^r\{\alpha\mapsto t_\alpha\})\theta')\cdot\trace_j^r & (\theta'\vDash C'')\\
-& = &(s_j^r(\theta' \cup \{\alpha\mapsto t_\alpha\}))\cdot\trace_j^r& \\
-\end{array}
-$$
-Therefore, the result follows.
-\end{ProofEnumDesc}
-\end{proof}
 
 \begin{lemma}\label{lem:unifycomplete}
 If $\theta \vDash C$, then there exist $\theta'$ and $\theta''$ such that $unify(C) = \theta'$ and $\theta = \theta'\theta''$.
 \end{lemma}
-\begin{proof}
-We prove that the statement $\theta = \theta'\theta$, which deduces the result. The statement holds trivially when $|C| = 0$. \\
-When $|C| > 0$, we have $C = \{\cCond{\trace_i^l}{t_i^l}{\trace_i}{\alpha}\}_{i\in I} \cup \{\cCond{\trace_j}{\alpha}{\trace_j^r}{t_j^r}\}_{j\in J}\cup C'$, where $O(\alpha)$ is the greatest.
-Let $t_\alpha$ be the type constructed from the constraints on $\alpha$ (denoted as $C_{\alpha}$) and $C_0$ be the constraint set obtained by replacing in $C'$ every occurrence of $\alpha$ by $t_{\alpha}$.
-Since $\theta \vDash C$, we have $\theta\vDash C'$ and $\theta \vDash  C_{\alpha}$,
-and  thus $\theta\vDash C_0$.
-By induction on $C_0$, there exists $\theta'_0$ such that $unify(C_0) = \theta'_0$ and $\theta = \theta'_0\theta$.
-According to the function $unify$, we get $unify(C) = \theta'_0\cup\{\alpha\mapsto t_\alpha\} =\theta'$.
-For any $\beta\notin dom(\theta')$, clearly $\beta(\theta'\theta) = \beta\theta$.
-Considering $\alpha$, since $\theta\vDash C_{\alpha}$, by Lemma \ref{lem:consolcorrect}, we have $\alpha\theta =  (t_\alpha)\theta$, and thus $\alpha\theta = \alpha(\theta'\theta)$.
-While for any other variable $\beta \in dom(\theta')$, we have
-$\beta(\theta'\theta) = \beta((\theta'_0\cup\{\alpha\mapsto t_\alpha\})\theta)
-= \beta(\theta'_0\theta)=\beta\theta$.
-\end{proof}
 
 
-Let $sol$ be the function for the constraint solving algorithm, that is, $sol(C) = unify(sat(dec(C)))$.
-It is provable that the constraint solving algorithm is sound and complete.
+Let $sol$ be the function for the constraint solving algorithm, i.e., $sol(C) = unify(sat(dec(C)))$.
+It is provable that this algorithm is sound and complete.
 
 \begin{lemma}\label{lem:solsound}
 If $sol(C) = \theta$, then $\theta \vDash C$.
 \end{lemma}
-\begin{proof}
-By Lemma  \ref{lem:consolcorrect} and Lemma \ref{lem:unifysound}.
-\end{proof}
 
 \begin{lemma}\label{lem:solcomplete}
 If $\theta \vDash C$, then there exist $\theta'$ and $\theta''$ such that $sol(C) = \theta'$ and $\theta = \theta'\theta''$.
 \end{lemma}
-\begin{proof}
-By Lemma  \ref{lem:consolcorrect} and Lemma \ref{lem:unifycomplete}.
-\end{proof}
 
 
 To conclude, an expression (command, function, resp.) is typeable, iff it is derivable under the constraint rules with a solvable constraint set by our algorithm.
@@ -3263,7 +2267,7 @@ The type inference system is sound, complete and decidable.
 
 \section{Related Work}
 
-We discuss only those closely related work on the type checking based verification on information flow security for Android.
+We discuss the related work on the type checking based verification on information flow security for the Android platform.
 
 We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in ~\S\ref{sec:sta_intro}.
 
