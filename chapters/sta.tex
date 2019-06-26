@@ -368,7 +368,7 @@ Given a mapping $\mu$ and a variable $x$, we write $\mu\!-\!x$ to denote the
 mapping resulting from removing $x$ from $dom(\mu)$.
 
 The operational semantics for expressions and commands is
-given in Fig.~\ref{fig:semantics}.
+given in Figure~\ref{fig:semantics}.
 The evaluation judgment
 for expressions has the form $\mu\vdash e\leadsto v$,
 which states that expression $e$ evaluates to value $v$ when variables
@@ -684,7 +684,7 @@ then it expects input of type up to $\app{\overline{t}}{P}$ and
 a return value of type at most $\app{t'}{P}$.
 
 \end{itemize}
-The typing rules are given in Fig.~\ref{fig:typing-rules}.
+The typing rules are given in Figure~\ref{fig:typing-rules}.
 Most of them are common to
 information flow type systems~\cite{Volpano:1996,Banerjee:2005ht,Sabelfeld:2003} except for \ruleTagText{T-CP} and \ruleTagText{T-ICALL}. Note that in the subtyping rule for commands (\ruleTagText{T-SUB$_c$}), the security type of the effect of the command
 can be safely downgraded, since typing for commands keeps track of a lower bound of the write effects of the command. This typing rule for
@@ -785,11 +785,11 @@ M.main & \mapsto  & () \rightarrow \hat{L}
 Notice that the return type of $M.main$ is $\hat{L}$ despite having a
 return value that contains sensitive value \textit{P\_INFO}.
 If we were to use \ruleTagText{T-ICALL'} in place of \ruleTagText{T-ICALL}, the above functions can
-be typed as shown in Fig.~\ref{fig:type1}.
+be typed as shown in Figure~\ref{fig:type1}.
 Finally, still assuming \ruleTagText{T-ICALL'}, a partial typing
-derivation for $M.main$ is given in Fig.~\ref{fig:type2}.
+derivation for $M.main$ is given in Figure~\ref{fig:type2}.
 
-As shown in Fig.~\ref{fig:type1}, \textit{B.g} can be given type $t \rightarrow \hat{L}$. Intuitively, it checks that the
+As shown in Figure~\ref{fig:type1}, \textit{B.g} can be given type $t \rightarrow \hat{L}$. Intuitively, it checks that the
 caller has permission $p$. If it does, then \textit{B.g} returns 0 (non-sensitive), otherwise it returns the
 argument of the function (i.e., $x$). This is as expected and is sound, under the assumption that the security labels of
 the content of $x$ is dependent on the permissions of the caller. If the caller of \textit{B.g} is the original creator of the content of $x$,
@@ -1555,8 +1555,8 @@ Well-typed systems are non-interferent.
  \section{Type Inference}\label{sec:constraint_gen}
 This section describes a decidable inference algorithm for the language  in Section~\ref{sec:language}.
 Section~\ref{sec:constraint-gen-rules} firstly rewrites the typing
-rules (Fig.~\ref{fig:typing-rules}) in the form of permission trace
-rules (Fig.~\ref{fig:infer-rules}), then reduces the type inference
+rules (Figure~\ref{fig:typing-rules}) in the form of permission trace
+rules (Figure~\ref{fig:infer-rules}), then reduces the type inference
 into a constraint solving problem; Section~\ref{sec:constraint_solve}
 provides procedures to solve the generated constraints. Detailed
 definitions and proofs can be found in~\cite{Chen17arxiv}.
@@ -1752,7 +1752,7 @@ This indicates that $s\leq t$.
 
 \subsubsection{\textbf{Permission Trace Rules}}
  We split the applications of the promotions and demotions into two parts  (i.e., typing environments and permission traces), and move the subsumption rules (guarded by permission traces) for expressions and commands to where they are needed.
-This yields the syntax-directed  typing rules, which we call the {\em permission trace rules} and are given in Fig.~\ref{fig:infer-rules}.
+This yields the syntax-directed  typing rules, which we call the {\em permission trace rules} and are given in Figure~\ref{fig:infer-rules}.
 The judgments of the trace rules are similar to those of typing rules, except that each trace rule is guarded by the permission trace $\trace$ collected from the context, which keeps track of the adjustments of variables depending on the permission checks,
 and that the subtyping relation in the trace rules is the partial subtyping one $\leq_{\trace}$.
 
@@ -2420,7 +2420,7 @@ $
 Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \termEmph{solution} to $C$, denoted by $\theta \vDash C $, iff. for each $(\trace, t_l \leq t_r) \in C$, $t_l\theta \leq_{\trace} t_r\theta $ holds.
 \end{definition}
 
-The constraint generation rules are presented in Fig. \ref{fig:constraint-rules}, where
+The constraint generation rules are presented in Figure \ref{fig:constraint-rules}, where
 $\FT_{C}$ is the extended function type table such that $\FT_{C}$ maps all function names to function types and their corresponding constraint sets.
 The judgments of the constraint rules are similar to those of trace rules, except that
 each rule generates a constraint set $C$, which consists of the side conditions needed by the typing derivation of $\mathcal{S}$.
@@ -2934,7 +2934,7 @@ B.fun() { %// $B$ has permission $q$%
 \end{lstlisting}
 
 
-Let us apply the constraint generation rules in Fig.~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
+Let us apply the constraint generation rules in Figure~\ref{fig:constraint-rules} on each function, yielding the constraint sets $C_A$ and $C_B$
 \[
 \begin{array}{lcl}
 C_A & =  &\{(\oplus p\oplus q, l_1 \leq \alpha),(\oplus p\ominus q, L \leq \alpha), \\
@@ -2946,7 +2946,7 @@ C_B & =  & \{(\epsilon, L\leq\gamma), (\oplus p, L\leq\beta) ,(\ominus p, \app{\
 and the types $t_A =()\rightarrow \alpha$  and $t_B=()\rightarrow \beta$ for the functions  \textit{getInfo} and  \textit{fun}\footnote{Indeed, the constraint set for \textit{fun} is $C_A \cup C_B $, but here we focus on the constraints generated by the function itself.} respectively. Thus, the constraint set $C_{eg}$ for the whole program is $C_A \cup C_B$.
 
  \subsection{Constraint Solving}\label{sec:constraint_solve}
-We now present an algorithm for solving the constraints generated by the rules in Fig.~\ref{fig:constraint-rules}.
+We now present an algorithm for solving the constraints generated by the rules in Figure~\ref{fig:constraint-rules}.
 For these constraints, both types appearing on the two sides of subtyping are
 guarded by the \emph{same} permission trace. But during the process of solving these constraints, new constraints, whose two sides of subtyping are guarded by \emph{different} traces, may be generated.
 Take the constraint \cRawCond{\trace}{\app{t_l}{P}}{\app{\alpha}{Q}} for example,

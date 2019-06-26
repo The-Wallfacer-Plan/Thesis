@@ -86,12 +86,12 @@ Finally, we review the state-of-the-art DGF, namely \aflgo~\cite{Bohme:2017:DGF}
 
 
 
-Fig.~\ref{fig:exam_trace} shows two execution traces related to CVE-2017-15939~\cite{cve-2017-15939}, which is a NULL pointer dereference bug caused by~an incomplete fix in CVE-2017-15023~\cite{cve-2017-15023}.
+Figure~\ref{fig:exam_trace} shows two execution traces related to CVE-2017-15939~\cite{cve-2017-15939}, which is a NULL pointer dereference bug caused by~an incomplete fix in CVE-2017-15023~\cite{cve-2017-15023}.
 This vulnerability is difficult for~the~existing GBFs to discover.
 For instance, AFL~\cite{afl} fails to detect this vulnerability within 24 hours in all the 10 different runs we conducted.
 This bug is triggered in \texttt{nm} from GNU binutils.
 In function \texttt{concat\_filename}, a NULL pointer is assigned and used without checking, which triggers the segmentation fault.
-From a patch testing perspective, we would like to target \texttt{concat\_filename} (subsequently, we will denote this as $T$) and guide the fuzzing to reproduce the crashing trace (i.e., $\langle a, b, c, d, T, Z\rangle$ in Fig.~\ref{fig:call_chain}).
+From a patch testing perspective, we would like to target \texttt{concat\_filename} (subsequently, we will denote this as $T$) and guide the fuzzing to reproduce the crashing trace (i.e., $\langle a, b, c, d, T, Z\rangle$ in Figure~\ref{fig:call_chain}).
 
 
 
@@ -124,7 +124,7 @@ From a patch testing perspective, we would like to target \texttt{concat\_filena
 
 
 
-For simplicity, in Fig.~\ref{fig:call_chain}, we illustrate only three representative traces for the CVE-2017-15939 by omitting 1) the overlapping functions before $a$ and 2) the other traces that do not pass the target function $T$. {The difficulty in discovering this CVE for the general GBFs (e.g., AFL) arises from the fact that the target function $T$ is deeply hidden in the crashing trace.} As shown in Fig.~\ref{fig:call_chain}, the call chain of $\langle a, e, T, Z\rangle$ is shorter than $\langle a, b, c, d, T, Z\rangle$.
+For simplicity, in Figure~\ref{fig:call_chain}, we illustrate only three representative traces for the CVE-2017-15939 by omitting 1) the overlapping functions before $a$ and 2) the other traces that do not pass the target function $T$. {The difficulty in discovering this CVE for the general GBFs (e.g., AFL) arises from the fact that the target function $T$ is deeply hidden in the crashing trace.} As shown in Figure~\ref{fig:call_chain}, the call chain of $\langle a, e, T, Z\rangle$ is shorter than $\langle a, b, c, d, T, Z\rangle$.
 
 Since most of the GBFs (such as AFL, LibFuzzer, etc.) are supposed to be \emph{coverage oriented}, and do not care specially about the target locations, they may not put most of their efforts in generating seeds that reach function $T$ and testing the function throughly. For DGFs, although there suppose to be some efforts to guide the fuzzing procedure to favor \emph{some} traces leading to $T$ and focus more on these traces, they may frequently miss \emph{all} the traces. For example, if \aflgo detects that two traces can reach the target locations, it will highly likely favors the trace with shorter path: the distance between the seed to the target is determined by the average distance of the components (basicblocks or functions) in the execution trace to the target locations, where the components' distance to the target locations are essentially determined by the number of edges between the components and the target locations. This mechanism causes \aflgo to give more energy to the trace $\langle a, e, T, Z\rangle$ since it reaches the target $T$ \emph{and} the induced trace distance is smaller than $\langle a, b, c, d, T, Z\rangle$; on the other hand, less attention is put on $\langle a, b, c, d, T, Z\rangle$, which however causes the crash under some circumstances. Worse still, other traces like $\langle a, e, f, Z\rangle$ may be mistakenly assigned with more energy. As a result, \aflgo was also not able to reproduce the crash within 24 hours in any of the 10 runs we conducted.
  
@@ -140,15 +140,15 @@ We observe that an ideal DGF should possess the following desired properties.
 	\centering
 	\includegraphics[width=0.15\columnwidth]{res/dfot/eg_callchain.pdf}
 	\vspace{-5pt}
-	\caption{Fuzzing traces for Fig.~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$; $\langle a, e, f , Z\rangle$ does not pass $T$.}
+	\caption{Fuzzing traces for Figure~\ref{fig:exam_trace}: $\langle a, b, c, d, T, Z\rangle $ is a crashing trace passing $T$,  $\langle a, e, T, Z\rangle$ is a normal trace passing $T$; $\langle a, e, f , Z\rangle$ does not pass $T$.}
 	\label{fig:call_chain}
 \end{figure}
 
 \textbf{P1. DGF should define a \emph{robust} distance mechanism to guide directed fuzzing by avoiding the bias to certain traces}  \label{subsec:p1}
 Different from general GBFs, to reach the specified locations, there may exist several execution traces towards them. More often than not, a target function could appear several times in the code and be called even from different entries of the code. Without any static information as guidance, during the fuzzing process, the fuzzer knows nothing about the execution traces that cover the target locations before they have been executed; and even if the locations have already been covered, the fuzzer does not know whether there are \emph{other} traces that can lead to them.  
-Taking Fig.~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing seeds due to the existence of a strong precondition before $a$. Therefore, \emph{the guiding mechanism should provide the knowledge of all the possible traces that lead to the target locations and guide the mutation towards it via gradually reducing the distance}. 
+Taking Figure~\ref{fig:call_chain} as an example, in the AFL fuzzing process, trace $\langle a, b, c, d, T, Z\rangle$  may not be ever exercised by the existing seeds due to the existence of a strong precondition before $a$. Therefore, \emph{the guiding mechanism should provide the knowledge of all the possible traces that lead to the target locations and guide the mutation towards it via gradually reducing the distance}. 
 
-However, for DGF, awareness of all the possible traces towards target locations is not enough: the distance to specified locations for all traces should be properly calculated so that all traces reachable to them will be assigned more energy compared to other traces. For Fig.~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know in advance that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target location, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target location. 
+However, for DGF, awareness of all the possible traces towards target locations is not enough: the distance to specified locations for all traces should be properly calculated so that all traces reachable to them will be assigned more energy compared to other traces. For Figure~\ref{fig:call_chain}, $T$ is the target and we would like to check the functionality of $T$. Note that if we know in advance that \emph{only} the traces that involve $d$ and $T$ may cause crashes, we can set \emph{both} $d$ and $T$ as target locations. Intuitively, traces $ \langle a, e, T, Z\rangle$ and $\langle a, b, c, d, T, Z\rangle$ should be treated without bias as both of them can lead to the target location, while $ \langle a, e, f , Z\rangle$ should be less important as it misses the target location. 
 
 
 
@@ -156,7 +156,7 @@ However, for DGF, awareness of all the possible traces towards target locations 
 Effective static analysis can benefit the dynamic fuzzing procedure in two aspects: 1) In real-world C/C++ programs, there are indirect function calls (e.g., passing a function pointer as a parameter in C, or using function objects and pointers to member functions in C++). In the presence of indirect calls, call sites cannot be observed directly from the source code or binary instructions. So the trade-offs between overheads and utilities need to be made for analyzing them. 2) Not all call relations should be treated equally. For example, some functions occur multiple times in its calling functions, implying  that they have higher chance to be called at runtime. From the static analysis perspective, we need to provide a way to distinguish these scenarios. As to function level distances between functions that have \emph{immediate} calling relations, it is intuitive that callees called in multiple times in different branches should be ``closer'' to the caller.
 
 
-To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a greybox fuzzing setting.
+To sum up, taking Figure~\ref{fig:call_chain} as an example, \emph{the desired design} for the DGF is: 1) if function $a$ (transitively) calls $T$ in an indirect way (i.e., one or more calls in the chain $a\rightarrow\! b\!\rightarrow\! c\!\rightarrow\! d\!\rightarrow\! T$ are through function pointers), the static analysis should capture such indirect calls, otherwise the distance from $a$ to $T$ will be not available (i.e., treated as unreachable). 2) if the callee appears in more different branches and occurs more times in its caller, a smaller distance should be given since it may have more chance of being called for reaching the target(s). However, modeling the \emph{actual} branch conditions in static phrase is impractical due to the inherent limitations of static analysis. For example, given a nontrivial code segment, it is hard to predict whether the true branch of a predicate will be executed more often than its false branch during runtime. On the other hand, tracking symbolic conditions \emph{dynamically} would be too time costly in a greybox fuzzing setting.
 
 \textbf{P3. DGF should \emph{prioritize} seeds close to target locations.}
  AFL determines how many new seeds should be generated (i.e., ``energy'') from a seed to improve the fuzzing effectiveness (i.e., increase the coverage); this is termed ``power scheduling'' in~\cite{Bohme:2016:CGF,Bohme:2017:DGF}. In directed fuzzing, the goal of fuzzing is not to reach \emph{the upper-limit of coverage} as fast as possible, but reach the \emph{particular target locations} as fast as possible. Hence, power scheduling in DGF should determine how many new seeds should be generated from a seed in order to get a new seed that leads to the target locations~\cite{Bohme:2017:DGF}. Similarly, the seed prioritization in DGF is to determine an optimized fuzzing order of seeds to reach target locations as fast as possible. Both of them can be guided by the distance-based mechanism which measures the affinity between the current seed to the target locations. 
@@ -168,7 +168,7 @@ To sum up, taking Fig.~\ref{fig:call_chain} as an example, \emph{the desired des
 In general, these mutators can be categorized into two levels: fine-grained mutations (e.g., bitwise flip) and coarse-grained mutations (e.g., chunk replacement).
  Although there is no direct evidence that fine-grained mutations will likely preserve the execution traces, it is widely accepted that a coarse-grained random mutation has a high chance to greatly change the execution trace. Therefore, the desired design is that when a seed has already reached the target locations (including target lines, basicblocks or functions), it should be given less chances for coarse-grained mutations.
  
-For the example in Fig.~\ref{fig:call_chain}, consider the case where the DGF has already reached the target function via trace $\langle a, b, c, d, T, Z\rangle $, but crash is not triggered yet.
+For the example in Figure~\ref{fig:call_chain}, consider the case where the DGF has already reached the target function via trace $\langle a, b, c, d, T, Z\rangle $, but crash is not triggered yet.
 Now, the DGF should allocate less chances for coarse-grained mutations for the input of $\langle a, b, c, d, T, Z\rangle $.
 Meanwhile, if DGF has just started up and $\langle a, b, c, d, T, Z\rangle $ has not been reached yet, the DGF should give more chances for coarse-grained mutations.
 
@@ -190,7 +190,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 \end{figure*}
 
 \textbf{For P1.} 
-For Fig.~\ref{fig:call_chain}, based on the distance formula defined in \aflgo
+For Figure~\ref{fig:call_chain}, based on the distance formula defined in \aflgo
 the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
 Given these three execution traces, the energy assigned to them will be $ \langle a, e, T, Z\rangle$ $>$ $\langle a, e, f , Z\rangle$ $>$ $\langle a, b, c, d, T, Z\rangle$.
 This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphasized; the crashing trace $\langle a, b, c, d, T, Z\rangle$ is however considered the least important, even less important than the trace $\langle a, e, f , Z\rangle$ that fails to reach the target $T$.
@@ -201,7 +201,7 @@ This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphas
 As a result, all function pointers are treated as \emph{external nodes} which 
 are ignored during distance calculation. 
 This means that, in an extreme case, if the target function is called via a function pointer, its distance from the actual caller is undefined. 
-For example, in Fig.~\ref{fig:call_chain}, if $d$ and $e$ call $T$ via function pointers, both $d$ and $e$ will be mistakenly considered unreachable to $T$; consequently, all nodes except for $T$ will be considered unreachable to $T$. Therefore essentially there is no directedness in such a case.
+For example, in Figure~\ref{fig:call_chain}, if $d$ and $e$ call $T$ via function pointers, both $d$ and $e$ will be mistakenly considered unreachable to $T$; consequently, all nodes except for $T$ will be considered unreachable to $T$. Therefore essentially there is no directedness in such a case.
 Besides, \aflgo counts the same callee in its callers only once, and it does not differentiate multiple call patterns between the caller and callee (see \S\ref{subsec:functionDist}).
 The function level distance is calculated on the call graph with the Dijkstra shortest path, assuming the weight of two adjacent nodes (functions) in the call graph always to be 1, which will distort the distance calculation. 
 
@@ -231,7 +231,7 @@ Hence, \aflgo lacks the adaptive mutation strategies, which will mutate arbitrar
 
 \section{Approach Overview}
 
-In this section, we briefly introduce the workflow of our proposed approach, named \dFOT. An overview of \dFOT is given in Fig.~\ref{fig:overview}, which~consists of two major components, i.e., \textit{static analysis} and \textit{fuzzing loop}. 
+In this section, we briefly introduce the workflow of our proposed approach, named \dFOT. An overview of \dFOT is given in Figure~\ref{fig:overview}, which~consists of two major components, i.e., \textit{static analysis} and \textit{fuzzing loop}. 
 
 
 
@@ -267,7 +267,7 @@ Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those t
 
 \section{Methodology}
 
-This section elaborates the key components in Fig.~\ref{fig:overview} featuring the four properties.
+This section elaborates the key components in Figure~\ref{fig:overview} featuring the four properties.
 
 
 \subsection{Graph Construction} \label{subsec:graghCons}
@@ -290,9 +290,9 @@ The control flow graph of each function is generated based on LLVM's IR. The int
 To achieve \textbf{P1}, we propose to implement a lightweight static analysis that considers the patterns of the (immediate) call relation based on the generated call graph.
 As discussed in \textbf{P2}, under different context, the distances from the calling function to the immediately called function may not be exactly the same. 
 Given functions $f_a$, $f_b$, $f_c$, there may exist several different call patterns in the call graph. 
-For example, in Fig.~\ref{subfig:dist1} and Fig.~\ref{subfig:dist2}, there are calls $f_a\rightarrow f_b$  and  $f_a\rightarrow f_c$ in both cases. 
-However, in Fig.~\ref{subfig:dist1}  $f_a$ is bound to call $f_b$ (since $f_b$ appears in both \emph{if} and \emph{else} branches in $f_a$), but not necessary to call $f_c$; in Fig.~\ref{subfig:dist2}, both $f_b$ and $f_c$ are not necessary to be called by $f_a$.
-From a probability perspective, we would think that in both cases the distance from $f_a$ to $f_b$ should be smaller than the distance from $f_a$ to $f_c$, and the distance from $f_a$ to $f_b$ in Fig.~\ref{subfig:dist1} should be smaller than that in  Fig.~\ref{subfig:dist2}. 
+For example, in Figure~\ref{subfig:dist1} and Figure~\ref{subfig:dist2}, there are calls $f_a\rightarrow f_b$  and  $f_a\rightarrow f_c$ in both cases. 
+However, in Figure~\ref{subfig:dist1}  $f_a$ is bound to call $f_b$ (since $f_b$ appears in both \emph{if} and \emph{else} branches in $f_a$), but not necessary to call $f_c$; in Figure~\ref{subfig:dist2}, both $f_b$ and $f_c$ are not necessary to be called by $f_a$.
+From a probability perspective, we would think that in both cases the distance from $f_a$ to $f_b$ should be smaller than the distance from $f_a$ to $f_c$, and the distance from $f_a$ to $f_b$ in Figure~\ref{subfig:dist1} should be smaller than that in  Figure~\ref{subfig:dist2}. 
 
 
 \begin{figure}[t]
@@ -344,12 +344,12 @@ Given a (direct or indirect) immediate function call pair $( f_1, f_2)$ where $f
 \end{equation}
 where $\traceFnDistPrime{f_1}{f_2}$ refers to the \emph{augmented} \emph{direct} function distance. 
 
-As an example, in Fig.~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\csbbn{f_a}{f_b}=2$; and for $f_c$, $\csnumn{f_a}{f_c}=1$, $\csbbn{f_a}{f_c}=1$. Assume $\phi=2$ and $\psi=2$ and assume the original distance $\traceFnDist{f_a}{f_b}=\traceFnDist{f_a}{f_c}=1$, the augmented distances will be $\traceFnDistPrime{f_a}{f_c}=\frac{3}{2}\cdot\frac{3}{2}=2.25$, and $\traceFnDistPrime{f_a}{f_b}=\frac{5}{4}\cdot\frac{5}{4}=1.56$.
+As an example, in Figure~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\csbbn{f_a}{f_b}=2$; and for $f_c$, $\csnumn{f_a}{f_c}=1$, $\csbbn{f_a}{f_c}=1$. Assume $\phi=2$ and $\psi=2$ and assume the original distance $\traceFnDist{f_a}{f_b}=\traceFnDist{f_a}{f_c}=1$, the augmented distances will be $\traceFnDistPrime{f_a}{f_c}=\frac{3}{2}\cdot\frac{3}{2}=2.25$, and $\traceFnDistPrime{f_a}{f_b}=\frac{5}{4}\cdot\frac{5}{4}=1.56$.
 
 
 A special case not shown in the above examples is that some branches form cycles (i.e., loops). Indeed, these functions may be called multiple times at runtime. However, it is uncertain that \emph{how many times} they will be executed across different runs when fed with different seeds. Fortunately, actual execution on one call site of a callee inside one loop typically has similar effect --- the loop explores the similar program states and benefits less in covering new paths. Hence, the function call inside the loop does not bring many execution trace diversities like the scenario where the same callee occurs in multiples branches with significantly different parameters.
 
-The applied approach aims to make a trade-off between the efficiency and the utility of the static analysis. Therefore, we do not consider the solution space of any branch condition that may affect the \emph{runtime reachability} in the CFG. For example, in Fig.~\ref{subfig:dist1}, if we change the condition check ${i>0}$ to be ${i==0}$, the true branch will be executed only when the input value of $i$ is 0. It is tempting to assign a smaller distance to the code segments in the false branch. However, since the target program is usually nontrivial, it is impractical to statically formulate the exact constraint set of the preconditions before reaching function $f_a$ and predicate the branches's actual execution probabilities. One common scenario is that the branch condition \emph{i==0} is used for checking the return status code of an external function call, at runtime it may actually execute the true branch more often than the false branch.
+The applied approach aims to make a trade-off between the efficiency and the utility of the static analysis. Therefore, we do not consider the solution space of any branch condition that may affect the \emph{runtime reachability} in the CFG. For example, in Figure~\ref{subfig:dist1}, if we change the condition check ${i>0}$ to be ${i==0}$, the true branch will be executed only when the input value of $i$ is 0. It is tempting to assign a smaller distance to the code segments in the false branch. However, since the target program is usually nontrivial, it is impractical to statically formulate the exact constraint set of the preconditions before reaching function $f_a$ and predicate the branches's actual execution probabilities. One common scenario is that the branch condition \emph{i==0} is used for checking the return status code of an external function call, at runtime it may actually execute the true branch more often than the false branch.
 
 
 
@@ -391,7 +391,7 @@ where $c$ is a constant that magnifies function level distance.
 
 Note that Equation \ref{eq:aflgo_func_dist} and \ref{eq:aflgo_bb_dist}, on their own, are the same as those in \aflgo \cite{Bohme:2017:DGF}. However, $\traceFnDist{n}{\tgtfn}$ for these equations in \aflgo is simply the Dijkstra shortest distance on a CG where the weight of edges (i.e., adjacent function distance) is 1.
 
-\textbf{Target Function Trace Closure.} This utility, $\fntrace{\tgtfnset}$,  is calculated by collecting all the predecessors that can statically lead to the target functions $\tgtfnset$, until the entry function \emph{main} has been reached. We choose \emph{not} to exclude those that are \emph{considered} unreachable from entry function due to the limitations of static analysis. In the example in Fig.~\ref{fig:call_chain}, $\xi_f(T_f)=\{a,b,c,d,e,T\}$.
+\textbf{Target Function Trace Closure.} This utility, $\fntrace{\tgtfnset}$,  is calculated by collecting all the predecessors that can statically lead to the target functions $\tgtfnset$, until the entry function \emph{main} has been reached. We choose \emph{not} to exclude those that are \emph{considered} unreachable from entry function due to the limitations of static analysis. In the example in Figure~\ref{fig:call_chain}, $\xi_f(T_f)=\{a,b,c,d,e,T\}$.
 
 
 
@@ -410,7 +410,7 @@ where \bbtrace{s} is the execution trace of a seed $s$ and contains all the basi
 It then applies a feature scaling normalization to get the final distance $\traceDistFinal{s}{\tgtbbset}=\frac{\traceDist{s}{\tgtbbset}-minD}{maxD-minD}$ where $minD$ (or $maxD$) is the smallest (or largest) distances ever met.
 
 
-\textbf{Covered Function Similarity.} This metric measures the similarity between the execution trace of the seed and the target execution trace \emph{on the function level}. We do not track the basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the ``expected traces'' will have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the function \emph{sets} the current seed covered (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Fig.~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
+\textbf{Covered Function Similarity.} This metric measures the similarity between the execution trace of the seed and the target execution trace \emph{on the function level}. We do not track the basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the ``expected traces'' will have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the function \emph{sets} the current seed covered (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Figure~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
 
 The covered function similarity is then determined by the following formula:
 \begin{equation}
@@ -660,7 +660,7 @@ This also serves a benchmark in other works such as~\cite{Bohme:2016:CGF, Bohme:
 \item \textbf{AFL} is the current state-of-the-art GBF. It discards all the target information for the target program and only utilizes the ``basicblock transition'' instrumentation.
 \item \textbf{{\aflgo}} is the state-of-the-art DGF based on AFL.
 Compared to AFL, it also instruments basicblock distance information.
-\item \textbf{{\dGO}} is the fuzzer whose basicblock level distance is generated with our static analysis procedure (Fig.~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
+\item \textbf{{\dGO}} is the fuzzer whose basicblock level distance is generated with our static analysis procedure (Figure~\ref{fig:overview}), but the dynamic fuzzing is conducted by {\aflgo}.
 \end{enumerate}
 
 Here we mainly follow \aflgo's practice to only use AFL as the baseline for coverage oriented GBFs. Other techniques do not focus on directed fuzzing, and they are either orthogonal (e.g., CollAFL~\cite{CollAFL}) or may sometimes perform worse than AFL (e.g., \aflfast, as observed by \cite{Shastry:LNCS2017:Orthrus}), or not easily comparable (e.g., libFuzzer~\cite{libfuzzer}). The detailed reason is available at our website. %; in \S\ref{sec:related}, we also provide a more detailed comparison between {\dFOT} and these techniques.
