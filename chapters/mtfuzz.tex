@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 In Listing~\ref{lst:eg_vm}, in the multithreading execution environment, if the condition \func{satisfy(s\_var)} returns true, it executes \func{func\_1} otherwise \func{func\_2}; let us suppose that there is a vulnerability inside \func{fun\_2} that is not introduced by concurrency bugs. Note that this branching results may rely on the number of threads, the input content themselves. For example, if in single-threaded mode, \func{satisfy(s\_var)} always returns true, the vulnerability will never be triggered; this vulnerability can only be revealed with more than one thread. Under other circumstances, suppose for the input content, \func{func\_2} will not be executed except for some very specific conditions (e.g., error handling), the vulnerabilities can only be revealed with certain content. Therefore, it may not be enough to only consider the \textsf{C-Bug} induced vulnerabilities $V_c$.
 
 
-As mentioned in Section~\ref{sec:intro-gbf}, a conventional GBF usually has no awareness of multithreading.
+As mentioned in ~\S\ref{sec:intro-gbf}, a conventional GBF usually has no awareness of multithreading.
 In fact, the only symptom it observes is that a seed has non-deterministic behaviors in that the same seed exercises different traces during calibration execution.
 However, since there are \emph{multiple reasons} that can cause non-deterministic behaviors, a GBF typically does not have any countermeasures: all it can do is to increase \Ncal to execute the seeds more times to get more stable running statistics.
 

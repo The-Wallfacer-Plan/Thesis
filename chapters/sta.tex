@@ -171,25 +171,25 @@ It is done technically via a \emph{merging} operator on security types, to keep 
 branches of \textbf{test}. Additionally, there is a significant
 difference in the permission model used in traditional type systems such as {\BN} system, where permissions
 are propagated across method invocations among apps. This is due to the fact that permissions in Android are relevant only during inter-process calls, while permissions are not inherited along the call
-chains across apps. As we shall see in Section~\ref{sec:typing_rules}, this may give rise to a type of attack which we call
+chains across apps. As we shall see in ~\S\ref{sec:typing_rules}, this may give rise to a type of attack which we call
 ``parameter laundering'' attack if one adopts a naive typing rule for function calls.
 The soundness proof for our type system is significantly different from that for {\BN} type system due to the difference
 in permission model and the new merging operator on types in our type system.
 
 \subsection{Contributions}
 The contributions of this chapter are threefold.
-\begin{enumerate}\item We develop a lightweight type system where security types are dependent on a permission-based access control mechanism, and prove its soundness in terms of non-interference (Section~\ref{sec:type_system}). A novel feature of our type system is the type merging constructor, used for typing the conditional branch for permission checking. This makes it possible to model non-monotonic information flow policies.
+\begin{enumerate}\item We develop a lightweight type system where security types are dependent on a permission-based access control mechanism, and prove its soundness in terms of non-interference (\S\ref{sec:type_system}). A novel feature of our type system is the type merging constructor, used for typing the conditional branch for permission checking. This makes it possible to model non-monotonic information flow policies.
 	\item We identify a problem of explicit flow through function calls in the setting where permissions are not propagated during calls. This problem
 	arises as a byproduct of Android's permission model, which is significantly different from that in JVM, and adopting a standard typing rule for function calls such as the one proposed for Java in~\cite{Banerjee:2005ht} 
 	would result in unsoundness. We name this the parameter laundering problem and propose a typing rule for function calls that prevents it.
-	\item We provide a type inference for our proposed type system, and show its decidability by reducing it to a constraint solving problem (Section~\ref{sec:constraint_gen}).
+	\item We provide a type inference for our proposed type system, and show its decidability by reducing it to a constraint solving problem (\S\ref{sec:constraint_gen}).
 \end{enumerate}
  \section{A Secure Information Flow Type System}\label{sec:type_system}
 
-In this section, we present the proposed information flow type system. Section~\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
-Section~\ref{sec:language} and Section~\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
+In this section, we present the proposed information flow type system. \S\ref{sec:permission_model} discusses informally a permission-based access control model, which is an abstraction of the permission mechanism used in Android.
+ \S\ref{sec:language} and ~\S\ref{sec:semantics} give the operational semantics of a simple imperative language that includes permission checking
 constructs based on the abstract permission model.
-Section~\ref{sec:types} and Section~\ref{sec:typing_rules} describe our type system and prove its soundness in terms of non-interference.
+~\S\ref{sec:types} and ~\S\ref{sec:typing_rules} describe our type system and prove its soundness in terms of non-interference.
 
 \subsection{A Model of Permission-based Access Control}
 \label{sec:permission_model}
@@ -199,7 +199,7 @@ Instead of taking all the language features and the library dependencies of Andr
 In Android, an app specifies its required permissions at installation time via a manifest file. In recent versions of Android (since Android 6.0, API level 23), some of these permissions need to be granted by users at runtime. But
 at no point a permission request is allowed if it is not already specified in the manifest.
 For now, we assume a permission enforcement mechanism that applies to Android versions prior to version 6.0, so it does not
-account for permission granting at runtime. To be specific, runtime permission request requires the compatible version specified in the manifest file to be greater than or equal to API level 23, and the running OS should be at least Android 6.0~\cite{url:android-perm}. Runtime permission granting poses some problems in typing non-monotonic policies, which shall be discussed further in Section~\ref{sec:conclusion}.
+account for permission granting at runtime. To be specific, runtime permission request requires the compatible version specified in the manifest file to be greater than or equal to API level 23, and the running OS should be at least Android 6.0~\cite{url:android-perm}. Runtime permission granting poses some problems in typing non-monotonic policies, which shall be discussed further in ~\S\ref{sec:conclusion}.
 
 An Android app may provide services to other apps,
 or other components within the app itself. Such a service provider
@@ -211,7 +211,7 @@ In our model, a program is an abstracted version of an app, and the intention is
 %~\footnote{We have also been implementing a permission-dependent information flow analysis tool on top of Amandroid. The basic idea is similar to the one mentioned in this chapter, however the focus is improving the precision of information leakage detection rather than non-interference certification.}
 , IccTA\cite{Li:2015:IDI:2818754.2818791}, etc.
 
-One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions which have been assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must take care to avoid what we call a ``parameter laundering" attack (see Section~\ref{sec:types}).
+One significant issue that has to be taken into account is that Android framework does not track IPC call chains between apps and permissions of an app are not propagated to the callee. That is, an app $A$ calling another app $B$ does not grant $B$ the permissions which have been assigned to $A$. This is different from the traditional type systems such as {\BN} where permissions can potentially propagate along the call stacks. Note however that $B$ can potentially have more permissions than $A$, leading to a potential privilege escalation, a known weakness in Android permission system~\cite{Chin:2011wa}. Another consequence of lacking transitivity is that in designing the type system, one must take care to avoid what we call a ``parameter laundering" attack (c.f. ~\S\ref{sec:types}).
 
 \subsection{A Language with Permission Checks}\label{sec:language}
 
@@ -695,7 +695,7 @@ we type $c_1$ in a promoted typing environment for a successful permission check
 The challenge is how to combine the types of the two premises  to obtain the type
 for the conclusion. One possibility is to force
 the type of the two premises and the conclusion to be identical (i.e., treat permission check the same as other if-then-else statements and apply \ruleTagText{T-IF}).
-This, as we have seen in Section~\ref{sec:sta_intro},
+This, as we have seen in ~\S\ref{sec:sta_intro},
 leads to a loss in precision of the type for \textbf{test} construct. We consider
 a more refined \emph{merged} type $\omerge{p}{t_1}{t_2}$ for the conclusion,
 where $t_1$ ($t_2$ resp.) is the type of the left (right resp.) premise.
@@ -1553,11 +1553,11 @@ Well-typed systems are non-interferent.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  \section{Type Inference}\label{sec:constraint_gen}
-This section describes a decidable inference algorithm for the language  in Section~\ref{sec:language}.
-Section~\ref{sec:constraint-gen-rules} firstly rewrites the typing
+This section describes a decidable inference algorithm for the language  in ~\S\ref{sec:language}.
+~\S\ref{sec:constraint-gen-rules} firstly rewrites the typing
 rules (Figure~\ref{fig:typing-rules}) in the form of permission trace
 rules (Figure~\ref{fig:infer-rules}), then reduces the type inference
-into a constraint solving problem; Section~\ref{sec:constraint_solve}
+into a constraint solving problem; \S\ref{sec:constraint_solve}
 provides procedures to solve the generated constraints. Detailed
 definitions and proofs can be found in~\cite{Chen17arxiv}.
 
@@ -3265,7 +3265,7 @@ The type inference system is sound, complete and decidable.
 
 We discuss only those closely related work on the type checking based verification on information flow security for Android.
 
-We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in Section~\ref{sec:sta_intro}.
+We have discussed extensively the work by Banerjee and Naumann~\cite{Banerjee:2005ht} and highlights the major differences between our work and theirs in ~\S\ref{sec:sta_intro}.
 
 
 Flow-sensitive and value-dependent information flow type systems
