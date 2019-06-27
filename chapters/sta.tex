@@ -129,7 +129,7 @@ String getInfo() {
 Here \textit{id} denotes a unique advertising ID  generated and stored by the app for
 the purpose of anonymizing user tracking and \textit{loc} denotes location
 information.
-The function first tests whether the caller has access to IMEI number.
+The function first checks whether the caller has access to IMEI number.
 If it does, and if it has access to location, then only the location information is returned.
 If the caller has no access to IMEI number, but can access location information,
 then the combination of advertising id and location \textit{id++loc} is returned.
@@ -266,7 +266,7 @@ a function call to $A.f$. The statement
 ``\lcCP{p}{c_1}{c_2}''
 checks whether the calling app has permission $p$: if so then $c_1$ is executed,
 otherwise $c_2$ is executed.
-This is similar to the \textbf{test} construct in {\BN} system, except that we allow testing only
+This is similar to the \textbf{test} primitive in {\BN} system, except that we allow checking only
 one permission at a time. This is a not real restriction since both primitives can simulate one another.
 
 
