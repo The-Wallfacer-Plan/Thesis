@@ -2256,13 +2256,6 @@ Thus, our type inference system terminates.
 \begin{theorem}
 The type inference system is sound, complete and decidable.
 \end{theorem}
-\begin{proof}
-\begin{itemize}
-\item \textbf{soundness}: By Lemma  \ref{lem:cgrsound0} and Lemma \ref{lem:solsound}.
-\item \textbf{completeness}: By Lemma  \ref{lem:cgrcomplete0} and Lemma \ref{lem:solcomplete}.
-\item \textbf{decidablity}: As the function call chains are finite, the constraint generation terminates with a finite constraint set, which can be solved by $sol$ in finite steps. In this sense, the type inference system always terminates.
-\end{itemize}
-\end{proof}
 
 
 \section{Related Work}
