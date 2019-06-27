@@ -5,8 +5,8 @@
 \section{Introduction and Motivation}\label{sec:sta_intro}
 
 Owing to the pervasive use of mobile applications (apps), mobile security has become increasingly important for our daily life.
-Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of constructing secure apps.
-In particular, we aim to provide a guarantee for information flow security in the constructed apps. In order to achieve this, we apply a type checking based verification approach.
+Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of designing secure apps.
+In particular, we aim to provide a guarantee for information flow security in the constructed apps. Although testing approaches are widely used in detecting Android security issues such as malware analysis, it however fails to stress the ``higher level'' permission relevant information leakage issue. In fact, testing approaches can only detect some data leakage issues, however cannot guarantee the absence of leakage. In order to achieve this, we apply a type checking based verification approach.
 
 \subsection{Motivating Examples}
 
@@ -674,7 +674,6 @@ The typing judgment takes the form:
 {\myeqsize\begin{equation*}
 \vdash \lpFUN{B.f}{\overline{x}}{c} :  \overline{t} \xrightarrow{} t'	
 \end{equation*}}
-
 where $\overline{x} = (x_1,\dots,x_n)$ and
 $\overline{t} = (t_1,\dots,t_n)$ for some $n \geq 0.$
 Functions are

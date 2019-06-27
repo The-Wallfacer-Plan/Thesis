@@ -49,11 +49,11 @@ As the fuzzer's awareness of the program structure is based on the instrumentati
 
 In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,FairFuzz,CollAFL,Angora,nezha,fuzz_survey}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the greybox fuzzing.
 
-\section{Security Type Checking on Android}\label{sec:intro-sta}
+\section{Type Checking Based Verification}\label{sec:intro-sta}
 
-\subsection{Language-based Type Checking on Information Flow}
+\subsection{Type Checking for Information Flow Analysis}
 
-The starting point of security type checking based verification is the classification of program variables into different security labels. The simplest is to classify some variables as $L$, meaning low security (public), while other variables as $H$, meaning high security (private). The goal is to prevent private information variables from being leaked publicly, i.e., prevent information in $H$ variables from \emph{flowing} to $L$ variables.
+Security type checking in securing information flow is based on the classification of program variables into different security labels. The simplest is to classify some variables as $L$, meaning low security (public), while other variables as $H$, meaning high security (private). The goal is to prevent private information variables from being leaked publicly, i.e., prevent information in $H$ variables from \emph{flowing} to $L$ variables.
 
 As to \emph{confidentiality}, the common practice is to treat the set of the security labels as a  \emph{lattice} and the information flows only upwards in the lattice~\cite{Denning:1977hwa}. For example, since $L\leq H$, we would allow flows from $L$ to $L$, from $H$ to $H$, and from $L$ to $H$, but we would disallow flows from $H$ to $L$.
 
@@ -76,7 +76,7 @@ a[secret] := 1;
 for (int i := 0; i < a.length; i++) {  if (a[i] == 1) leak := i;}
 \end{lstlisting}
 
-\subsubsection{Non-interference}
+\subsubsection{The Non-interference Property}
 At a program level, the security properties are described as \emph{non-interference}, which was described by Goguen and Meseguer in 1982~\cite{Goguen:1982ta}. The simplest form tells that a deterministic program $c$ satisfies non-interference, if and only if, for any memories $\mu$ and $\nu$ that agree on $L$ variables, the memories produced by running $c$ on $\mu$ and on $\nu$ also agree on $L$ variables (provided that both terminate successfully). Basically, the program can be viewed as a state machine. If a low user is working on the machine, it will respond in exactly the same manner (on the low outputs) whether or not a high user is working with sensitive data. The low user will not be able to acquire any information about the activities (if any) of the high user by observing the values of low variables.
 
 Typically, a security type system is introduced to prove the non-interference property. In addition to the regular types (such as integer, boolean, etc.), expressions and commands also contain security labels. And by applying the well-established typing derivation approach, it is fairly enough by reasoning over provided typing rules to verify the property, thus it provides a certificate to the underlying program.
@@ -104,27 +104,31 @@ The concrete security typing rules vary in the underlying type systems to guaran
 \end{equation*}}
 Intuitively, \ruleTagText{(Sub$_e$)} depicts the fact that it is always safe to read less confidential data as more confidential one; while \ruleTagText{(Sub$_c$)} discloses that if there is no variable below level $\tau$ updated in $c$, then there is surely no variable below $\tau'$ updated in $c$, as long as $\tau'\leq\tau$.
 
-\subsection{Android Security Model}
-The security model of Android system differs significantly from standard security models such as regular Bell-La Padula, mandatory access control (MAC), etc. In fact, Android applications (or apps for short) are treated as mutually distrusting principals: they are isolated from each other and do not have access to others' private (local) data. The mechanism is achieved by Android discretionary access control (DAC), which originates from Linux's access control mechanism. Next, we provide an overview of Android security model and its inter-process communication (IPC) facilities.
 
-\subsubsection{Thread Model}
+\subsection{IPC Mechanism in Android}
 
-The Android Market contains a large number of third-party apps, and a user may install apps with different trust levels. Users install apps from unknown developers alongside trusted apps that handle private information such as financial data and personal photographs. For example, a user might install both a highly trusted payment app, as well as a free game app. In most of the scenarios, the user would not expect that the game app has access to the user's payment information.
+%\subsection{Android Security Model}
+%The security model of Android system differs significantly from standard security models such as regular Bell-La Padula, mandatory access control (MAC), etc. In fact, Android applications (or apps for short) are treated as mutually distrusting principals: they are isolated from each other and do not have access to others' private (local) data. The mechanism is achieved by Android discretionary access control (DAC), which originates from Linux's access control mechanism. Next, we provide an overview of Android security model and its inter-process communication (IPC) facilities.
+%
+%\subsubsection{Thread Model}
+%
+%The Android Market contains a large number of third-party apps, and a user may install apps with different trust levels. Users install apps from unknown developers alongside trusted apps that handle private information such as financial data and personal photographs. For example, a user might install both a highly trusted payment app, as well as a free game app. In most of the scenarios, the user would not expect that the game app has access to the user's payment information.
+%
+%Under Android security model, all the apps are treated as potentially malicious. Each app runs in its own process with a low-privilege user ID, and apps can only access their own files by default. This isolation mechanism aims to protect apps with sensitive information from malware. Despite that, apps can inherently communicate via message passing (which is by convention called inter-process/app communication, IPC), which has been and is being utilized by various malware. In fact, the app might leak sensitive data, whenever the app sends information to the recipient without proper permission checking on the latter.
 
-Under Android security model, all the apps are treated as potentially malicious. Each app runs in its own process with a low-privilege user ID, and apps can only access their own files by default. This isolation mechanism aims to protect apps with sensitive information from malware. Despite that, apps can inherently communicate via message passing (which is by convention called inter-process/app communication, IPC), which has been and is being utilized by various malware. In fact, the app might leak sensitive data, whenever the app sends information to the recipient without proper permission checking on the latter.
+Android have become the mainstream of the smartphones. Android security has also long been the focus for security researchers, one of which belongs to the information leakage issue.
+On Android, inter-process communication (IPC) is one of the major reasons that cause information leak, when the app sends sensitive data to the recipient but without proper permission checking on the latter.
 
-\subsubsection{App Components and IPC Mechanism}
+%Intents are logical app building blocks delivered to app components. There are four categories of components in Android:
 
-Intents are logical app building blocks delivered to app components. There are four categories of components in Android:
-
-\begin{description}
-	\item[Activity] components form the basis of the user interface. Typically, each activity corresponds to certain ``window'' in the underlying app.
-	\item[Service] components run as a daemon, and remain active even when the windows are switched. Services can expose interfaces for communication with other apps.
-	\item[BroadcastReceiver] components react asynchronously to messages from other apps.
-	\item[ContentProvider] components store app's data, usually in a database. Such data may sometimes be allowed to be shared across different apps.
-\end{description}
+%\begin{description}
+%	\item[Activity] components form the basis of the user interface. Typically, each activity corresponds to certain ``window'' in the underlying app.
+%	\item[Service] components run as a daemon, and remain active even when the windows are switched. Services can expose interfaces for communication with other apps.
+%	\item[BroadcastReceiver] components react asynchronously to messages from other apps.
+%	\item[ContentProvider] components store app's data, usually in a database. Such data may sometimes be allowed to be shared across different apps.
+%\end{description}
 
 In particular, \emph{intents} are frequently used for message passing within or across apps. An intent is a message that declares a recipient, optionally with data. It can be thought of as a self-contained object that specifies a remote procedure to call and includes the associated arguments (remote procedure call, RPC). Intents are widely used for both inter-app communication and intra-app communication.
 
-Intents are sent between three of the aforementioned four components: Activities, Services, and Broadcast Receivers. They can be used for different purposes, such as starting Activities, starting, stopping, and binding Services, broadcasting information to BroadcastReceivers, etc. All of these communications can be used with explicit or implicit Intents.
+Intents are sent between three categories of Android components: Activities, Services, and Broadcast Receivers (excluding \emph{Content Provider}). They can be used for different purposes, such as starting Activities, starting, stopping, and binding Services, broadcasting information to BroadcastReceivers, etc. All of these communications can be used with explicit or implicit Intents.
 Intents can be used for explicit or implicit communication. An explicit intent regulates that it should be delivered to a particular app with explicit app ID, whereas an implicit intent requests delivery to any app that satisfies certain properties. In other words, an explicit intent specifies the recipient by name, whereas an implicit intent's recipient(s) are eventually determined by the Android system based on the recipient's/recipients' support for certain operations. For example, consider an app that stores contact information. When a user clicks on one of his or her contacts' family address, the ``contacts app'' needs to ask another app to display a map of that location (in Android, it would be a \textsf{ACTION\_VIEW} action with the data URI of the scheme ``\textsf{geo:0,0?q=my+street+address}''). In this scenario, the contacts app could send an \emph{explicit intent} directly to Google Maps (in most cases, it is enough to call \textsf{intent.setPackage("com.google.android.apps.maps")} followed by a \textsf{startActivity(intent)}). Alternatively, it can send an \emph{implicit intent} that would be delivered to any app that also provides map service such as Yahoo! Maps (e.g., only \textsf{startActivity(intent)} is called). Using an explicit intent guarantees that it is delivered to the intended recipient, whereas implicit Intents allow for late runtime binding between different apps. {Typically, the resolution result is checked by calling of \textsf{intent.resolveActivity(getPackageManager())}, which is unknown until runtime.}
