@@ -71,7 +71,7 @@ currently known to be disabled. The set $Q$ may or may not contain all disabled 
 Their language features a command ``\lcCP{P}{c_1}{c_2}'', which
 means that if the permissions in the set $P$ are \emph{all enabled}, then
 the command behaves like $c_1$; otherwise it behaves like $c_2$.
-The typing rules for the \textit{test} command (in a much
+The typing rules for the \textbf{ckp} command (in a much
 simplified form) are:
 {\myeqsize\[
 \inference[(R1)~]{
@@ -92,12 +92,12 @@ Q \vdash \lcCP{P}{c_1}{c_2} : t
 where $Q$ is a set of permissions that are disabled.
 When $Q \cap P \not = \emptyset$, then
 at least one of the permissions in $P$ is disabled, thus
-one can determine statically that ``\textbf{test}(P)'' would fail and only the \emph{else} branch would be executed at runtime. This case is
+one can determine statically that ``\textbf{ckp}(P)'' would fail and only the \emph{else} branch would be executed at runtime. This case is
 reflected in the typing rule R2.
 When $Q \cap P = \emptyset$, there can be two possible runtime scenarios.
-One scenario is that all permissions in $P$ are enabled, so ``\textbf{test}(P)'' succeeds and $c_1$ is executed.
+One scenario is that all permissions in $P$ are enabled, so ``\textbf{ckp}(P)'' succeeds and $c_1$ is executed.
 The other is that some permissions in $P$ are disabled, but are not accounted for in $Q$.
-So in this case, one cannot determine statically which branch of \textbf{test} will be
+So in this case, one cannot determine statically which branch of \textbf{ckp} will be
 taken at runtime. Therefore, R1 conservatively considers typing both branches.
 
 When adapting {\BN} system to Android, R1
@@ -117,10 +117,10 @@ IMEI and location information are denoted by $p$ and $q$, respectively.
 \begin{lstlisting}[caption={An example about non-monotonic policy.}, label={lst:eg_nonmonotonic}]
 String getInfo() {
    String r = "";
-   test(p) {
-     test(q) r = loc; else r = "";
+   ckp(p) {
+     ckp(q) r = loc; else r = "";
    } else  {
-     test(q) r = id++loc; else r = "";
+     ckp(q) r = id++loc; else r = "";
    }
    ret r;
 }
@@ -141,7 +141,7 @@ Consider the case where the caller has permissions $p$ and $q$ and both are (exp
 When applying {\BN} system, the desired type of \textit{getInfo} in this case is  $()~{\xrightarrow{~\emptyset~}}~l_1$.
 This means that the type of \textit{r} has to be at most $l_1$.
 Since no permissions are disabled, only \ruleTagText{R1} is applicable
-to type this program. This, however, will force both branches of \textbf{test}(p)
+to type this program. This, however, will force both branches of \textbf{ckp}(p)
 to have the same type. As a result, \textit{r}
 has to be typed as $H$ so that all four assignments in the program
 can be typed.
@@ -168,7 +168,7 @@ under an access control model inspired by Android framework.
 Our type system solves the problem of typing non-monotonic policies
 without resorting to downgrading or declassifying information.
 It is done technically via a \emph{merging} operator on security types, to keep information related to both
-branches of \textbf{test}. Additionally, there is a significant
+branches of \textbf{ckp}. Additionally, there is a significant
 difference in the permission model used in traditional type systems such as {\BN} system, where permissions
 are propagated across method invocations among apps. This is due to the fact that permissions in Android are relevant only during inter-process calls, while permissions are not inherited along the call
 chains across apps. As we shall see in ~\S\ref{sec:typing_rules}, this may give rise to a type of attack which we call
@@ -267,7 +267,7 @@ a function call to $A.f$. The statement
 checks whether the calling app has permission $p$: if so then $c_1$ is executed,
 otherwise $c_2$ is executed.
 This is similar to the \textbf{test} construct in {\BN} system, except that we allow testing only
-one permission at a time. This is a not real restriction since both versions of the \textbf{test} can simulate one another.
+one permission at a time. This is a not real restriction since both primitives can simulate one another.
 
 
 A function declaration has the following syntax:
@@ -387,8 +387,8 @@ The permission set $P$ denotes the {\em permission context}, i.e., it is the set
 app may be $A$ itself (in which case the permission context will be the same as the permission set of $A$) but more often it is another app in the system.
 
 The operational semantics of most commands are straightforward.
-We explain the semantics of the \emph{test} primitive and the function call.
-Rules (\ruleTagText{E-CP-T}) and (\ruleTagText{E-CP-F}) capture the semantics of the \textbf{test} primitive.
+We explain the semantics of the \emph{ckp} primitive and the function call.
+Rules (\ruleTagText{E-CP-T}) and (\ruleTagText{E-CP-F}) capture the semantics of the \textbf{ckp} primitive.
 These are where the permission context $P$ in the evaluation judgement is used.
 The semantics of function calls is given by (\ruleTagText{E-ICALL}). 
  Notice that $c$ inside the body of \emph{callee} is executed under
@@ -699,7 +699,7 @@ The challenge is how to combine the types of the two premises  to obtain the typ
 for the conclusion. One possibility is to force
 the type of the two premises and the conclusion to be identical (i.e., treat permission check the same as other if-then-else statements and apply \ruleTagText{T-IF}).
 This, as we have seen in ~\S\ref{sec:sta_intro},
-leads to a loss in precision of the type for \textbf{test} construct. We consider
+leads to a loss in precision of the type for \textbf{ckp} construct. We consider
 a more refined \emph{merged} type $\omerge{p}{t_1}{t_2}$ for the conclusion,
 where $t_1$ ($t_2$ resp.) is the type of the left (right resp.) premise.
 To understand the merged type,
@@ -747,14 +747,14 @@ A.f(x) {  %// $A$ does \emph{not} have permission $p$%
 	
 B.g(x) { %// $B$ does \emph{not} have permission $p$%
 	init r = 0 in {
-	   test(p) r := 0 else r := x;
+	   ckp(p) r := 0 else r := x;
 	   ret r 
    }
 }
 
 C.getsecret() { %// $C$ \emph{has} permission $p$%
 	init r = 0 in {
-	  test(p) r := P_INFO else r := 0;
+	  ckp(p) r := P_INFO else r := 0;
 	  ret r 
   }
 }
@@ -2016,11 +2016,11 @@ Recall the function \textit{getInfo} in Listing~\ref{lst:eg_nonmonotonic} and as
 \begin{lstlisting}[float=tp, caption={The example in Listing~\ref{lst:eg_nonmonotonic} in a calling context.}, label={lst:eg_solve}]
 A.getInfo() {
    init r in { %// $\Psi({\lpRES})=\alpha$%
-      test(p) {
-         test(q) r = loc; %// ${(\oplus p\oplus q, l_1 \leq \alpha)}$ %
+      ckp(p) {
+         ckp(q) r = loc; %// ${(\oplus p\oplus q, l_1 \leq \alpha)}$ %
          else r = ""; %// ${(\oplus p\ominus q, L \leq \alpha)}$ %
       }  else  {
-         test(q) r = id++loc; %// ${(\ominus p\oplus q, H \leq \alpha)}$ %
+         ckp(q) r = id++loc; %// ${(\ominus p\oplus q, H \leq \alpha)}$ %
          else r = ""; %// ${(\ominus p\ominus q, L \leq \alpha)}$ %
       }
       ret r;   
@@ -2029,7 +2029,7 @@ A.getInfo() {
 B.fun() { %// $B$ has permission $q$%
    init r in { %// $\Psi({\lpRES})=\beta$%
       letv x = "" in { %// $\Psi({x})=\gamma$, $(\epsilon, L\leq\gamma)$%
-         test(p) r = 0;  %// $(\oplus p, L\leq\beta) $%
+         ckp(p) r = 0;  %// $(\oplus p, L\leq\beta) $%
          else x = call A.getInfo();
          %//$\FT_{C}(A.getInfo) = ()\rightarrow \alpha$,  $(\ominus p, \app{\alpha}{\Theta(B)}\leq\gamma) $%
          if x == "" then r = 0;  %// $(\epsilon, L\leq\beta) $%
