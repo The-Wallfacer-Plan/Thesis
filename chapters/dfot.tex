@@ -197,21 +197,21 @@ This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphas
 
 
 
-\textbf{For P2.} AFLGo only considers the explicit call graph information.
-As a result, all function pointers are treated as \emph{external nodes} which 
+\textbf{For P2.} AFLGo only considers explicit call graph.
+Due to this, all function pointers are treated as \emph{external nodes} which 
 are ignored during distance calculation. 
 This means that, in an extreme case, if the target function is called via a function pointer, its distance from the actual caller is undefined. 
 For example, in Figure~\ref{fig:call_chain}, if $d$ and $e$ call $T$ via function pointers, both $d$ and $e$ will be mistakenly considered unreachable to $T$; consequently, all nodes except for $T$ will be considered unreachable to $T$. Therefore essentially there is no directedness in such a case.
-Besides, \aflgo counts the same callee in its callers only once, and it does not differentiate multiple call patterns between the caller and callee (see \S\ref{subsec:functionDist}).
+Besides, \aflgo counts the same callee in its callers only once, and does not differentiate various call patterns between the caller and callee (see \S\ref{subsec:functionDist}).
 The function level distance is calculated on the call graph with the Dijkstra shortest path, assuming the weight of two adjacent nodes (functions) in the call graph always to be 1, which will distort the distance calculation. 
 
 
 \textbf{For P3. } 
-\aflgo applies a simulated annealing based power scheduler: it favors those seeds that are closer~to~the target locations by assigning more energy to them for mutation; the applied cooling schedule initially assigns smaller weight on the effect of ``distance guidance'', until it reaches the ``exploitation'' phrase. It solves the ``exploration vs exploitation'' problem~\cite{eve} and mitigates the imprecision issue brought by the statically calculated basicblock level distance. In our opinion, this is an effective strategy. The problem is that there is no prioritization procedure so the newly generated seeds with smaller distance may wait for a long to be mutated.
+\aflgo applies a simulated annealing based power scheduler: it favors those seeds that are closer~to~the target locations by assigning more energy to them for mutation; the applied cooling schedule initially assigns smaller weight on the effect of ``distance guidance'', until it reaches the ``exploitation'' phrase. It solves the ``exploration vs exploitation'' problem~\cite{eve} and mitigates the imprecision issue brought by the statically calculated basicblock level distance. In our opinion, this is an effective strategy. The problem is that there lacks a prioritization procedure so the newly generated seeds with smaller distance may wait for a long to be mutated.
 
 
  
-\textbf{For P4. } The mutation operators of \aflgo come from AFL's two non-deterministic strategies: 1) \emph{havoc}, which does purely randomly mutations such as bit flips, chunk replacement, etc; 2) \emph{splice}, which generates seeds from some random byte parts of two existing seeds. 
+\textbf{For P4. } The mutation of \aflgo come from AFL's two non-deterministic strategies: 1) \emph{havoc}, which does purely random mutations such as bit flips, chunk replacement, etc; 2) \emph{splice}, which generates seeds from some random byte parts of two existing seeds. 
 Notably, during runtime \aflgo excludes all the deterministic mutation procedures and relies purely on the power scheduling on havoc/splice strategies.
 The randomness of these two strategies can indeed favor those with smaller distances to the target locations.
 However, it may also destroy the existing seeds that are close to them.
@@ -222,10 +222,10 @@ Hence, \aflgo lacks the adaptive mutation strategies, which will mutate arbitrar
 \textbf{Summary.} We summarize the following suggestions to improve DGFs:
 \begin{enumerate}[(1)] 
 	\itemsep0em
-	\item For \textbf{P1}, a more accurate distance definition is needed to retain trace diversity, avoiding the focus on short traces.
-	\item For \textbf{P2}, both direct and indirect calls need to be analyzed; various call patterns need to be distinguished during static distance calculation.
-	\item For \textbf{P3}, a moderation to the current power scheduling is required. The distance-guided seed prioritization is also needed. 
-	\item For \textbf{P4}, the DGF needs an adaptive mutation strategy, which optimally applies the fine-grained and coarse-grained mutations when the distance between the seed to the target locations is different.
+	\item For \textbf{P1}, an accurate distance definition is needed to retain trace diversity and mitigate the bias on short traces.
+	\item For \textbf{P2}, both direct and indirect calls need to be analyzed; different call patterns need to be distinguished during static distance calculation.
+	\item For \textbf{P3}, a moderation to the current power scheduling and a distance-guided seed prioritization strategy are preferable.
+	\item For \textbf{P4}, an adaptive mutation strategy is needed to optimally apply fine-grained and coarse-grained mutations.
 \end{enumerate}
 
 
@@ -258,9 +258,9 @@ Lastly, the target program is instrumented to keep track of the edge transitions
 The inputs of fuzzing loop are the \textit{instrumented program binary},~the \textit{initial seeds}, the \textit{target locations} as well as the information of \textit{function level distance} and \textit{target function trace closure}.
 The outputs~of~fuzzing loop are the seeds that cause abnormal program behaviors such as crashes or timeouts.
 
-During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target locations more mutation chances, i.e., energy (\S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basicblock trace distance}. For each newly generated seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basicblock trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basicblock trace distance is calculated as the accumulated basicblock level distances divided by the total number of executed basicblocks; and its covered function similarity is calculated based on the overlapping of current executed functions and the target function trace closure, as well as the function level distance.
+During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target locations more mutation chances (a.k.a. energy, \S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basicblock trace distance}. For each newly generated seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basicblock trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basicblock trace distance is calculated as the accumulated basicblock level distances divided by the total number of executed basicblocks; and its covered function similarity is calculated based on the conjunction of covered functions and the target function trace closure, as well as the function level distance.
 
-After the energy is determined, the fuzzer adaptively allocates mutation budgets on two different categories of mutations according to mutators' granularities on the seed (\S\ref{subsec:mutationStr}).
+After the energy is determined, the fuzzer adaptively allocates mutation budgets on two categories of mutations according to mutators' granularities on the seed (\S\ref{subsec:mutationStr}).
 Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those that have more energy or that have reached the target functions (\S\ref{subsec:prioritization}).
 
 
