@@ -16,5 +16,6 @@ main.pdf
 main.toc
 main.txt
 main_all.tex
+*.synctex.gz
 
 .texpadtmp/

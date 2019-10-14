@@ -86,7 +86,7 @@ Finally, we review the state-of-the-art DGF, namely \aflgo~\cite{Bohme:2017:DGF}
 
 
 
-Figure~\ref{fig:exam_trace} shows two execution traces related to CVE-2017-15939~\cite{cve-2017-15939}, which is a NULL pointer dereference bug caused by~an incomplete fix in CVE-2017-15023~\cite{cve-2017-15023}.
+Figure~\ref{fig:exam_trace} shows two execution traces related to CVE-2017-15939~\cite{cve-2017-15939}, which is a NULL pointer dereference bug caused by~an incomplete fix in CVE-2017-15023~\cite{cve_2017_15023}.
 This vulnerability is difficult for~the~existing GBFs to discover.
 For instance, AFL~\cite{afl} fails to detect this vulnerability within 24 hours in all the 10 different runs we conducted.
 This bug is triggered in \texttt{nm} from GNU binutils.
@@ -190,8 +190,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 \end{figure*}
 
 \textbf{For P1.} 
-For Figure~\ref{fig:call_chain}, based on the distance formula defined in \aflgo
-the trace distances are:  $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
+In \aflgo, the seed distance to a specific target basicblock/function is calculated as the average shortest distance of basicblocks/function the seed covers. For example, in Figure~\ref{fig:call_chain}, for trace $a\rightarrow b\rightarrow c\rightarrow d\rightarrow T\rightarrow Z$, given the fact that $d(a, T)=2$ (shortest path: $a\rightarrow e\rightarrow T$), $d(b,T)=3$ (shortest path: $b\rightarrow c\rightarrow d\rightarrow T$), $d(c,T)=2$ (shortest path: $c\rightarrow d\rightarrow T$), $d(d,T)=1$ (shortest path: $d\rightarrow T$), we can see $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$. Analogously, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
 Given these three execution traces, the energy assigned to them will be $ \langle a, e, T, Z\rangle$ $>$ $\langle a, e, f , Z\rangle$ $>$ $\langle a, b, c, d, T, Z\rangle$.
 This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphasized; the crashing trace $\langle a, b, c, d, T, Z\rangle$ is however considered the least important, even less important than the trace $\langle a, e, f , Z\rangle$ that fails to reach the target $T$.
 
@@ -258,7 +257,7 @@ Lastly, the target program is instrumented to keep track of the edge transitions
 The inputs of fuzzing loop are the \textit{instrumented program binary},~the \textit{initial seeds}, the \textit{target locations} as well as the information of \textit{function level distance} and \textit{target function trace closure}.
 The outputs~of~fuzzing loop are the seeds that cause abnormal program behaviors such as crashes or timeouts.
 
-During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target locations more mutation chances (a.k.a. energy, \S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basicblock trace distance}. For each newly generated seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basicblock trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basicblock trace distance is calculated as the accumulated basicblock level distances divided by the total number of executed basicblocks; and its covered function similarity is calculated based on the conjunction of covered functions and the target function trace closure, as well as the function level distance.
+During fuzzing, the fuzzer selects a seed from a priority seed queue. The fuzzer applies a \textit{power scheduling} against the seed with~the goal of giving those seeds that are considered to be ``closer'' to the target locations more mutation chances (a.k.a. energy, \S\ref{subsec:powerSche}). Specifically, this is achieved through a power function, which is a combination of the \textit{covered function similarity} and the \textit{basicblock trace distance}. For each newly generated seed during mutation, after capturing its execution trace, the fuzzer will calculate the covered function similarity and the basicblock trace distance based on the utilities (\S\ref{subsec:static_flow}). For each input execution trace, its basicblock trace distance is calculated as the accumulated basicblock level distances divided by the total number of executed basicblocks; and its covered function similarity is calculated based on the intersection of covered functions and the target function trace closure, as well as the function level distance.
 
 After the energy is determined, the fuzzer adaptively allocates mutation budgets on two categories of mutations according to mutators' granularities on the seed (\S\ref{subsec:mutationStr}).
 Afterwards, the fuzzer evaluates the newly generated seeds to prioritize those that have more energy or that have reached the target functions (\S\ref{subsec:prioritization}).
@@ -272,7 +271,7 @@ This section elaborates the key components in Figure~\ref{fig:overview} featurin
 
 \subsection{Graph Construction} \label{subsec:graghCons}
 
-To calculate the accurate distance from a seed to the oracle seed executing the target locations, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basicblock distance in \S\ref{subsec:UtilityComputation}.
+To calculate the accurate distance from a seed to the target locations, we first build up the CG and CFG, then combine them to construct the final inter-procedural CFG. Note that CG is used to compute the function level distance in \S\ref{subsec:functionDist} and \S\ref{subsec:UtilityComputation}, CFG together with CG (i.e., inter-procedural CFG) is used to compute the basicblock distance in \S\ref{subsec:UtilityComputation}.
 
 
 
@@ -605,7 +604,7 @@ By combining all the static and dynamic techniques mentioned above, for the CVE 
 
 \section{Evaluation}\label{sec:eval}
 
-We implemented our instrumentation on top of FOT's static instrumentation mode (c.f. \S\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are availale on \url{https://sites.google.com/view/ccs2018-fuzz}.
+We implemented our instrumentation on top of FOT's static instrumentation mode (c.f. \S\ref{ch:fot}) and the pointer analysis is based on the interprocedural static value-flow analysis tool called SVF~\cite{Sui:2016:SVF}; this part takes about 2000 lines of C/C++ code based on the LLVM~\cite{Lattner:2004:LCF:977395.977673} infrastructure. For directed fuzzing purpose, we add another 4000 lines of code for tracing functions, calculating power function for seeds, distinguishing graininess of mutators, and so on. More details are available on \url{https://sites.google.com/view/ccs2018-fuzz}.
 
 For each program with the given target locations, the instrumentation of {\dFOT} consists of three parts: 1) basicblock IDs that track the execution traces 2) basicblock distance information that determines basicblock trace distance and 3) function IDs that track functions that have been covered. 
 
@@ -781,7 +780,7 @@ Therefore, the major differences between {\dFOT} and {\dGO} is the dynamic part.
 Due to the aforementioned performance issues of \aflgo~in static analysis on Oniguruma and other big projects, hereinafter, we use \dGO as an alternative	to \aflgo in the subsequent experiments.
 We therefore compare {\dFOT} with {\dGO} to show the effectiveness of our dynamic strategies.
 
-In Table~\ref{tbl:exp_onig}, we compare \dFOT with \dGO and AFL against the Oniguruma regex library. The first three bugs come from the reported CVEs which occur on version 6.2.0, and Bug \#4 is an newly fixed vulnerability issue on its GitHub pages.
+In Table~\ref{tbl:exp_onig}, we compare \dFOT with \dGO and AFL against the Oniguruma regex library. The first three bugs come from the reported CVEs which occur on version 6.2.0, and Bug \#4 is a newly fixed vulnerability issue on its GitHub pages.
 Some observations are: 
 1) For \#3 and \#4,  \dFOT achieves the best results among the three tools. 
 Especially, for \#4, the improvements in both hitting rounds and  {\utte} are highly significant. 
@@ -901,7 +900,7 @@ Note that our proposed four properties can also be applied for DGF on programs w
 
 \subsection{Directed Symbolic Execution}.
 Directed Symbolic Execution (DSE) is one of the most related techniques to DGF as it also aims to execute target locations of the target program.
-Several works have been proposed for DSE~\cite{Godefroid:2005:DART, Ma:2011:DSE:2041552.2041563, Haller:2013:DOG, Jin:2012, Marinescu:2013:katch}.
+Several works have been proposed for DSE~\cite{dart, Ma:2011:DSE:2041552.2041563, Haller:2013:DOG, Jin:2012, Marinescu:2013:katch}.
 These DSE techniques rely on heavyweight program analysis and  constraint-solving to reach the target locations systematically.
 A typical example of DSE is Katch~\cite{Marinescu:2013:katch}, which relies on symbolic execution, augmented by several synergistic heuristics based on static and dynamic program analysis.
 Katch can effectively find bugs in incomplete patches and increase the patch coverage comparing to manual test suite.
