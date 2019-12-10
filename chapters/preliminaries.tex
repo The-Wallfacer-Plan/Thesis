@@ -32,11 +32,11 @@ Since its introduction in the early 1990s~\cite{fuzzing1990}, \emph{fuzz testing
 Greybox fuzzers (GBFs), which apply some instrumentations and utilize the collected dynamic statistics as feedback to guide the fuzzing procedure, have been proven to be effective in generating seeds and detecting vulnerabilities in modern programs~\cite{fuzz_survey}. Specially, AFL~\cite{afl}, libFuzzer~\cite{libfuzzer}, honggfuzz~\cite{honggfuzz} and the fuzzing infrastructure ClusterFuzz~\cite{clusterfuzz} have been able to detect more than 16,000 vulnerabilities or bugs in over 160 open source projects~\cite{afl,clusterfuzz}. Greybox fuzzing strikes a balance between mutation effectiveness and it execution speed. Compared to blackbox fuzzing, greybox fuzzing, to some extent, is aware of the structure of the target program under test via the instrumentation, therefore it has the capability to effectively guides the fuzzing procedure to much more valuable paths. Compared to white-box fuzzing techniques such as symbolic execution~\cite{dart,klee}, it is extremely lightweight and far more scalable to real-world projects.
 
 
-Algorithm~\ref{algo:gbf} presents the core procedures of a typical greybox fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop. Given a target program \ProgO and input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual target program is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weakness inside \ProgO. In practice, this difference is usually neglected.
+Algorithm~\ref{algo:gbf} presents the core procedures of a typical greybox fuzzing algorithm. Basically, it involves an instrumentation step and a fuzzing loop. Given a target program \ProgO and input seeds \Seeds, a GBF first applies the instrumentation to track the coverage information in \ProgO. That is, the actual target program is \Prog. In spite of the difference, since the instrumentation typically does not significantly change the regular flow of a program's semantics, the crash on \Prog usually still indicates a weaknesses inside \ProgO. In practice, this difference is usually neglected.
 The instrumentation can be done statically or dynamically. Static source instrumentation is usually applied during the source compilation procedure, with the help of compilation infrastructure such as LLVM~\cite{Lattner:2004:LCF:977395.977673}, GCC~\cite{gcc}. Dynamic binary instrumentation (DBI) is done with the help of DBI frameworks such as Valgrind~\cite{valgrind}, Intel PIN~\cite{pin}. Logically, instrumentation does not belong to fuzzing procedure, and its purpose is to collect feedback during fuzzing. Usually, the instrumentation does not involve deep static analyses.
 The fuzzing loop does the actual mutations and testings against the program.
 \begin{enumerate}[1.]
-	\item Based on the seed priority, \emph{seed selection} selects next candidate seed $t$ from the queue which is formed by \Seeds.
+	\item Based on the seed priority, \emph{seed se15lection} selects next candidate seed $t$ from the queue which is formed by \Seeds.
 	\item \emph{Seed mutation} procedure determines based on previous execution statistics on $t$ to determine how many mutation chances (\mutChance) will be provided for $t$.
 	\item It enters the \emph{monitored execution} against the variants of $t$ with \mutChance iterations. 
 	\begin{enumerate}[a)]
@@ -73,7 +73,9 @@ Some complex data structures may result in subtle information leaks. For example
 
 \begin{lstlisting}[language=c]
 a[secret] := 1;
-for (int i := 0; i < a.length; i++) {  if (a[i] == 1) leak := i;}
+for (int i := 0; i < a.length; i++) {
+  if (a[i] == 1) leak := i;
+}
 \end{lstlisting}
 
 \subsubsection{The Non-interference Property}
