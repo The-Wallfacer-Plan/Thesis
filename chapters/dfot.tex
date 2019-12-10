@@ -189,7 +189,7 @@ In this section, we evaluate the solution of \aflgo against the four desired pro
 \end{figure*}
 
 \textbf{For P1.} 
-In \aflgo, the seed distance to a specific target basicblock/function is calculated as the average shortest distance of basicblocks/function the seed covers. For example, in Figure~\ref{fig:call_chain}, for trace $a\rightarrow b\rightarrow c\rightarrow d\rightarrow T\rightarrow Z$, given the fact that $d(a, T)=2$ (shortest path: $a\rightarrow e\rightarrow T$), $d(b,T)=3$ (shortest path: $b\rightarrow c\rightarrow d\rightarrow T$), $d(c,T)=2$ (shortest path: $c\rightarrow d\rightarrow T$), $d(d,T)=1$ (shortest path: $d\rightarrow T$), we can see $d_s(abcdTZ)=(2+3+2+1+0)/5=1.6$. Analogously, $d_s(aeTZ)=(2+1+0)/3=1$ and $d_s(aefZ)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
+In \aflgo, the seed distance to a specific target basicblock/function is calculated as the average shortest distance of basicblocks/function the seed covers. For example, in Figure~\ref{fig:call_chain}, where the nodes are functions, for trace $a\rightarrow b\rightarrow c\rightarrow d\rightarrow T\rightarrow Z$, given the fact that $d(a, T)=2$ (shortest path: $a\rightarrow e\rightarrow T$), $d(b,T)=3$ (shortest path: $b\rightarrow c\rightarrow d\rightarrow T$), $d(c,T)=2$ (shortest path: $c\rightarrow d\rightarrow T$), $d(d,T)=1$ (shortest path: $d\rightarrow T$), we can see $d_s(\langle a,b,c,d,T,Z\rangle)=(2+3+2+1+0)/5=1.6$. Analogously, $d_s(\langle a,e,T,Z\rangle)=(2+1+0)/3=1$ and $d_s(\langle a,e,f,Z\rangle)=(2+1)/2=1.5$~\footnote{In practice, \aflgo calculates the trace distance at the \emph{basicblock} level with harmonic mean of the accumulative distance; nevertheless, the essential idea is the same.}. 
 Given these three execution traces, the energy assigned to them will be $ \langle a, e, T, Z\rangle$ $>$ $\langle a, e, f , Z\rangle$ $>$ $\langle a, b, c, d, T, Z\rangle$.
 This is problematic: the normal trace $\langle a, e, T, Z\rangle $ is overemphasized; the crashing trace $\langle a, b, c, d, T, Z\rangle$ is however considered the least important, even less important than the trace $\langle a, e, f , Z\rangle$ that fails to reach the target $T$.
 
@@ -331,18 +331,19 @@ void fa(int i) {
 
 Therefore, we propose two metrics to augment the distance that is defined by immediate calling relation between caller and callee.
 \begin{enumerate}[(1)] 
-\item Call site occurrences \csnum~of a certain callee for a given caller. More occurrences of callee could incur more chance that callee will be dynamically executed with more different (actual) parameters, and in return the distance between the caller to the callee will be smaller. We apply a factor $\Phi(\csnum)=\frac{\phi\cdot \csnum+1}{\phi\cdot \csnum}$ to denote this effect, where $\phi$ is a constant value (usually, $\phi=2$).
-\item The number of basicblocks \csbb~in the caller that contains at least one call site of the callee. The rationale is that, with more branches that have a call site, more different execution traces will include the callee. The factor function $\Psi(\csbb)=\frac{\psi\cdot \csbb+1}{\psi\cdot \csbb}$ denotes this effect, and $\psi$ is a constant value (usually, $\psi=2$).
+\item Call site occurrences $\csnumn{f_1}{f_2}$~of a certain callee $f_2$ for a given caller $f_1$. More occurrences of callee could incur more chance that callee will be dynamically executed with more different (actual) parameters, and in return the distance between the caller to the callee will be smaller. We apply a factor $\Phi(f_1,f_2)=\frac{\phi\cdot \csnumn{f_1}{f_2}+1}{\phi\cdot \csnumn{f_1}{f_2}}$ to denote this effect, where $\phi$ is a constant value.
+\item The number of basicblocks $\csbbn{f_1}{f_2}$~in the caller that contains at least one call site of the callee. The rationale is that, with more branches that have a call site, more different execution traces will include the callee. The factor function $\Psi(f_1,f_2)=\frac{\psi\cdot \csbbn{f_1}{f_2}+1}{\psi\cdot \csbbn{f_1}{f_2}}$ denotes this effect, and $\psi$ is a constant value.
 \end{enumerate}
 
-Note that both factor functions are monotone decreasing functions; also, $\Phi$ converges to 1 when $C_N\rightarrow\infty$ and $\Psi$ converges to 1 when $C_B\rightarrow 1$.
-Given a (direct or indirect) immediate function call pair $( f_1, f_2)$ where $f_1$ is the caller and $f_2$ is the callee, the original distance between $f_1$ and $f_2$ is 1 (see \aflgo~\cite{Bohme:2017:DGF}). Now, with the two metrics mentioned above, we can define the augmented distance between the function pairs that holds an immediate call relation. The final adjustment factor will be a multiplication of $\Phi$ and $\Psi$, and the \emph{augmented adjacent-function distance} is
+By default, we choose $\phi=2$ and $\psi=2$, to balance the effects of the considered two metrics.
+Note that both factor functions are monotone decreasing functions; also, $\Phi(f_1,f_2)$ converges to 1 when $\csnumn{f_1}{f_2}\rightarrow\infty$ and $\Psi(f_1,f_2)$ converges to 1 when $\csbbn{f_1}{f_2}\rightarrow 1$.
+Given a (direct or indirect) immediate function call pair $( f_1, f_2)$ where $f_1$ is the caller and $f_2$ is the callee, the original distance between $f_1$ and $f_2$ is 1. Now, with the two metrics mentioned above, we can define the augmented distance between the function pairs that holds an immediate call relation. The final adjustment factor will be a multiplication of $\Phi$ and $\Psi$, and the \emph{augmented adjacent-function distance} is
 {\myeqsize\begin{equation}
  \traceFnDistPrime{f_1}{f_2} =  \Psi(f_1, f_2)\cdot\Phi(f_1, f_2)
 \end{equation}}
 where $\traceFnDistPrime{f_1}{f_2}$ refers to the \emph{augmented} \emph{direct} function distance. 
 
-As an example, in Figure~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\csbbn{f_a}{f_b}=2$; and for $f_c$, $\csnumn{f_a}{f_c}=1$, $\csbbn{f_a}{f_c}=1$. Assume $\phi=2$ and $\psi=2$ and assume the original distance $\traceFnDist{f_a}{f_b}=\traceFnDist{f_a}{f_c}=1$, the augmented distances will be $\traceFnDistPrime{f_a}{f_c}=\frac{3}{2}\cdot\frac{3}{2}=2.25$, and $\traceFnDistPrime{f_a}{f_b}=\frac{5}{4}\cdot\frac{5}{4}=1.56$.
+ As an example, in Figure~\ref{subfig:dist1}, for $f_b$, $\csnumn{f_a}{f_b}=2$, $\csbbn{f_a}{f_b}=2$; and for $f_c$, $\csnumn{f_a}{f_c}=1$, $\csbbn{f_a}{f_c}=1$. Assume $\phi=2$ and $\psi=2$ and assume the original distance $\traceFnDist{f_a}{f_b}=\traceFnDist{f_a}{f_c}=1$, the augmented distances will be $\traceFnDistPrime{f_a}{f_c}=\frac{3}{2}\cdot\frac{3}{2}=2.25$, and $\traceFnDistPrime{f_a}{f_b}=\frac{5}{4}\cdot\frac{5}{4}=1.56$.
 
 
 A special case not shown in the above examples is that some branches form cycles (i.e., loops). Indeed, these functions may be called multiple times at runtime. However, it is uncertain the sense that \emph{how many times} they will be executed across different runs when fed with different seeds. Fortunately, actual execution on one call site of a callee inside one loop typically has similar effect --- the loop explores the similar program states and benefits less in covering new paths. Hence, the function call inside the loop does not bring many execution trace diversities like the scenario where the same callee occurs in multiples branches with significantly different parameters.
@@ -407,7 +408,7 @@ where \bbtrace{s} is the execution trace of a seed $s$ and contains all the basi
 It then applies a feature scaling normalization to get the final distance $\traceDistFinal{s}{\tgtbbset}=\frac{\traceDist{s}{\tgtbbset}-minD}{maxD-minD}$ where $minD$ (or $maxD$) is the smallest (or largest) distances ever met.
 
 
-\textbf{Covered Function Similarity.} This metric measures the similarity between a seed's execution trace and the target execution trace \emph{at function level}. We do not track basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the expected traces have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the seed's covered function \emph{sets} (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Figure~\ref{fig:call_chain}, $\xi_f(abcdTZ)=\{a,b,c,d,T\}$, $\xi_f(aeTZ)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
+\textbf{Covered Function Similarity.} This metric measures the similarity between a seed's execution trace and the target execution trace \emph{at function level}. We do not track basicblock level trace similarity since that would introduce considerable overheads. The similarity is calculated based on the intuition that seeds covering more functions in the expected traces have more chances to be mutated to reach the target locations. This similarity is calculated by tracking the seed's covered function \emph{sets} (denoted as \fntrace{s}) and comparing it with the target function trace closure $\fntrace{\tgtfnset}$.  In the example in Figure~\ref{fig:call_chain}, $\xi_f(\langle a,b,c,d,T,Z\rangle)=\{a,b,c,d,T\}$, $\xi_f(\langle a,e,T,Z\rangle)=\{a,e,T\}$ and $\xi_f(aefZ)=\{a,e\}$.
 
 The covered function similarity is then determined by the following formula:
 {\myeqsize\begin{equation}
@@ -672,7 +673,7 @@ Our experiments are conducted on an Intel(R) Xeon(R) CPU E5-2697 v3 @ 2.60GHz wi
 
 
 In Table~\ref{tbl:stats}, the first three columns denote the projects, programs and the sizes in their LLVM bitcode form. \emph{ics} denotes the number of indirect call sites in the binary, which is calculated by counting those call sites without explicitly known callees; \emph{cs} is the number of call sites; \emph{ics/cs} denotes the percentage of indirect calls among all call sites. 
-The next two columns denote the number where $C_B>1$ and $C_N>1$ (\S~\ref{subsec:functionDist}), respectively. The last column denotes the time cost of call graph generation, which takes the majority of the time among all the directedness utility computation.
+The next two columns denote the number where $\csnumn{f_1}{f_2}>1$ and $\csbbn{f_1}{f_2}>1$ between two adjacent functions $f_1$ and $f_2$, respectively. The last column denotes the time cost of call graph generation, which takes the majority of the time among all the directedness utility computation.
 
 
 
@@ -680,7 +681,7 @@ We can see from  the table that the chosen benchmarks have fair diversities in t
 It is also noticeable that the number of indirect function calls may contribute a large portion to the total number of function calls.
 Specifically, in libpng, $44.11\%$ function calls are indirect function calls.
 This clearly shows the importance of building precise call graphs.
-Furthermore, the number of occurrences of $C_N>1$ and the number of occurrences of $C_B>1$ are also large, which shows the importance of taking into consideration the different patterns of call relations.
+Furthermore, the number of occurrences of $\csnumn{f_1}{f_2}>1$ and the number of occurrences of $\csbbn{f_1}{f_2}>1$ are also large, which shows the importance of taking into consideration the different patterns of call relations.
 
 
 
