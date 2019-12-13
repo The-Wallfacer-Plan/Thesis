@@ -47,7 +47,7 @@ The fuzzing loop does the actual mutations and testings against the program.
 \end{enumerate}
 As the fuzzer's awareness of the program structure is based on the instrumentation feedback, a GBF typically does not \emph{know} the target program itself; therefore it usually has no idea when to stop the fuzzing procedure. In practice, however, this is not an issue since the fuzzing procedure is terminated manually or canceled within a time thredshold.
 
-In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,FairFuzz,CollAFL,Angora,nezha,fuzz_survey}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the greybox fuzzing.
+In the recent years, many approaches have been proposed to increase the fuzzing effectiveness in different aspects~\cite{Bohme:2016:CGF,LiCMLLT17,Bohme:2017:DGF,FairFuzz,CollAFL,Angora,nezha,fuzz_survey,issta19:deephunter,fse19:deepstellar}. For example, Angora~\cite{Angora} proposes to introduce fine-grained instrumentation and applies constraint solving to increase coverages; Coll-AFL~\cite{CollAFL} proposes a path sensitive approach to avoid collisions; Skyfire~\cite{junjie:2017sp:skyfire} attempts to improve the mutation operations on structure-sensitive programs. These have lead to further advances in the greybox fuzzing.
 
 \section{Type Checking Based Verification}\label{sec:intro-sta}
 

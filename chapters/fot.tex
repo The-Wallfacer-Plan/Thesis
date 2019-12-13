@@ -29,7 +29,7 @@ In this sense, we propose our fuzzing framework, \emph{Fuzzing Orchestration Too
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.5\textwidth]{res/fot/FOT_overview}
+	\includegraphics[width=0.6\textwidth]{res/fot/FOT_overview}
 	\caption{The architecture of the {\FOT} fuzzing framework}
 	\label{fig:fot_workflow}
 \end{figure}
@@ -45,7 +45,7 @@ This part consists of multiple tools to collect statically calculated metrics wh
 
 
 \subsubsection{Static Analyzer}\label{sec:static_analysis}
-This includes several analyzers to extract interesting semantics from the target program, such as control flow graph generation, data flow analysis results, as well as the metric utility to fit them for instrumentation.
+This includes several analyzers to extract interesting semantics from the target program, such as control flow graph generation, data flow analysis results, as well as the metric utility to fit them for instrumentation~\cite{icse19:leopard,fse19:cerebro}.
 It is \textit{configurable} to generate different levels of static information. It is \textit{extensible} as developers are allowed to add new types of static analysis as long as the generated result follows the specified format.
 
 
@@ -91,7 +91,7 @@ It is \textit{extensible} as end-users can specify their customized types of fee
 \subsection{Complementary Toolchains}
 {\FOT} contains various complementary tools which help to make the framework \textit{versatile}.
 For instance, we implemented a web-based frontend user interface to observe the overall results, which provides intuitive and fruitful information for manual monitoring.
-We also have a crash analyzer to analyze the detected crashes and automatically generate reports.
+We also have a crash analyzer to analyze the detected crashes and automatically generate reports~\cite{MemRecover}.
 This greatly reduces the manual efforts of crash triaging.
 Many other tools are also being added to complement the fuzzer.
 

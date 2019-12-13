@@ -5,7 +5,7 @@
 \section{Introduction and Motivation}\label{sec:sta_intro}
 
 Owing to the pervasive use of mobile applications (apps), mobile security has become increasingly important for our daily life.
-Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791}) that focus on detecting potential security violations. Here we are interested in the problem of designing secure apps.
+Among all different kinds of mobile devices, Android accounts for the majority of them. Due to this, security analysis on them has been of significant interests. There has been a quantity of analyses on Android security~(\cite{Enck:2009:UAS:1512148.1512324, Fuchs2010, Arzt:2014:FPC:2666356.2594299, Wei:2014:APG:2660267.2660357, Li:2015:IDI:2818754.2818791,icse18:androidApp}) that focus on detecting potential security violations. Here we are interested in the problem of designing secure apps.
 In particular, we aim to provide a guarantee for information flow security in the constructed apps. Although testing approaches are widely used in detecting Android security issues such as malware analysis, it however fails to stress the ``higher level'' permission relevant information leakage issue. In fact, testing approaches can only detect some data leakage issues, however cannot guarantee the absence of leakage. In order to achieve this, we apply a type checking based verification approach.
 
 \subsection{Motivating Examples}
@@ -284,7 +284,7 @@ are either introduced by \textbf{letv} or from the set $\{\overline{x}, r\}$.
 
 
 \begin{figure*}[ht]
-{\tiny
+{\scriptsize
 \[
 \inference[E-VAL]{}{\mu \vdash \leVAL{v}  \leadsto v}
 \qquad
@@ -547,7 +547,7 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 
 
 \begin{figure*}
-\tiny
+\footnotesize
 \[
 \inference[T-VAR]{}
 {\Psi \vdash \leVAR{x} : \Psi(x)}
@@ -555,7 +555,9 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 \inference[T-OP]
 {\Psi\vdash e_1: t & \Psi ; A\vdash e_2: t}
 {\Psi\vdash \leOP{e_1}{e_2} : t}
-\qquad
+\]
+
+\[
 \inference[T-SUB$_{e}$]
 {\Psi\vdash e : s & s \leq t}
 {\Psi\vdash e : t}
@@ -574,22 +576,24 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 {\Psi \vdash e : s &
 \Psi[x:s]; A \vdash c : t }
 {\Psi; A\vdash \lcLETV{x}{e}{c} :  t}
-\qquad
-\inference[T-IF]
-{\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
-{\Psi; A \vdash \lcIF{e}{c_1}{c_2} : t}
 \]
 
 \[
+\inference[T-IF]
+{\Psi \vdash e : t & \Psi ; A\vdash c_1 : t & \Psi; A \vdash c_2 : t }
+{\Psi; A \vdash \lcIF{e}{c_1}{c_2} : t}
+\qquad
 \inference[T-CP]
 {\Psi\uparrow_{p} ; A \vdash c_1 : t_1 &
 \Psi\downarrow_{p} ; A\vdash c_2 : t_2}
 {\Psi; A\vdash \lcCP{p}{c_1}{c_2} : \omerge p {t_1} {t_2}}
-\qquad
+\]
+
+\[
 \inference[T-WHILE]
 {\Psi \vdash e : t & \Psi ; A\vdash c : t  }
 {\Psi; A \vdash \lcWHILE{e}{c} : t }
-\quad
+\qquad
 \inference[T-SEQ]
 {\Psi; A\vdash c_1 : t & \Psi ; A\vdash c_2 : t }
 {\Psi ; A\vdash \lcSEQ{c_1}{c_2} : t}
@@ -602,7 +606,9 @@ where $\overline{t} = (t_1,\dots, t_m)$, are respectively:
 \app{t'}{\Theta(A)} \leq \Psi(x)}
 {\Psi; A \vdash \lcCALL{x}{B.f}{\overline{e}} :
  \Psi(x)  }
-\qquad
+\]
+
+\[
 \inference[T-FUN]
 {[\overline{x}:\overline{t}, r : t'] ; B\vdash c : s}
 { \vdash \lpFUN{B.f}{\overline{x}}{c} :
@@ -1757,7 +1763,7 @@ The judgments of the trace rules are similar to those of typing rules, except th
 and that the subtyping relation in the trace rules is the partial subtyping one $\leq_{\trace}$.
 
 \begin{figure*}[ht]
-\begin{tiny}
+\begin{scriptsize}
 \[
 \inference[TT-VAR]{}
 {\Psi;\trace\vdash_{t} \leVAR{x} : \Psi(x)}
@@ -1781,7 +1787,9 @@ and that the subtyping relation in the trace rules is the partial subtyping one 
 t \leq_{\trace} t_1\sqcap t_2
 }
 {\Psi;\trace;  A \vdash_{t} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2}
-\qquad
+\]
+
+\[
 \inference[TT-SEQ]
 {\Psi;\trace; A \vdash_{t} c_1 : t_1 \quad \Psi;\trace; A \vdash_{t} c_2 : t _2}
 {\Psi;\trace; A \vdash_{t} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2}
@@ -1792,7 +1800,9 @@ t \leq_{\trace} t_1\sqcap t_2
 {\Psi;\trace \vdash_{t} e : s &
 \Psi[x:s']; \trace; A \vdash_{t} c : t & s \leq_{\trace} s' }
 {\Psi;\trace; A\vdash_{t} \lcLETV{x}{e}{c} :  t}
-\qquad
+\]
+
+\[
 \inference[TT-WHILE]
 {
 \Psi;\trace \vdash_{t} e : s &
@@ -1823,7 +1833,7 @@ t \leq_{\trace} t_1\sqcap t_2
 }
 {\vdash_{t} \lpPROG{B.f}{\overline{x}}{c}{\lpRES} :  \overline{t}\xrightarrow{} t'}
 \]
-\end{tiny}
+\end{scriptsize}
 \caption{Permission trace rules for expressions, commands, and functions} \label{fig:infer-rules}
 \end{figure*}
 
@@ -1878,13 +1888,15 @@ Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \te
 \end{definition}
 
 \begin{figure*}[ht]
-\begin{tiny}
+\begin{scriptsize}
 \[
 \inference[TG-OP]
 {\Psi;\trace \vdash_{g} e_1: t_1 \leadsto C_1 &
  \Psi;\trace \vdash_{g} e_2: t_2 \leadsto C_2}
 {\Psi;\trace \vdash_{g} \leOP{e_1}{e_2} : t_1\sqcup t_2\leadsto C_1\cup C_2}
-\quad
+\]
+
+\[
 \inference[TG-ASS]
 {\Psi;\trace \vdash_{g} e : t \leadsto C }
 {\Psi;\trace; A \vdash_{g} \lcASS{x}{e} : \Psi(x)\leadsto C\cup \{ (\trace, t \leq_{} \Psi(x))\} }
@@ -1896,10 +1908,12 @@ Given a constraint set $C$ and a substitution $\theta$, we say $\theta$ is a \te
 \inference[TG-VAR]
 {}
 {\Psi;\trace \vdash_{g} \leVAR{x} : \Psi(x)\leadsto \emptyset}
-\quad
+\]
+
+\[
 \inference[TG-LETV]
-{\Psi;\trace \vdash_{g} e : s \leadsto C_1 \\
-\Psi[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \\
+{\Psi;\trace \vdash_{g} e : s \leadsto C_1 \quad
+\Psi[x:\alpha]; \trace; A \vdash_{g} c : t \leadsto C_2 \quad
 C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 }
 {\Psi;\trace; A\vdash_{g} \lcLETV{x}{e}{c} :  t\leadsto C}
@@ -1909,14 +1923,16 @@ C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 \[
 \inference[TG-WHILE]
 {
-\Psi;\trace \vdash_{g} e : s  \leadsto C \\
+\Psi;\trace \vdash_{g} e : s  \leadsto C \quad
 \Psi;\trace; A \vdash_{g} c : t \leadsto C'
 }
 {\Psi;\trace;  A \vdash_{g} \lcWHILE{e}{c} : t  \leadsto C\cup C' \cup\{(\trace,s\leq_{} t)\}}
-\quad
+\]
+
+\[
 \inference[TG-SEQ]
 {
-\Psi;\trace; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+\Psi;\trace; A \vdash_{g} c_1 : t_1  \leadsto C_1 \quad
 \Psi;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2
 }
 {\Psi;\trace; A \vdash_{g} \lcSEQ{c_1}{c_2} : t_1\sqcap t_2 \leadsto C_1\cup C_2}
@@ -1925,16 +1941,18 @@ C = C_1\cup C_2 \cup \{(\trace, s \leq_{} \alpha) \}
 \[
 \inference[TG-IF]
 {
-\Psi;\trace; A \vdash_{g} c_1 : t_1 \leadsto C_1 \\
-\Psi;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2 \\
-\Psi;\trace \vdash_{g} e : t \leadsto C_e \\
+\Psi;\trace; A \vdash_{g} c_1 : t_1 \leadsto C_1 \quad
+\Psi;\trace; A \vdash_{g} c_2 : t_2 \leadsto C_2 \quad
+\Psi;\trace \vdash_{g} e : t \leadsto C_e \quad
 C = C_e\cup C_1\cup C_2 \cup \{(\trace, t \leq_{} t_1\sqcap t_2) \}}
 {\Psi;\trace;  A \vdash_{g} \lcIF{e}{c_1}{c_2} : t_1\sqcap t_2 \leadsto C}
-\quad
+\]
+
+\[
 \inference[TG-CALL]
 {
-\FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \\
-\Psi;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \\
+\FT_{C}(B.f) = (\overline{t} \xrightarrow{} t', C_{f})  \quad
+\Psi;\trace \vdash_{g} \overline{e} : \overline{s} \leadsto \bigcup \overline{C_{e}} \quad
 C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, \app{t'}{\Theta(A)}\leq_{} \Psi(x))\} }
 {
 \Psi;\trace; A \vdash_{g} \lcCALL{x}{B.f}{\overline{e}} : \Psi(x)\leadsto C_{f} \cup \bigcup\overline{C_{e}}\cup C_{a}
@@ -1944,11 +1962,13 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 \[
 \inference[TG-CP]
 {
-\Psi;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \\
+\Psi;\trace::\tplus p; A \vdash_{g} c_1 : t_1  \leadsto C_1 \quad
  \Psi;\trace::\tminus p; A \vdash_{g} c_2 : t_2  \leadsto C_2
  }
 {\Psi;\trace; A \vdash_{g} \lcCP{p}{c_1}{c_2} : \omerge{p}{t_1}{t_2} \leadsto C_1\cup C_2}
-\quad
+\]
+
+\[
 \inference[TG-FUN]
 {
 [\overline{x}: \overline{\alpha},\lpRES:\beta]; \epsilon; B \vdash_{g} c : s  \leadsto C
@@ -1957,7 +1977,7 @@ C_{a} = \{(\trace, \overline{s}\leq_{} \overline{\app{t}{\Theta(A)}}), (\trace, 
 \vdash_{g} \lpPROG{B.f}{x}{c}{\lpRES} :  \overline{\alpha}\xrightarrow{} \beta  \leadsto  C
 }
 \]
-\end{tiny}
+\end{scriptsize}
 \caption{Constraint generation rules for expressions, commands, and functions, with function type table {\FT}.}
 \label{fig:constraint-rules}
 \end{figure*}
@@ -2300,7 +2320,7 @@ one could give a general construction of the index types in their type
 system that would correspond to our security types, and how the merge
 operator would translate to their dependent type constructors, among
 other things.
-We leave the exact correspondence to the future work.
+% We leave the exact correspondence to the future work.
 
 
 Recent research on information flow has also been conducted to deal

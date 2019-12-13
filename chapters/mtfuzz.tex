@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 }	
 \end{lstlisting}
 
-In Listing~\ref{lst:eg_vm}, in the multithreading execution environment, if the condition \func{satisfy(s\_var)} returns true, it executes \func{func\_1} otherwise \func{func\_2}; let us suppose that there is a vulnerability inside \func{func\_2} that is not introduced by concurrency bugs. Note that this branching results may rely on the number of threads, the input content themselves. For example, if in single-threaded mode, \func{satisfy(s\_var)} always returns true, the vulnerability will never be triggered; this vulnerability can only be revealed with more than one thread. Under other circumstances, suppose for the input content, \func{func\_2} will not be executed except for some very specific conditions (e.g., error handling), the vulnerabilities can only be revealed with certain content. Therefore, it may not be enough to only consider the \textsf{C-Bug} induced vulnerabilities $V_{cb}$.
+In Listing~\ref{lst:eg_vm}, in the multithreading execution environment, if the condition \func{satisfy(s\_var)} returns true, it executes \func{func\_1}; otherwise \func{func\_2}. Let us suppose that there is a vulnerability inside \func{func\_2} that is not introduced by concurrency bugs. Note that this branching results may rely on the number of threads, the input content themselves. For example, if in single-threaded mode, \func{satisfy(s\_var)} always returns true, the vulnerability will never be triggered; this vulnerability can only be revealed with more than one thread. Under other circumstances, suppose for the input content, \func{func\_2} will not be executed except for some very specific conditions (e.g., error handling), the vulnerabilities can only be revealed with certain content. Therefore, it may not be enough to only consider the \textsf{C-Bug} induced vulnerabilities $V_{cb}$.
 
 
 As mentioned in ~\S\ref{sec:intro-gbf}, a conventional GBF usually has no awareness of multithreading.
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
 
 
-Listing~\ref{lst:eg1} is a program abstracted from real-world multithreaded programs such as \emph{GraphicsMagick}. Before processing the input, it does a validation check inside \func{check} against some properties of \emph{argv}[1]. if the check fails, the program terminates immediately. The core functionality starts from two threads created at lines \ref{line:main_thread_fork_1} and \ref{line:main_thread_fork_2} respectively in \func{main} function. There are two shared variables: 1) the global variable \var{g\_var} has an initial value 1, 2) and input \var{argv}[1] is passed to both threads T1 and T2 through the thread-forking call to \func{pthread\_create}.
+Listing~\ref{lst:eg1} is a program abstracted from real-world multithreaded programs such as \emph{GraphicsMagick}. Before processing the input, it does a validation check inside \func{check} against some properties of \emph{argv}[1]. If the check fails, the program terminates immediately. The core functionality starts from two threads created at lines \ref{line:main_thread_fork_1} and \ref{line:main_thread_fork_2} respectively in \func{main} function. There are two shared variables: 1) the global variable \var{g\_var} has an initial value 1, 2) and input \var{argv}[1] is passed to both threads T1 and T2 through the thread-forking call to \func{pthread\_create}.
 Apparently, there are multiple reads and writes on \var{g\_var} and \var{argv}[1] and this program suffers from data races.
 
 
@@ -170,7 +170,7 @@ AFL knows nothing about the threading context, therefore it cannot distinguish w
 
 \begin{figure*}[ht]
     \centering
-    \includegraphics[width=0.95\textwidth]{res/mtfuzz/overview.pdf}
+    \includegraphics[width=\textwidth]{res/mtfuzz/overview.pdf}
     \caption{Overall workflow of \mtfuzz.}
     \label{fig:workflow}
 \end{figure*} 
@@ -240,14 +240,14 @@ We use $\stpn$ as the probability to \emph{selectively} instrument on the first 
 {\myeqsize\begin{equation}
     \stp{\aFUNC} = \min\big\{\ccr{\aFUNC}, ~\stpnO\big\}
 \end{equation}}
-where $0<\stpnO<1$. Empirically, we set $\stpnO=0.5$.
+where $0<\stpnO<1$. $\stpn0$ should not be set too large since that would bring instumentation overhead; it should not be set too small since otherwise \stp{\aFUNC} would always equal $\stpnO$, failing to consider the complexity influence of the underlying function.  Empirically, we set $\stpnO=0.5$. 
 
 On the other hand, for each basicblock \aBB inside the given function~\aFUNC, we calculate the total number of instructions $N(\aBB)$, and the total number of memory operation instructions  $N_m(\aBB)$, e.g., load/store operations, or builtin memory function calls such as \func{memcpy}, \func{strncat}, \func{malloc}, \func{free}, etc. 
 Then for each of the instructions, we instrument based on the probability as:
 {\myeqsize\begin{equation}
     \mtp{\aFUNC}{\aBB} = \min\big\{\ccr{\aFUNC}\cdot\frac{N_m(\aBB)}{N(\aBB)}, ~\mtpnO \big\}\end{equation}}
-where $\mtpnO$ is a factor satisfying $0<\mtpnO<1$ and defaults to $0.33$.
-
+where $\mtpnO$ is a factor satisfying $0<\mtpnO<1$ and defaults to $0.33$. Note the default value of $\mtpnO$ follows AFL's practice to avoid
+ heavy instrumentations.
 \subsubsection{Instrumentation Algorithm}
 The exploration-oriented instrumentation algorithm is described in Algorithm~\ref{algo:inst_explore}. It iterates each function inside a program. For each basicblock \aBB in function \aFUNC, we firstly get the intersection of the instructions inside \aBB and \mtiscope. If this intersection \mtiscope(\aBB) is empty, it instruments the \emph{first instruction} of \aBB with a probability of \emph{\stpn(\aFUNC)}. Otherwise, for the first instruction in \aBB, we always instrument it (instrument with probability of 1.0); for the other instructions, if they are inside \mtiscope, we instrument them with a probability of \mtp{\aFUNC}{\aBB}. We will refer our selection of deputy instructions as \MTIns.
 
