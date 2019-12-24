@@ -6,9 +6,9 @@
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
 \newcommand\Vtextvisiblespace[1][.3em]{%
-	\mbox{\kern.06em\vrule height.3ex}%
-	\vbox{\hrule width#1}%
-	\hbox{\vrule height.3ex}}
+        \mbox{\kern.06em\vrule height.3ex}%
+        \vbox{\hrule width#1}%
+        \hbox{\vrule height.3ex}}
 
 \usepackage{longtable}
 \usepackage[perpage]{footmisc}
@@ -82,7 +82,7 @@
         captionpos=b,
         aboveskip=8pt,
         numbers=left,
-		tabsize=2,
+                tabsize=2,
         commentstyle=\it,
         basicstyle=\footnotesize,
 keywordstyle=\color[rgb]{0,0,1},
@@ -119,14 +119,14 @@ keywordstyle=\color[rgb]{0,0,1},
 
 
 %\mainmatter
-%\fancyhead[RE,LO]{\fancyplain{}{\leftmark}} 	% pagestyle for arabic number pages
+%\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}    % pagestyle for arabic number pages
 %\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
 
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % New command to make the lines in the title page
 
 %----------------------------------------------------------------------------------------
-%	additional commands
+%       additional commands
 %----------------------------------------------------------------------------------------
 \newcommand*{\todo}[1]{{\footnotesize \textcolor{red}{$\ll$\textsf{TODO #1}$\gg$}}}
 %\newcommand*{\todo}[1]{}
@@ -141,7 +141,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \hypersetup{pdfkeywords=\keywordnames}
 
 %----------------------------------------------------------------------------------------
-%	TITLE PAGE
+%       TITLE PAGE
 %----------------------------------------------------------------------------------------
 
 \maketitle
@@ -150,7 +150,7 @@ keywordstyle=\color[rgb]{0,0,1},
 
 
 %----------------------------------------------------------------------------------------
-%	ABSTRACT PAGE
+%       ABSTRACT PAGE
 %----------------------------------------------------------------------------------------
 
 %\input{chapters/chapter4/obj}
@@ -174,7 +174,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \setstretch{1.5} % Reset the line-spacing to 1.3 for body text (if it has changed)
 \lhead{\emph{Statement of Originality}}
 \originality{
-	%\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
+        %\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
 \input{originality}
 
 }
@@ -188,7 +188,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \setstretch{1.5} % Reset the line-spacing to 1.3 for body text (if it has changed)
 \lhead{\emph{Supervisor Declaration Statement}}
 \supervisorstate{
-	%\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
+        %\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
 \input{supervisorstate}
 }
 
@@ -201,7 +201,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \setstretch{1.5} % Reset the line-spacing to 1.3 for body text (if it has changed)
 \lhead{\emph{Authorship Attribution Statement}}
 \authorship{
-	%\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
+        %\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
 \input{authorshipstate}
 }
 
@@ -210,13 +210,13 @@ keywordstyle=\color[rgb]{0,0,1},
 
 
 %----------------------------------------------------------------------------------------
-%	ACKNOWLEDGEMENTS
+%       ACKNOWLEDGEMENTS
 %----------------------------------------------------------------------------------------
 
 \setstretch{1.5} % Reset the line-spacing to 1.3 for body text (if it has changed)
 \lhead{\emph{Acknowledgements}}
 \acknowledgements{
-	%\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
+        %\addtocontents{toc}{\vspace{1em}} % Add a gap in the Contents, for aesthetics
 \input{acknowledge}
 }
 
@@ -225,7 +225,7 @@ keywordstyle=\color[rgb]{0,0,1},
 
 
 %----------------------------------------------------------------------------------------
-%	LIST OF CONTENTS/FIGURES/TABLES PAGES
+%       LIST OF CONTENTS/FIGURES/TABLES PAGES
 %----------------------------------------------------------------------------------------
 
 %\pagestyle{fancy} % The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
@@ -243,7 +243,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \listoftables % Write out the List of Tables
 
 %----------------------------------------------------------------------------------------
-%	THESIS CONTENT - CHAPTERS
+%       THESIS CONTENT - CHAPTERS
 %----------------------------------------------------------------------------------------
 %\mainmatter % Begin numeric (1,2,3...) page numbering
 
@@ -251,7 +251,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \fancyhead{}
 \mainmatter
 \fancyhead[LE,RO]{\thepage}
-\fancyhead[RE,LO]{\fancyplain{}{\leftmark}} 	% pagestyle for arabic number pages
+\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}     % pagestyle for arabic number pages
 %\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{#1}}{}}
 
@@ -284,9 +284,9 @@ keywordstyle=\color[rgb]{0,0,1},
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Security Type Checking for Android Access Control}}{}}
 \input{chapters/sta}
 
-\fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Discussions}}{}}
-\input{chapters/discuss}
+% \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
+% \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Discussions}}{}}
+% \input{chapters/discuss}
 
 \fancyhead[RE,LO]{\fancyplain{}{\leftmark}}
 \renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ \emph{Conclusion and Future Work}}{}}
@@ -296,7 +296,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \nocite{*}
 
 %----------------------------------------------------------------------------------------
-%	THESIS CONTENT - APPENDICES
+%       THESIS CONTENT - APPENDICES
 %----------------------------------------------------------------------------------------
 
 \addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
@@ -318,7 +318,7 @@ keywordstyle=\color[rgb]{0,0,1},
 \backmatter
 
 %----------------------------------------------------------------------------------------
-%	BIBLIOGRAPHY
+%       BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 \fancyhead[RE,LO]{\fancyplain{}{\emph{Bibliography}}}
 
@@ -330,10 +330,14 @@ keywordstyle=\color[rgb]{0,0,1},
 \bibliography{common,ref-fuzzing,ref-sta}
 
 
-
 %\bibliographystyle{unsrtnat} % Use the "unsrtnat" BibTeX style for formatting the Bibliography
 %
 %\bibliography{Bibliography} % The references (bibliography) information are stored in the file named "Bibliography.bib"
 \cleardoublepage
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

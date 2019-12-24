@@ -1,0 +1,36 @@
+(TeX-add-style-hook
+ "common"
+ (lambda ()
+   (LaTeX-add-bibitems
+    "heartbleed"
+    "vul_flexera18"
+    "Hailpern:2002:SDT:1660992.1660994"
+    "Felderer:2016:MST:2904681.2904685"
+    "mc-at"
+    "xie2016proteus"
+    "xie2017automatic"
+    "loopinv"
+    "fib"
+    "loopster"
+    "CompVer"
+    "TimedSys"
+    "MemRecover"
+    "Wen2020MemLock"
+    "Wang2020Typestate"
+    "SemSlice"
+    "usec20:HotPatch"
+    "issta19:deephunter"
+    "icse19:leopard"
+    "zhou2019devign"
+    "fse19:deepstellar"
+    "ase18:cldiff"
+    "icse18:androidApp"
+    "issta15-slooper"
+    "fse16:bingo"
+    "fse19:cerebro"
+    "meng-csur"
+    "meng-asiaccs"
+    "meng-tifs"
+    "7727508"))
+ :bibtex)
+

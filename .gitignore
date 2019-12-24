@@ -19,3 +19,4 @@ main_all.tex
 *.synctex.gz
 
 .texpadtmp/
+tags
